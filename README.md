@@ -14,13 +14,13 @@ You can easily install Velen through Maven Central by adding these entries onto 
 <dependency>
   <groupId>pw.mihou</groupId>
   <artifactId>Velen</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
 </dependency>
 ```
 
 **build.gradle**
 ```gradle
-implementation 'pw.mihou:Velen:1.0.1'
+implementation 'pw.mihou:Velen:1.0.2'
 ```
 
 ## ⌛ Velen Rate Limiter
@@ -242,6 +242,62 @@ The main class where you register all your Velen commands.
 // This is pretty much the same as the examples above but with the handler on a different class.
 VelenCommand.of("hi", velen, new ExampleEvent()).attach();
 ```
+
+## Velen Pagination
+Velen also offers a helper class that helps you paginate items easily with the `Paginate<T>` class, an example
+usage can be seen below:
+```java
+VelenCommand.of("paginate", "Tests pagination.", velen, (event, message, user, args) -> {
+  List<String> testList = Arrays.asList("Test 0", "Test 1", "Test 2", "Test 3", "Test 4");
+  Paginate<String> paginate = new Paginate<>(testList);
+
+  paginate.paginate(event, new PaginateEvent<String>() {
+
+    private EmbedBuilder embed(String currentItem, int arrow, int maximum) {
+      // Remember to always add +1 to arrow for these types of stuff since
+      // arrow returns the raw position which means it starts at 0 instead of 1.
+      return new EmbedBuilder().setTitle("Item [" + (arrow + 1) + "/" + maximum + "]")
+        .setDescription(currentItem).setColor(Color.BLUE);
+    }
+
+    private EmbedBuilder embed(String currentItem) {
+      return new EmbedBuilder().setTitle("Item")
+        .setDescription(currentItem).setColor(Color.BLUE);
+    }
+
+    @Override
+    public MessageBuilder onInit(MessageCreateEvent event, String currentItem,
+      int arrow, Paginator<String> paginator) {
+      // This is the initial message that will be sent on start of pagination.
+      return new MessageBuilder().setEmbed(embed(currentItem, arrow, paginator.size()));
+    }
+
+    @Override
+    public void onPaginate(MessageCreateEvent event, Message paginateMessage, String currentItem,
+      int arrow, Paginator<String> paginator) {
+      // This is what will be executed when you paginate next or backwards.
+      paginateMessage.edit(embed(currentItem, arrow, paginator.size()));
+    }
+
+    @Override
+    public MessageBuilder onEmptyPaginator(MessageCreateEvent event) {
+      // This is sent when the paginator has no items.
+      return new MessageBuilder().setContent("There are currently no items!");
+    }
+
+    @Override
+    public void onSelect(MessageCreateEvent event, Message paginateMessage, String itemSelected,
+      int arrow, Paginator<String> paginator) {
+      // Similar to onPaginate except this is sent whenever the user
+      // has selected a page that they want.
+      paginateMessage.edit(embed(itemSelected));
+    }
+  }, Duration.ofMinutes(5));
+}).attach();
+```
+
+Similar to `VelenEvent`, you can also place the handler onto its own class. Refer to the example
+of `VelenEvent` but instead of `VelenEvent`, the class should implement `PaginateEvent`.
 
 ## 🏎️ How does Velen work?
 Velen works through a single monolith listener who then processes each command invocation onto their own
