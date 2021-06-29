@@ -1,7 +1,6 @@
 # ✨ Velen ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/ShindouMihou/Velen?label=version&style=flat-square) ![Discord](https://img.shields.io/discord/807084089013174272?color=blue&label=Discord&style=flat-square) ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/ShindouMihou/Velen?color=red&style=flat-square) ![GitHub last commit](https://img.shields.io/github/last-commit/ShindouMihou/Velen?color=orange&style=flat-square)
 Velen is a command framework that is created for Javacord, it aims to be simple to understand and
-easy to create like the library it is using. Velen is also extremely lightweight with the only dependency being
-Javacord's API which only has the interfaces.
+easy to create like the library it is using.
 
 ## 📦 How many components does Velen have?
 Velen has several components: `VelenRateLimiter`, `VelenCommand`, `VelenPrefixManager` and the main `Velen` component
