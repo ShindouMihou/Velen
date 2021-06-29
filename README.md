@@ -9,7 +9,7 @@ which is the core. Each of the components have their own uses and is decently fl
 ## ❤️ Installation
 You can easily install Velen through Maven Central by adding these entries onto your `build.gradle` or `pom.xml`:
 
-**pom.xml**
+### Maven
 ```xml
 <dependency>
   <groupId>pw.mihou</groupId>
@@ -18,7 +18,7 @@ You can easily install Velen through Maven Central by adding these entries onto 
 </dependency>
 ```
 
-**build.gradle**
+### Gradle
 ```gradle
 implementation 'pw.mihou:Velen:1.0.2'
 ```
@@ -307,8 +307,58 @@ VelenCommand.of("paginate", "Tests pagination.", velen, (event, message, user, a
 }).attach();
 ```
 
-Similar to `VelenEvent`, you can also place the handler onto its own class. Refer to the example
-of `VelenEvent` but instead of `VelenEvent`, the class should implement `PaginateEvent`.
+Similar to `VelenEvent`, you can also place the handler onto its own class. An example of such can be 
+seen below:
+
+### ExamplePaginateEvent.class
+This is the handler class for pagination.
+```java
+class ExamplePaginateEvent implements PaginateEvent<String> {
+
+
+    private EmbedBuilder embed(String currentItem, int arrow, int maximum) {
+      return new EmbedBuilder().setTitle("Item [" + (arrow + 1) + "/" + maximum + "]")
+        .setDescription(currentItem).setColor(Color.BLUE);
+    }
+
+    private EmbedBuilder embed(String currentItem) {
+      return new EmbedBuilder().setTitle("Item")
+        .setDescription(currentItem).setColor(Color.BLUE);
+    }
+
+    @Override
+    public MessageBuilder onInit(MessageCreateEvent event, String currentItem,
+      int arrow, Paginator<String> paginator) {
+      return new MessageBuilder().setEmbed(embed(currentItem, arrow, paginator.size()));
+    }
+
+    @Override
+    public void onPaginate(MessageCreateEvent event, Message paginateMessage, String currentItem,
+      int arrow, Paginator<String> paginator) {
+      paginateMessage.edit(embed(currentItem, arrow, paginator.size()));
+    }
+
+    @Override
+    public MessageBuilder onEmptyPaginator(MessageCreateEvent event) {
+      return new MessageBuilder().setContent("There are currently no items!");
+    }
+
+    @Override
+    public void onSelect(MessageCreateEvent event, Message paginateMessage, String itemSelected,
+      int arrow, Paginator<String> paginator) {
+      paginateMessage.edit(embed(itemSelected));
+    }
+}
+```
+
+### Main.class
+The main class where you register all your Velen commands.
+```java
+VelenCommand.of("paginate", "Tests pagination.", velen, (event, message, user, args) -> {
+  List<String> testList = Arrays.asList("Test 0", "Test 1", "Test 2", "Test 3", "Test 4");
+  new Paginate<>(testList).paginate(event, new ExamplePaginateEvent(), Duration.ofMinutes(5));
+}).attach();
+```
 
 Optionally, you can customize the emojis (unicode or Javacord Emoji objects) that will be used, for example (this example will use Unicode):
 ```java
