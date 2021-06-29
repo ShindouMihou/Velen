@@ -1,13 +1,13 @@
-# Velen
+# ✨ Velen ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/ShindouMihou/Velen?label=version&style=flat-square) ![Discord](https://img.shields.io/discord/807084089013174272?color=blue&label=Discord&style=flat-square) ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/ShindouMihou/Velen?color=red&style=flat-square) ![GitHub last commit](https://img.shields.io/github/last-commit/ShindouMihou/Velen?color=orange&style=flat-square)
 Velen is a command framework that is created for Javacord, it aims to be simple to understand and
 easy to create like the library it is using. Velen is also extremely lightweight with the only dependency being
 Javacord's API which only has the interfaces.
 
-## How many components does Velen have?
+## 📦 How many components does Velen have?
 Velen has several components: `VelenRateLimiter`, `VelenCommand`, `VelenPrefixManager` and the main `Velen` component
 which is the core. Each of the components have their own uses and is decently flexible to use for many situations.
 
-## Installation
+## ❤️ Installation
 You can easily install Velen through Maven Central by adding these entries onto your `build.gradle` or `pom.xml`:
 
 **pom.xml**
@@ -24,7 +24,7 @@ You can easily install Velen through Maven Central by adding these entries onto 
 implementation 'pw.mihou:Velen:1.0'
 ```
 
-## Velen Rate Limiter
+## ⌛ Velen Rate Limiter
 The cooldown handler for Velen, this is an extremely simple implementation and doesn't have much settings other than
 being able to change the duration of the cooldown, the message of the cooldown (which is done when building Velen). You
 can change the cooldown of Velen and the message by modifying them during build, for example:
@@ -35,7 +35,7 @@ Velen velen = Velen.builder()
                     "You are currently rate-limited for " + remainingSeconds + " seconds.");
 ```
 
-## Velen Prefix Manager
+## ⚙️ Velen Prefix Manager
 This component is in charge of providing prefixes to all the servers whether it'd be a per-server prefix or a single 
 prefix for all servers, by default, all servers uses the prefix `v.` but that is easily changeable through the builder.
 ```java
@@ -57,34 +57,33 @@ The example above uses MongoDB (with a helper class), the flow of the prefix man
 The loader is also not just limited to external databases, in fact, you can even use a `HashMap<Long, String>` and
 store stuff there but database is recommended for persistence.
 
-## Velen Component
+## ✔️ Velen Component
 The Velen component is, by far, the simplest to make with the exception of `PrefixManager` and `Ratelimiter` with
 an example of creating the component being:
 ```java
 Velen velen = Velen.builder()
+  // Sets the default cooldown time of the command if no cooldown is specified.
+  .setDefaultCooldownTime(Duration.ofSeconds(10))
 
-                // Sets the default cooldown time of the command if no cooldown is specified.
-                .setDefaultCooldownTime(Duration.ofSeconds(10))
+  // Sets the default prefix that Velen will use (this will be overriden by Prefix Manager).
+  .setDefaultPrefix("v.")
 
-                // Sets the default prefix that Velen will use (this will be overriden by Prefix Manager).
-                .setDefaultPrefix("v.")
+  // Sets the message to be sent once every ratelimit cycle if the user is rate-limited.
+  .setRatelimitedMessage((remainingSeconds, user, channel, command) -> "You are currently rate-limited for " + remainingSeconds + " seconds.")
 
-                // Sets the message to be sent once every ratelimit cycle if the user is rate-limited.
-                .setRatelimitedMessage((remainingSeconds, user, channel, command) -> "You are currently rate-limited for " + remainingSeconds + " seconds.")
+  // Set the message to be sent if the user doesn't have all the permissions needed to use the command. (default)
+  .setNoPermissionMessage((permission, user, channel, command) -> "You need the permission(s): " + permission.stream()
+    .map(Enum::name).collect(Collectors.joining(",")) + " to use this command!")
 
-                // Set the message to be sent if the user doesn't have all the permissions needed to use the command. (default)
-                .setNoPermissionMessage((permission, user, channel, command) -> "You need the permission(s): " + permission.stream()
-                .map(Enum::name).collect(Collectors.joining(",")) + " to use this command!")
+  // Set the message to be sent if the user doesn't have the proper roles to use the command. (default)
+  .setNoRoleMessage((roles, user, channel, command) -> "You need the role(s): " + roles + " to use this command!")
 
-                // Set the message to be sent if the user doesn't have the proper roles to use the command. (default)
-                .setNoRoleMessage((roles, user, channel, command) -> "You need the role(s): " + roles + " to use this command!")
-
-                // Sets the prefix manager which is a more advanced default prefix which allows you to fetch
-                // prefixes from a database for per-server prefixes, example below.
-                // Key is equals to the server id, you should only use this if you are using a database to store
-                // per-server prefixes.
-                .setPrefixManager(new VelenPrefixManager("v.", key -> prefixes.get(key)))
-                .build();
+  // Sets the prefix manager which is a more advanced default prefix which allows you to fetch
+  // prefixes from a database for per-server prefixes, example below.
+  // Key is equals to the server id, you should only use this if you are using a database to store
+  // per-server prefixes.
+  .setPrefixManager(new VelenPrefixManager("v.", key -> prefixes.get(key)))
+  .build();
 ```
 
 You can also use the default settings of Velen which can be retrieved through the one-liner method:
@@ -102,7 +101,7 @@ DiscordApi api = new DiscordApiBuilder()
                 .join();
 ```
 
-## Velen Message Component
+## 🗨️ Velen Message Component
 This is the part of Velen where you can customize the no permission, no role and rate-limited message as seen on the example
 below. To modify the `no permission` message, you can simply create an `VelenPermissionMessage` which would give you the following
 parameters: `(List<PermissionType> permission, User user, TextChannel channel, String command)` which you can easily turn into a 
@@ -127,7 +126,7 @@ Velen.builder().setRatelimitedMessage((remainingSeconds, user, channel, command)
                                                   "This message will delete itself when cooldown is over.");
 ```
 
-## Velen Utils
+## 🧰 Velen Utils
 This is a utility class of Velen which you can use as you like to retrieve user mentions, role mentions, channel mentions in their
 proper order. Here are all the methods of the utility class:
 ```java
@@ -136,23 +135,23 @@ Collection<Long> : VelenUtils.getOrderedChannelMentions(String message);
 Collection<Long> : VelenUtils.getOrderedRoleMentions(String message);
 ```
 
-## Velen Command
+## 📛 Velen Command
 This is the most amusing part of Velen which takes a lot of inspiration from the library it uses. A VelenCommand is
 composed of two parts, the metadata and the event handler which is invoked whenever the command is triggered. A simple
 example of a Velen Command is:
 ```java
 VelenCommand.of(
-                // The name of the command.
-                "hi", 
+    // The name of the command.
+    "hi",
 
-                // The velen instance.
-                velen, 
+    // The velen instance.
+    velen,
 
-                // The event handler which will be invoked if the command is triggered.
-                (event, message, user, arg) -> event.getChannel().sendMessage("Hello!"))
+    // The event handler which will be invoked if the command is triggered.
+    (event, message, user, arg) -> event.getChannel().sendMessage("Hello!"))
 
-                // Attach directly to the Velen instance.
-                .attach();
+  // Attach directly to the Velen instance.
+  .attach();
 
 // Short form
 VelenCommand.of("hi", velen, (event, message, user, arg) -> event.getChannel().sendMessage("Hello!")).attach();
@@ -229,7 +228,7 @@ The main class where you register all your Velen commands.
 VelenCommand.of("hi", velen, new ExampleEvent()).attach();
 ```
 
-## How does Velen work?
+## 🏎️ How does Velen work?
 Velen works through a single monolith listener who then processes each command invocation onto their own
 respective commands in a multi-threaded fashion (which means each command is on their own threads) when executed,
 similar to a Listener in Javacord (or rather, they are pretty much the same).
