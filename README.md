@@ -14,13 +14,13 @@ You can easily install Velen through Maven Central by adding these entries onto 
 <dependency>
   <groupId>pw.mihou</groupId>
   <artifactId>Velen</artifactId>
-  <version>1.0</version>
+  <version>1.0.1</version>
 </dependency>
 ```
 
 **build.gradle**
 ```gradle
-implementation 'pw.mihou:Velen:1.0'
+implementation 'pw.mihou:Velen:1.0.1'
 ```
 
 ## ⌛ Velen Rate Limiter
