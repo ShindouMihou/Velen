@@ -310,6 +310,11 @@ VelenCommand.of("paginate", "Tests pagination.", velen, (event, message, user, a
 Similar to `VelenEvent`, you can also place the handler onto its own class. Refer to the example
 of `VelenEvent` but instead of `VelenEvent`, the class should implement `PaginateEvent`.
 
+Optionally, you can customize the emojis (unicode or Javacord Emoji objects) that will be used, for example (this example will use Unicode):
+```java
+new Paginate<>(items, "➡", "⬅", "👍", "👎").paginate(...);
+```
+
 ## 🏎️ How does Velen work?
 Velen works through a single monolith listener who then processes each command invocation onto their own
 respective commands in a multi-threaded fashion (which means each command is on their own threads) when executed,
