@@ -97,6 +97,22 @@ public interface Velen extends MessageCreateListener {
     List<VelenCommand> getCommands();
 
     /**
+     * Gets all the commands registered with the specified category on the Velen.
+     *
+     * @param category The category to search for (case-sensitive).
+     * @return The commands registered with the specified category.
+     */
+    List<VelenCommand> getCategory(String category);
+
+    /**
+     * Gets all the commands registered with the specified category on the Velen.
+     *
+     * @param category The category to search for (case-insensitive).
+     * @return The commands registered with the specified category.
+     */
+    List<VelenCommand> getCategoryIgnoreCasing(String category);
+
+    /**
      * Gets a certain command through its name.
      *
      * @param command The command to find.

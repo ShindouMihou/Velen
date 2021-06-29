@@ -24,6 +24,7 @@ public class VelenCommandImpl implements VelenCommand {
     private final String name;
     private final String usage;
     private final String description;
+    private final String category;
     private final Duration cooldown;
     private final List<Long> requiredRoles;
     private final List<Long> requiredUsers;
@@ -33,12 +34,13 @@ public class VelenCommandImpl implements VelenCommand {
     private final VelenEvent velenEvent;
     private final Velen velen;
 
-    public VelenCommandImpl(String name, String usage, String description, Duration cooldown, List<Long> requiredRoles,
+    public VelenCommandImpl(String name, String usage, String description, String category, Duration cooldown, List<Long> requiredRoles,
                             List<Long> requiredUsers, List<PermissionType> permissions, boolean serverOnly,
                             List<String> shortcuts, VelenEvent event, Velen velen) {
         this.name = name;
         this.usage = usage;
         this.description = description;
+        this.category = category;
         this.cooldown = cooldown;
         this.requiredRoles = requiredRoles;
         this.requiredUsers = requiredUsers;
@@ -172,6 +174,11 @@ public class VelenCommandImpl implements VelenCommand {
     @Override
     public List<String> getShortcuts() {
         return shortcuts;
+    }
+
+    @Override
+    public String getCategory(){
+        return category;
     }
 
     @Override

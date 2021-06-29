@@ -205,6 +205,22 @@ through the following (this applies to any parameter of a Velen Command):
 velen.getCommand("hello").ifPresent(command -> System.out.println(command.getDescription));
 ```
 
+Additionally, you can set a category which you can retrieve in bulk which is especially handy for help commands:
+```java
+VelenCommand.of("hello", velen, (event, message, user, arg) -> event.getChannel().sendMessage("Hi!"))
+                .setDescription("Say Hello to Velen!")
+                .setUsage("hello")
+                .setCategory("Miscelleanous")
+                .attach();
+```
+
+To retrieve in bulk when building a help command, you can do:
+```java
+velen.getCategory("Miscelleanous");
+```
+The example above will return a `List<VelenCommand>` which you can then use to grab the name of the command,
+description, usage and the category itself.
+
 You can also move the handler to its own class, as seen on the example below:
 
 ### ExampleEvent.class

@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class VelenImpl implements Velen {
 
@@ -74,6 +75,20 @@ public class VelenImpl implements Velen {
     @Override
     public List<VelenCommand> getCommands() {
         return commands;
+    }
+
+    @Override
+    public List<VelenCommand> getCategory(String category) {
+        return commands.stream()
+                .filter(velenCommand -> velenCommand.getCategory().equals(category))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<VelenCommand> getCategoryIgnoreCasing(String category) {
+        return commands.stream()
+                .filter(velenCommand -> velenCommand.getCategory().equalsIgnoreCase(category))
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -103,4 +103,11 @@ public interface VelenCommand {
      */
     List<String> getShortcuts();
 
+    /**
+     * Gets the category of the command.
+     *
+     * @return The category of the command.
+     */
+    String getCategory();
+
 }

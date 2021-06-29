@@ -17,6 +17,7 @@ public class VelenCommandBuilder {
     private final List<Long> requiredUsers = new ArrayList<>();
     private final List<PermissionType> permissions = new ArrayList<>();
     private final List<String> shortcuts = new ArrayList<>();
+    private String category;
     private String name;
     private String usage;
     private String description;
@@ -55,6 +56,17 @@ public class VelenCommandBuilder {
      */
     public VelenCommandBuilder setDescription(String description) {
         this.description = description;
+        return this;
+    }
+
+    /**
+     * Sets the category of the command.
+     *
+     * @param category The category of the command.
+     * @return VelenCommandBuilder for chain calling methods.
+     */
+    public VelenCommandBuilder setCategory(String category) {
+        this.category = category;
         return this;
     }
 
@@ -230,7 +242,10 @@ public class VelenCommandBuilder {
         if (usage == null)
             usage = "";
 
-        return new VelenCommandImpl(name, usage, description, cooldown, requiredRoles, requiredUsers,
+        if(category == null)
+            category = "";
+
+        return new VelenCommandImpl(name, usage, description, category, cooldown, requiredRoles, requiredUsers,
                 permissions, serverOnly, shortcuts, velenEvent, velen);
 
     }
