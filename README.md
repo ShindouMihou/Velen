@@ -445,7 +445,6 @@ This is the handler class for pagination.
 ```java
 class ExamplePaginateEvent implements PaginateEvent<String> {
 
-
     private EmbedBuilder embed(String currentItem, int arrow, int maximum) {
       return new EmbedBuilder().setTitle("Item [" + (arrow + 1) + "/" + maximum + "]")
         .setDescription(currentItem).setColor(Color.BLUE);
