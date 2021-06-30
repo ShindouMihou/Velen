@@ -2,6 +2,9 @@
 Velen is a command framework that is created for Javacord, it aims to be simple to understand and
 easy to create like the library it is using.
 
+For a more organized look-through at Velen, please check our [GitHub Wiki](https://github.com/ShindouMihou/Velen/wiki) instead
+where everything is more organized and easier to read.
+
 ## 📦 How many components does Velen have?
 Velen has several components: `VelenRateLimiter`, `VelenCommand`, `VelenPrefixManager` and the main `Velen` component
 which is the core. Each of the components have their own uses and is decently flexible to use for many situations.
