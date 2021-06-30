@@ -326,15 +326,8 @@ A simple example of a Velen Slash Command is simply like this:
 ```java
 VelenCommand.ofSlash("velenSlash", "A normal velen slash command.", velen,
                 (event, user, args, options, firstResponder) -> {
-                    if(args.getStringOptionWithName("text").isPresent()) {
-                        firstResponder.setContent(args.getStringOptionWithName("text").get()).respond();
-                    } else {
-                        firstResponder.setContent("Hello!").respond();
-                    }
-                }).addOptions(new SlashCommandOptionBuilder()
-                        .setName("text")
-                        .setDescription("What should I say?")
-                        .setType(SlashCommandOptionType.STRING)).attach();
+                    firstResponder.setContent("Hello!").respond();
+                }).attach();
 ```
 
 ### 🎀 Options!
