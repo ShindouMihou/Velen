@@ -331,7 +331,10 @@ VelenCommand.ofSlash("velenSlash", "A normal velen slash command.", velen,
                     } else {
                         firstResponder.setContent("Hello!").respond();
                     }
-                }).attach();
+                }).addOptions(new SlashCommandOptionBuilder()
+                        .setName("text")
+                        .setDescription("What should I say?")
+                        .setType(SlashCommandOptionType.STRING)).attach();
 ```
 
 ### 🎀 Options!
