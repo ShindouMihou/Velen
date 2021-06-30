@@ -243,11 +243,11 @@ The main class where you register all your Velen commands.
 VelenCommand.of("hi", velen, new ExampleEvent()).attach();
 ```
 
-## Velen Slash Command and Hybrid Commands
+## ☄️ Velen Slash Command and Hybrid Commands
 Velen offers a simple implementation that allows you to implement slash commands and hybrid commands as fast
 as possible.
 
-### Hybrid commands.
+### 🗺️ Hybrid commands.
 An example implementation of a hybrid command looks like this:
 ```java
 VelenCommand.ofHybrid("velenHybrid", "A velen hybrid command!",
@@ -305,6 +305,7 @@ public class HybridEvent implements VelenSlashEvent, VelenEvent {
     InteractionImmediateResponseBuilder firstResponder) {
         firstResponder.setContent("Hello!").respond();
     }
+    
 }
 ```
 
@@ -315,7 +316,7 @@ VelenCommand.ofHybrid("velenHybrid", "A velen hybrid command!", velen, hybridEve
                 .attach();
 ```
 
-### Slash Commands
+### 🎉 Slash Commands
 A simple example of a Velen Slash Command is simply like this:
 ```java
 VelenCommand.ofSlash("velenSlash", "A normal velen slash command.", velen,
@@ -328,7 +329,7 @@ VelenCommand.ofSlash("velenSlash", "A normal velen slash command.", velen,
                 }).attach();
 ```
 
-### Options!
+### 🎀 Options!
 You can also add options to the commands (though, message commands will have to handle it differently. Options only works
 for slash command events). An example of a slash command with options is:
 ```java
@@ -355,7 +356,7 @@ the name of the option.
 
 `options` is also a `List<SlashCommandInteractionOptions>` which you have to do a pile load of if checks.
 
-### Registering the commands!
+### 💎 Registering the commands!
 Slash Commands are a bit different from ordinary commands in which you have to register the commands at least once
 (and also for every change you do like changing the name of the slash command, description or options), this is done
 so Discord knows the change.
@@ -369,7 +370,7 @@ Please remember to remove it once everything has been registered (and there are 
 options of the slash commands) as this is quite an expensive task to perform, only re-add it if you have changed a slash
 command's **name**, **description** or **options**.
 
-### Additional notes
+### 📝 Additional notes
 Hybrid commands shares the same rate-limit with each other which means if a user uses a hybrid command on slash command,
 they will be shown the rate-limited message when they try to use the message command after (vice-versa).
 
@@ -433,6 +434,7 @@ VelenCommand.of("paginate", "Tests pagination.", velen, (event, message, user, a
       paginateMessage.edit(embed(itemSelected));
       
     }
+    
   }, Duration.ofMinutes(5));
 }).attach();
 ```
@@ -477,6 +479,7 @@ class ExamplePaginateEvent implements PaginateEvent<String> {
       int arrow, Paginator<String> paginator) {
       paginateMessage.edit(embed(itemSelected));
     }
+    
 }
 ```
 
