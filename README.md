@@ -254,7 +254,8 @@ as possible.
 An example implementation of a hybrid command looks like this:
 ```java
 VelenCommand.ofHybrid("velenHybrid", "A velen hybrid command!",
-                velen, (event, message, user, args) -> message.reply("Hello!"),
+                velen, 
+                (event, message, user, args) -> message.reply("Hello!"),
                 (event, user, args1, options, firstResponder) -> firstResponder.setContent("Hello").respond())
                 .setServerOnly(true, 853911163355922434L)
                 .attach();
