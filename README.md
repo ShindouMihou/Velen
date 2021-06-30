@@ -1,6 +1,6 @@
 # ✨ Velen ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/ShindouMihou/Velen?label=version&style=flat-square) ![Discord](https://img.shields.io/discord/807084089013174272?color=blue&label=Discord&style=flat-square) ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/ShindouMihou/Velen?color=red&style=flat-square) ![GitHub last commit](https://img.shields.io/github/last-commit/ShindouMihou/Velen?color=orange&style=flat-square)
-Velen is a command framework that is created for Javacord, it aims to be simple to understand and
-easy to create like the library it is using.
+Velen is a command framework (or library) that is created mainly for Javacord with the aim to make everything more easier
+and faster to create, for example, slash commands, hybrid commands, cooldowns (rate-limiters), per-server prefixes, pagination and more!
 
 For a more organized look-through at Velen, please check our [GitHub Wiki](https://github.com/ShindouMihou/Velen/wiki) instead
 where everything is more organized and easier to read.
