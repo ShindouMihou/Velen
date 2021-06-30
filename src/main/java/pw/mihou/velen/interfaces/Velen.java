@@ -1,5 +1,7 @@
 package pw.mihou.velen.interfaces;
 
+import org.javacord.api.DiscordApi;
+import org.javacord.api.listener.interaction.SlashCommandCreateListener;
 import org.javacord.api.listener.message.MessageCreateListener;
 import pw.mihou.velen.VelenBuilder;
 import pw.mihou.velen.builders.VelenMessage;
@@ -10,8 +12,9 @@ import pw.mihou.velen.ratelimiter.VelenRatelimiter;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
-public interface Velen extends MessageCreateListener {
+public interface Velen extends MessageCreateListener, SlashCommandCreateListener {
 
     /**
      * Creates a default Velen instance with default
@@ -127,6 +130,16 @@ public interface Velen extends MessageCreateListener {
      * @return An optional that possibly contains the command.
      */
     Optional<VelenCommand> getCommandIgnoreCasing(String command);
+
+    /**
+     * Registers all the slash commands registered under Velen.
+     * This should only be done once unless you are changing the values
+     * inside the commands (like the name of the command, etc).
+     *
+     * @param api The Discord API to register the commands to.
+     * @return A CompletableFuture to mark its completion.
+     */
+    CompletableFuture<Void> registerAllSlashCommands(DiscordApi api);
 
     /**
      * Gets the Prefix Manager used by the Velen.

@@ -1,6 +1,11 @@
 package pw.mihou.velen.impl;
 
+import org.javacord.api.DiscordApi;
+import org.javacord.api.entity.server.Server;
+import org.javacord.api.event.interaction.SlashCommandCreateEvent;
 import org.javacord.api.event.message.MessageCreateEvent;
+import org.javacord.api.interaction.SlashCommandBuilder;
+import org.javacord.api.util.logging.ExceptionLogger;
 import pw.mihou.velen.builders.VelenMessage;
 import pw.mihou.velen.builders.VelenPermissionMessage;
 import pw.mihou.velen.builders.VelenRoleMessage;
@@ -8,12 +13,14 @@ import pw.mihou.velen.interfaces.Velen;
 import pw.mihou.velen.interfaces.VelenCommand;
 import pw.mihou.velen.prefix.VelenPrefixManager;
 import pw.mihou.velen.ratelimiter.VelenRatelimiter;
+import pw.mihou.velen.utils.Pair;
 import pw.mihou.velen.utils.Scheduler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class VelenImpl implements Velen {
@@ -102,6 +109,26 @@ public class VelenImpl implements Velen {
     }
 
     @Override
+    public CompletableFuture<Void> registerAllSlashCommands(DiscordApi api) {
+        return CompletableFuture.allOf(commands.stream().filter(VelenCommand::supportsSlashCommand)
+                .map(velenCommand -> {
+                    Pair<Long, SlashCommandBuilder> pair = ((VelenCommandImpl) velenCommand).asSlashCommand();
+
+                    if(pair.getLeft() != null && pair.getLeft() != 0L) {
+                        Optional<Server> server = api.getServerById(pair.getLeft());
+                        if(server.isPresent()) {
+                            return pair.getRight().createForServer(server.get());
+                        } else {
+                            throw new IllegalArgumentException("Server " + pair.getLeft() + " couldn't be found for " +
+                                    "slash command: " + pair.getRight().toString());
+                        }
+                    }
+
+                    return pair.getRight().createGlobal(api);
+                }).toArray(CompletableFuture[]::new)).exceptionally(ExceptionLogger.get());
+    }
+
+    @Override
     public VelenPrefixManager getPrefixManager() {
         return prefixManager;
     }
@@ -113,8 +140,8 @@ public class VelenImpl implements Velen {
     }
 
     private void dispatch(MessageCreateEvent event, String[] args, String prefix) {
-        commands.stream().filter(command -> isCommand(prefix, args[0], command.getName())
-                || isCommand(prefix, args[0], command.getShortcuts()))
+        commands.stream().filter(command -> (isCommand(prefix, args[0], command.getName())
+                || isCommand(prefix, args[0], command.getShortcuts())) && !command.isSlashCommandOnly())
                 .forEachOrdered(command -> Scheduler.executorService
                         .submit(() -> ((VelenCommandImpl) command)
                                 .execute(event, args.length > 1 ? Arrays.copyOfRange(args, 1, args.length)
@@ -135,5 +162,12 @@ public class VelenImpl implements Velen {
 
     private boolean isCommand(String message, List<String> commands) {
         return commands.stream().anyMatch(s -> isCommand(message, s));
+    }
+
+    @Override
+    public void onSlashCommandCreate(SlashCommandCreateEvent event) {
+        commands.stream().filter(velenCommand -> velenCommand.supportsSlashCommand()
+                && velenCommand.getName().toLowerCase().equals(event.getSlashCommandInteraction().getCommandName()))
+                .forEachOrdered(velenCommand -> Scheduler.executorService.submit(() -> ((VelenCommandImpl) velenCommand).execute(event)));
     }
 }

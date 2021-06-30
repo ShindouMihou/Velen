@@ -14,13 +14,13 @@ You can easily install Velen through Maven Central by adding these entries onto 
 <dependency>
   <groupId>pw.mihou</groupId>
   <artifactId>Velen</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
 </dependency>
 ```
 
 ### Gradle
 ```gradle
-implementation 'pw.mihou:Velen:1.0.2'
+implementation 'pw.mihou:Velen:1.0.3'
 ```
 
 ## ⌛ Velen Rate Limiter
@@ -242,6 +242,136 @@ The main class where you register all your Velen commands.
 // This is pretty much the same as the examples above but with the handler on a different class.
 VelenCommand.of("hi", velen, new ExampleEvent()).attach();
 ```
+
+## Velen Slash Command and Hybrid Commands
+Velen offers a simple implementation that allows you to implement slash commands and hybrid commands as fast
+as possible.
+
+### Hybrid commands.
+An example implementation of a hybrid command looks like this:
+```java
+VelenCommand.ofHybrid("velenHybrid", "A velen hybrid command!",
+                velen, (event, message, user, args) -> message.reply("Hello!"),
+                (event, user, args1, options, firstResponder) -> firstResponder.setContent("Hello").respond())
+                .setServerOnly(true, 853911163355922434L)
+                .attach();
+```
+
+Does it look intimidating, okay! Let's break it down, piece by piece!
+```java
+VelenCommand.ofHybrid(
+
+                // This is the command name.
+                "velenHybrid",
+                // This is the description (required for slash commands and hybrid).
+
+                "A velen hybrid command!",
+                // This is the velen instance.
+                velen,
+
+                // This is the response for non-slash commands (message commands).
+                (event, message, user, args) -> message.reply("Hello!"),
+
+                // This is the response for slash commands (it uses a first responder for first response)
+                // but you can use event.respondLater() to tell Discord you will respond later!
+                (event, user, args1, options, firstResponder) -> firstResponder.setContent("Hello").respond())
+
+                // This is for setting the slash command to only work on X server.
+                // This only works for the slash command, extra implementation will be added for message commands
+                // far in the future BUT THIS IS RECOMMENDED FOR DEBUGGING.
+                // If you want global slash command, please remove this.
+                .setServerOnly(true, 853911163355922434L)
+                .attach();
+```
+
+**We highly recommend using `setServerOnly(true, serverId)` for testing as Discord immediately updates the command
+for that server. After you are done testing, simply remove it and the command will run globally.**
+
+Now, you may have realized that hybrid commands have two separate handlers which is indeed not wrong as the 
+implementation of Slash commands and MessageCreateEvent in Javacord are marginally different which is why we require
+two different handlers for these two but that doesn't mean you can't place them in a single class!
+
+### HybridEvent.class
+```java
+public class HybridEvent implements VelenSlashEvent, VelenEvent {
+
+    @Override
+    public void onEvent(MessageCreateEvent event, Message message, User user, String[] args) {
+        message.reply("Hello!");
+    }
+
+    @Override
+    public void onEvent(SlashCommandInteraction event, User user, VelenArguments args, List<SlashCommandInteractionOption> options, 
+    InteractionImmediateResponseBuilder firstResponder) {
+        firstResponder.setContent("Hello!").respond();
+    }
+}
+```
+
+### Main.class
+```java
+HybridEvent hybridEvent = new HybridEvent();
+VelenCommand.ofHybrid("velenHybrid", "A velen hybrid command!", velen, hybridEvent, hybridEvent)
+                .attach();
+```
+
+### Slash Commands
+A simple example of a Velen Slash Command is simply like this:
+```java
+VelenCommand.ofSlash("velenSlash", "A normal velen slash command.", velen,
+                (event, user, args, options, firstResponder) -> {
+                    if(args.getStringOptionWithName("text").isPresent()) {
+                        firstResponder.setContent(args.getStringOptionWithName("text").get()).respond();
+                    } else {
+                        firstResponder.setContent("Hello!").respond();
+                    }
+                }).attach();
+```
+
+### Options!
+You can also add options to the commands (though, message commands will have to handle it differently. Options only works
+for slash command events). An example of a slash command with options is:
+```java
+VelenCommand.ofSlash("velenSlash", "A normal velen slash command.", velen,
+                (event, user, args, options, firstResponder) -> {
+                    if(args.getStringOptionWithName("text").isPresent()) {
+                        firstResponder.setContent(args.getStringOptionWithName("text").get()).respond();
+                    } else {
+                        firstResponder.setContent("Hello!").respond();
+                    }
+                }).addOptions(new SlashCommandOptionBuilder()
+                        .setName("text")
+                        .setDescription("What should I say?")
+                        .setType(SlashCommandOptionType.STRING)).attach();
+```
+
+`addOptions(...)` can take in multiple options at the same time, which why you can flood it with options
+for as much as you want. To build an option, you have to make a `SlashCommandOptionBuilder` which comes from Javacord,
+you can simply follow the one above and try out several things with it.
+
+Now, you may have realized as well that there are two types of options: `args` and `options` which both are pretty
+much the same except `args` is `options` but wrapped by Velen to make it easier for you to get the values from
+the name of the option.
+
+`options` is also a `List<SlashCommandInteractionOptions>` which you have to do a pile load of if checks.
+
+### Registering the commands!
+Slash Commands are a bit different from ordinary commands in which you have to register the commands at least once
+(and also for every change you do like changing the name of the slash command, description or options), this is done
+so Discord knows the change.
+
+Velen offers a quick method to have everything registered, simply add this line:
+```
+velen.registerAllSlashCommands(DiscordApi);
+```
+
+Please remember to remove it once everything has been registered (and there are no changes to the name, description or
+options of the slash commands) as this is quite an expensive task to perform, only re-add it if you have changed a slash
+command's **name**, **description** or **options**.
+
+### Additional notes
+Hybrid commands shares the same rate-limit with each other which means if a user uses a hybrid command on slash command,
+they will be shown the rate-limited message when they try to use the message command after (vice-versa).
 
 ## 📃 Velen Pagination
 Velen also offers a helper class that helps you paginate items easily with the `Paginate<T>` class, an example
