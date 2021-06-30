@@ -267,9 +267,10 @@ VelenCommand.ofHybrid(
 
                 // This is the command name.
                 "velenHybrid",
+                
                 // This is the description (required for slash commands and hybrid).
-
                 "A velen hybrid command!",
+                
                 // This is the velen instance.
                 velen,
 
