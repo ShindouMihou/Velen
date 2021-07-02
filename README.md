@@ -29,7 +29,7 @@ implementation 'pw.mihou:Velen:1.0.5'
 ## ✔️ Ping-Pong Example
 A very simple of a ping-pong command in Velen is:
 ```java
-Velen velen = Velen.ofDefaults();
+Velen velen = Velen.builder().setDefaultPrefix("v.").build();
 VelenCommand.of("ping", velen, (event, message, user, args) -> message.reply("Pong!")).attach();
 
 DiscordApi api = new DiscordApiBuilder().setToken(token)
