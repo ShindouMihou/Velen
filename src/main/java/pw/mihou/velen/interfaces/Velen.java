@@ -1,5 +1,6 @@
 package pw.mihou.velen.interfaces;
 
+import com.sun.istack.internal.Nullable;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.listener.interaction.SlashCommandCreateListener;
 import org.javacord.api.listener.message.MessageCreateListener;
@@ -7,6 +8,7 @@ import pw.mihou.velen.VelenBuilder;
 import pw.mihou.velen.builders.VelenMessage;
 import pw.mihou.velen.builders.VelenPermissionMessage;
 import pw.mihou.velen.builders.VelenRoleMessage;
+import pw.mihou.velen.internals.VelenBlacklist;
 import pw.mihou.velen.prefix.VelenPrefixManager;
 import pw.mihou.velen.ratelimiter.VelenRatelimiter;
 
@@ -140,6 +142,25 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * @return A CompletableFuture to mark its completion.
      */
     CompletableFuture<Void> registerAllSlashCommands(DiscordApi api);
+
+    /**
+     * This is used to check if the Velen instance currently
+     * supports utilization of a blacklist (ignored user list).
+     *
+     * @return Does this Velen instance sport a blacklist?
+     */
+     boolean supportsBlacklist();
+
+    /**
+     * Gets the blacklist being used by this {@link Velen} instance.
+     * It is recommended to use {@link Velen#supportsBlacklist()} first
+     * before attempting to do so, unless you are confident that the blacklist
+     * is supported.
+     *
+     * @return The blacklist instance that is being used.
+     */
+    @Nullable
+     VelenBlacklist getBlacklist();
 
     /**
      * Gets the Prefix Manager used by the Velen.

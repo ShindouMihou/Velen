@@ -1,5 +1,6 @@
 package pw.mihou.velen.impl;
 
+import com.sun.istack.internal.Nullable;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.event.interaction.SlashCommandCreateEvent;
@@ -11,6 +12,7 @@ import pw.mihou.velen.builders.VelenPermissionMessage;
 import pw.mihou.velen.builders.VelenRoleMessage;
 import pw.mihou.velen.interfaces.Velen;
 import pw.mihou.velen.interfaces.VelenCommand;
+import pw.mihou.velen.internals.VelenBlacklist;
 import pw.mihou.velen.prefix.VelenPrefixManager;
 import pw.mihou.velen.ratelimiter.VelenRatelimiter;
 import pw.mihou.velen.utils.Pair;
@@ -32,14 +34,18 @@ public class VelenImpl implements Velen {
     private final VelenPermissionMessage noPermissionMessage;
     private final VelenRoleMessage noRoleMessage;
 
+    @Nullable
+    private final VelenBlacklist blacklist;
+
     public VelenImpl(VelenRatelimiter ratelimiter, VelenPrefixManager prefixManager, VelenMessage ratelimitedMessage,
-                     VelenPermissionMessage noPermissionMessage, VelenRoleMessage noRoleMessage) {
+                     VelenPermissionMessage noPermissionMessage, VelenRoleMessage noRoleMessage, @Nullable VelenBlacklist blacklist) {
         this.ratelimiter = ratelimiter;
         this.ratelimitedMessage = ratelimitedMessage;
         this.commands = new ArrayList<>();
         this.prefixManager = prefixManager;
         this.noPermissionMessage = noPermissionMessage;
         this.noRoleMessage = noRoleMessage;
+        this.blacklist = blacklist;
     }
 
     @Override
@@ -129,6 +135,16 @@ public class VelenImpl implements Velen {
     }
 
     @Override
+    public boolean supportsBlacklist() {
+        return blacklist != null;
+    }
+
+    @Override
+    public VelenBlacklist getBlacklist() {
+        return blacklist;
+    }
+
+    @Override
     public VelenPrefixManager getPrefixManager() {
         return prefixManager;
     }
@@ -140,6 +156,9 @@ public class VelenImpl implements Velen {
     }
 
     private void dispatch(MessageCreateEvent event, String[] args, String prefix) {
+        if(supportsBlacklist() && blacklist.isBlacklisted(event.getMessageAuthor().getId()))
+            return;
+
         commands.stream().filter(command -> (isCommand(prefix, args[0], command.getName())
                 || isCommand(prefix, args[0], command.getShortcuts())) && !command.isSlashCommandOnly())
                 .forEachOrdered(command -> Scheduler.executorService
@@ -166,6 +185,9 @@ public class VelenImpl implements Velen {
 
     @Override
     public void onSlashCommandCreate(SlashCommandCreateEvent event) {
+        if(supportsBlacklist() && blacklist.isBlacklisted(event.getSlashCommandInteraction()
+                .getUser().getId())) return;
+
         commands.stream().filter(velenCommand -> velenCommand.supportsSlashCommand()
                 && velenCommand.getName().toLowerCase().equals(event.getSlashCommandInteraction().getCommandName()))
                 .forEachOrdered(velenCommand -> Scheduler.executorService.submit(() -> ((VelenCommandImpl) velenCommand).execute(event)));

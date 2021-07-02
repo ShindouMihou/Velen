@@ -5,6 +5,7 @@ import pw.mihou.velen.builders.VelenPermissionMessage;
 import pw.mihou.velen.builders.VelenRoleMessage;
 import pw.mihou.velen.impl.VelenImpl;
 import pw.mihou.velen.interfaces.Velen;
+import pw.mihou.velen.internals.VelenBlacklist;
 import pw.mihou.velen.prefix.VelenPrefixManager;
 import pw.mihou.velen.ratelimiter.VelenRatelimiter;
 
@@ -21,6 +22,7 @@ public class VelenBuilder {
     private VelenRoleMessage noRoleMessage = (role, user, channel, command) -> "You need to have any of the role(s): " + role + " to run this command!";
     private VelenRatelimiter ratelimiter = new VelenRatelimiter();
     private VelenPrefixManager prefixManager = new VelenPrefixManager("v.");
+    private VelenBlacklist blacklist;
 
     /**
      * Sets the default prefix to use, this is by default, <b>v.</b>
@@ -72,6 +74,22 @@ public class VelenBuilder {
     }
 
     /**
+     * Sets the blacklist to use by {@link Velen}, this will be used by {@link Velen} to
+     * check if the user is ignored or not.<br>
+     *
+     * We highly recommend that if you are not using the blacklist, set this to
+     * null since that will tell {@link Velen} that you are not using one and so the application
+     * does not have to check.
+     *
+     * @param blacklist The {@link VelenBlacklist} to use.
+     * @return
+     */
+    public VelenBuilder setBlacklist(VelenBlacklist blacklist) {
+        this.blacklist = blacklist;
+        return this;
+    }
+
+    /**
      * Sets the message to be sent when a user attempts to execute a command while
      * not having the required permissions to use the command.
      *
@@ -103,7 +121,7 @@ public class VelenBuilder {
      * @return the Velen component.
      */
     public Velen build() {
-        return new VelenImpl(ratelimiter, prefixManager, ratelimitMessage, noPermissionMessage, noRoleMessage);
+        return new VelenImpl(ratelimiter, prefixManager, ratelimitMessage, noPermissionMessage, noRoleMessage, blacklist);
     }
 
 }
