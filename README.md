@@ -26,6 +26,16 @@ You can easily install Velen through Maven Central by adding these entries onto 
 implementation 'pw.mihou:Velen:1.0.5'
 ```
 
+## ✔️ Ping-Pong Example
+A very simple of a ping-pong command in Velen is:
+```java
+Velen velen = Velen.ofDefaults();
+VelenCommand.of("ping", velen, (event, message, user, args) -> message.reply("Pong!")).attach();
+
+DiscordApi api = new DiscordApiBuilder().setToken(token)
+                 .addListener(velen).login().join();
+```
+
 ## ⌛ Velen Rate Limiter
 The cooldown handler for Velen, this is an extremely simple implementation and doesn't have much settings other than
 being able to change the duration of the cooldown, the message of the cooldown (which is done when building Velen). You
