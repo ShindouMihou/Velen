@@ -59,23 +59,23 @@ The example above uses MongoDB (with a helper class), the flow of the prefix man
 The loader is also not just limited to external databases, in fact, you can even use a `HashMap<Long, String>` and
 store stuff there but database is recommended for persistence.
 
-## Velen Blacklist
+## ⚔️ Velen Blacklist
 Velen also supports another simple feature that will assist you in blacklisting specific users from using any command of
 your bot with `VelenBlacklist` which supports both persistent and non-persistent blacklists *(persistent requires a database).*
 
 To get started, first, you have to create a blacklist instance and integrate it with Velen, an example usage would be 
 (non-persistent blacklist):
-```
+```java
 Velen velen = Velen.builder().setBlacklist(new VelenBlacklist()).build();
 ```
 
 If you want to blacklist a user, all you have to do is simply:
-```
+```java
 velen.getBlacklist().add(userId);
 ```
 
 To remove, all you have to do is:
-```
+```java
 velen.getBlacklist().remove(userId);
 ```
 
@@ -178,9 +178,15 @@ proper order. Here are all the methods of the utility class:
 Collection<Long> : VelenUtils.getOrderedUserMentions(String message);
 Collection<Long> : VelenUtils.getOrderedChannelMentions(String message);
 Collection<Long> : VelenUtils.getOrderedRoleMentions(String message);
+
+Collection<User> : VelenUtils.getOrderedUserMentions(DiscordApi api, String message);
+Collection<Ch..> : VelenUtils.getOrderedChannelMentions(DiscordApi api, String message);
+Collection<Role> : VelenUtils.getOrderedRoleMentions(DiscordApi api, String message);
+
+String           : VelenUtils.getCommandSuggestions(Velen velen, String query);
 ```
 
-## Fuzzy Command Suggestion
+## 🔍 Fuzzy Command Suggestion
 As part of VelenUtils, the library supports fuzzy searching for a command. This is especially handy for cases like an `help` command
 where you have `help [command]` but the user enters in a typo and writes a non-existent command as an argument instead. Fuzzy Command
 Suggestion can help you guide the user to the potential command. An example would be:
