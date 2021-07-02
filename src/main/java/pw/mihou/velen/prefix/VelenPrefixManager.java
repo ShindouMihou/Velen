@@ -119,8 +119,9 @@ public class VelenPrefixManager {
         if (prefixLoader == null)
             return defaultPrefix;
 
-        prefixes.put(server, prefixLoader.load(server));
-        return prefixes.get(server);
+        String prefix = prefixLoader.load(server);
+        prefixes.put(server, prefix == null ? defaultPrefix : prefix);
+        return prefix;
     }
 
 }

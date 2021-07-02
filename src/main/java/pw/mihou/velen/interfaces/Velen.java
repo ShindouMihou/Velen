@@ -1,6 +1,5 @@
 package pw.mihou.velen.interfaces;
 
-import com.sun.istack.internal.Nullable;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.listener.interaction.SlashCommandCreateListener;
 import org.javacord.api.listener.message.MessageCreateListener;
@@ -159,7 +158,6 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      *
      * @return The blacklist instance that is being used.
      */
-    @Nullable
      VelenBlacklist getBlacklist();
 
     /**

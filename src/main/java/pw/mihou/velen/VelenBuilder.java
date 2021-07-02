@@ -82,7 +82,7 @@ public class VelenBuilder {
      * does not have to check.
      *
      * @param blacklist The {@link VelenBlacklist} to use.
-     * @return
+     * @return VelenBuilder for chain calling methods.
      */
     public VelenBuilder setBlacklist(VelenBlacklist blacklist) {
         this.blacklist = blacklist;

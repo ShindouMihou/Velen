@@ -1,7 +1,5 @@
 package pw.mihou.velen.internals;
 
-import com.sun.istack.internal.Nullable;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -9,8 +7,6 @@ import java.util.function.Function;
 public class VelenBlacklist {
 
     private final List<Long> blacklist;
-
-    @Nullable
     private Function<Long, Boolean> loader;
 
     /**

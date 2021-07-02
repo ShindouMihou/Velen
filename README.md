@@ -6,7 +6,7 @@ For a more organized look-through at Velen, please check our [GitHub Wiki](https
 where everything is more organized and easier to read.
 
 ## 📦 How many components does Velen have?
-Velen has several components: `VelenRateLimiter`, `VelenCommand`, `VelenPrefixManager` and the main `Velen` component
+Velen has several components: `VelenRateLimiter`, `VelenCommand`, `VelenPrefixManager`, `VelenBlacklist` and the main `Velen` component
 which is the core. Each of the components have their own uses and is decently flexible to use for many situations.
 
 ## ❤️ Installation
@@ -17,13 +17,13 @@ You can easily install Velen through Maven Central by adding these entries onto 
 <dependency>
   <groupId>pw.mihou</groupId>
   <artifactId>Velen</artifactId>
-  <version>1.0.3</version>
+  <version>1.0.5</version>
 </dependency>
 ```
 
 ### Gradle
 ```gradle
-implementation 'pw.mihou:Velen:1.0.3'
+implementation 'pw.mihou:Velen:1.0.5'
 ```
 
 ## ⌛ Velen Rate Limiter
@@ -58,6 +58,49 @@ The example above uses MongoDB (with a helper class), the flow of the prefix man
 
 The loader is also not just limited to external databases, in fact, you can even use a `HashMap<Long, String>` and
 store stuff there but database is recommended for persistence.
+
+## Velen Blacklist
+Velen also supports another simple feature that will assist you in blacklisting specific users from using any command of
+your bot with `VelenBlacklist` which supports both persistent and non-persistent blacklists *(persistent requires a database).*
+
+To get started, first, you have to create a blacklist instance and integrate it with Velen, an example usage would be 
+(non-persistent blacklist):
+```
+Velen velen = Velen.builder().setBlacklist(new VelenBlacklist()).build();
+```
+
+If you want to blacklist a user, all you have to do is simply:
+```
+velen.getBlacklist().add(userId);
+```
+
+To remove, all you have to do is:
+```
+velen.getBlacklist().remove(userId);
+```
+
+The two methods above will only modify the internal blacklist and won't touch your database which means, if you are using
+a persistent database, additional means are needed. For example, if you are making changes onto your database through a method 
+like add, you have to use either methods as well to apply the changes to internal list.
+
+You can also opt to refreshing it which uses the loader you set when building the blacklist, the method to refresh
+the user is simply:
+```java
+velen.getBlacklist().refresh(userId);
+```
+
+**BUT** the method above as I mentioned, requires a loader which you can quickly build when constructing the blacklist, 
+for example (MongoDB with a Helper Class):
+```java
+new VelenBlacklist(aLong -> MongoDB.collection("blacklists", "someBot").find(Filters.eq("userId", aLong)).first() != null);
+```
+
+The reason why we are using `!= null` on the above is because the blacklist expects a `boolean` as a return, and so, the database
+is expected to be something similar like: `If the user is on the database, then the user is blacklisted otherwise not`.
+
+**We recommend placing `null` or not adding `setBlacklist()` at all if you are not using the blacklist
+since a null blacklist is a signal to the application that we are not using a blacklist (to stop the application from heading
+to the blacklist and getting the value and instead assume no one is blacklisted).**
 
 ## ✔️ Velen Component
 The Velen component is, by far, the simplest to make with the exception of `PrefixManager` and `Ratelimiter` with
@@ -136,6 +179,31 @@ Collection<Long> : VelenUtils.getOrderedUserMentions(String message);
 Collection<Long> : VelenUtils.getOrderedChannelMentions(String message);
 Collection<Long> : VelenUtils.getOrderedRoleMentions(String message);
 ```
+
+## Fuzzy Command Suggestion
+As part of VelenUtils, the library supports fuzzy searching for a command. This is especially handy for cases like an `help` command
+where you have `help [command]` but the user enters in a typo and writes a non-existent command as an argument instead. Fuzzy Command
+Suggestion can help you guide the user to the potential command. An example would be:
+```java
+// Some random commands.
+VelenCommand.of("readbackwards", velen, (event, message, user, args1) -> message.reply("hello!")).attach();
+VelenCommand.of("command", velen, (event, message, user, args1) -> message.reply("hello!")).attach();
+VelenCommand.of("another", velen, (event, message, user, args1) -> message.reply("hello!")).attach();
+VelenCommand.of("hello", velen, (event, message, user, args1) -> message.reply("hello!")).attach();
+
+// The help command.
+VelenCommand.of("help", velen, (event, message, user, args) -> {
+  if (args.length > 0) {
+    message.reply("Do you mean: " + VelenUtils.getCommandSuggestion(velen, args[0]));
+  } else {
+    message.reply("Help command: " + velen.getCommands().stream().map(VelenCommand::getName)
+      .collect(Collectors.joining(", ")));
+  }
+}).attach();
+```
+
+The example below would output: `command` if you were to type: `help com` or would output: `Help command: readbackwards, command, 
+another, hello, help` if you were to type: `help`.
 
 ## 📛 Velen Command
 This is the most amusing part of Velen which takes a lot of inspiration from the library it uses. A VelenCommand is

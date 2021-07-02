@@ -13,7 +13,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
-public class ValenUtils {
+public class VelenUtils {
 
     private static final VelenInternalUtils internals;
 
@@ -121,6 +121,7 @@ public class ValenUtils {
      * for the fuzzy scoring. (Please note that it may be a bit
      * expensive to use this).
      *
+     * @param velen The velen instance to get all the commands from.
      * @param query The query to find.
      * @return the highest scored command.
      */

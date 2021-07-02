@@ -1,6 +1,5 @@
 package pw.mihou.velen.impl;
 
-import com.sun.istack.internal.Nullable;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.event.interaction.SlashCommandCreateEvent;
@@ -33,12 +32,10 @@ public class VelenImpl implements Velen {
     private final VelenPrefixManager prefixManager;
     private final VelenPermissionMessage noPermissionMessage;
     private final VelenRoleMessage noRoleMessage;
-
-    @Nullable
     private final VelenBlacklist blacklist;
 
     public VelenImpl(VelenRatelimiter ratelimiter, VelenPrefixManager prefixManager, VelenMessage ratelimitedMessage,
-                     VelenPermissionMessage noPermissionMessage, VelenRoleMessage noRoleMessage, @Nullable VelenBlacklist blacklist) {
+                     VelenPermissionMessage noPermissionMessage, VelenRoleMessage noRoleMessage, VelenBlacklist blacklist) {
         this.ratelimiter = ratelimiter;
         this.ratelimitedMessage = ratelimitedMessage;
         this.commands = new ArrayList<>();
