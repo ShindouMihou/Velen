@@ -9,6 +9,16 @@ where everything is more organized and easier to read.
 Velen has several components: `VelenRateLimiter`, `VelenCommand`, `VelenPrefixManager`, `VelenBlacklist` and the main `Velen` component
 which is the core. Each of the components have their own uses and is decently flexible to use for many situations.
 
+## ✔️ Ping-Pong Example
+A very simple of a ping-pong command in Velen is:
+```java
+Velen velen = Velen.builder().setDefaultPrefix("v.").build();
+VelenCommand.of("ping", velen, (event, message, user, args) -> message.reply("Pong!")).attach();
+
+DiscordApi api = new DiscordApiBuilder().setToken(token)
+                 .addListener(velen).login().join();
+```
+
 ## ❤️ Installation
 You can easily install Velen through Maven Central by adding these entries onto your `build.gradle` or `pom.xml`:
 
@@ -26,15 +36,9 @@ You can easily install Velen through Maven Central by adding these entries onto 
 implementation 'pw.mihou:Velen:1.0.5'
 ```
 
-## ✔️ Ping-Pong Example
-A very simple of a ping-pong command in Velen is:
-```java
-Velen velen = Velen.builder().setDefaultPrefix("v.").build();
-VelenCommand.of("ping", velen, (event, message, user, args) -> message.reply("Pong!")).attach();
-
-DiscordApi api = new DiscordApiBuilder().setToken(token)
-                 .addListener(velen).login().join();
-```
+## ⛰️ Velen is used by
+- [Amelia](https://github.com/ManaNet/Amelia): A Discord bot that is dedicated to a webnovel site called ScribbleHub.
+- More to be added, feel free to create an issue if you want to add yours here!
 
 ## ⌛ Velen Rate Limiter
 The cooldown handler for Velen, this is an extremely simple implementation and doesn't have much settings other than
