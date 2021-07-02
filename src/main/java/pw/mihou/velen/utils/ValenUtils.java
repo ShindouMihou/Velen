@@ -1,13 +1,24 @@
 package pw.mihou.velen.utils;
 
 import org.javacord.api.util.DiscordRegexPattern;
+import pw.mihou.velen.interfaces.Velen;
+import pw.mihou.velen.interfaces.VelenCommand;
+import pw.mihou.velen.internals.VelenInternalUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
+import java.util.stream.Collectors;
 
 public class ValenUtils {
+
+    private static final VelenInternalUtils internals;
+
+    static {
+        internals = new VelenInternalUtils(Locale.ENGLISH);
+    }
 
     /**
      * Parses the messages and returns the correct order of users mentioned.
@@ -59,6 +70,26 @@ public class ValenUtils {
                     .replaceFirst(">", "")));
         }
         return channels;
+    }
+
+    /**
+     * Retrieves the name of command that the user potentially
+     * wanted to type in. (mostly because of typos, etc).
+     * <br>
+     * This is useful for commands such as "help command"
+     * where the user types in a wrong query and you can immediately
+     * fill in with a suggested command.
+     *
+     * This method uses {@link Velen#getCommands()} as the participants
+     * for the fuzzy scoring. (Please note that it may be a bit
+     * expensive to use this).
+     *
+     * @param query The query to find.
+     * @return the highest scored command.
+     */
+    public static String getCommandSuggestion(Velen velen, String query) {
+        return internals.closest(query, velen.getCommands().stream().map(VelenCommand::getName)
+                .collect(Collectors.toList())).getLeft();
     }
 
 }
