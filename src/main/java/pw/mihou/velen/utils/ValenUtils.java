@@ -1,14 +1,15 @@
 package pw.mihou.velen.utils;
 
+import org.javacord.api.DiscordApi;
+import org.javacord.api.entity.channel.Channel;
+import org.javacord.api.entity.permission.Role;
+import org.javacord.api.entity.user.User;
 import org.javacord.api.util.DiscordRegexPattern;
 import pw.mihou.velen.interfaces.Velen;
 import pw.mihou.velen.interfaces.VelenCommand;
 import pw.mihou.velen.internals.VelenInternalUtils;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,18 @@ public class ValenUtils {
     }
 
     /**
+     * Parses the messages and returns the correct order of users mentioned.
+     *
+     * @param api The Discord API to use.
+     * @param message The message to parse.
+     * @return A correctly ordered list of channel mentions.
+     */
+    public static CompletableFuture<Collection<User>> getOrderedUserMentions(DiscordApi api, String message) {
+        return CompletableFuture.supplyAsync(() -> getOrderedUserMentions(message).stream().map(api::getUserById)
+                .map(CompletableFuture::join).collect(Collectors.toList()));
+    }
+
+    /**
      * Parses the messages and returns the correct order of roles mentioned.
      *
      * @param message The message to parse.
@@ -56,6 +69,18 @@ public class ValenUtils {
     }
 
     /**
+     * Parses the messages and returns the correct order of roles mentioned.
+     *
+     * @param api The Discord API to use.
+     * @param message The message to parse.
+     * @return A correctly ordered list of channel mentions.
+     */
+    public static Collection<Optional<Role>> getOrderedRoleMentions(DiscordApi api, String message) {
+        return getOrderedRoleMentions(message).stream().map(api::getRoleById)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Parses the messages and returns the correct order of channels mentioned.
      *
      * @param message The message to parse.
@@ -70,6 +95,18 @@ public class ValenUtils {
                     .replaceFirst(">", "")));
         }
         return channels;
+    }
+
+    /**
+     * Parses the messages and returns the correct order of channels mentioned.
+     *
+     * @param api The Discord API to use.
+     * @param message The message to parse.
+     * @return A correctly ordered list of channel mentions.
+     */
+    public static Collection<Optional<Channel>> getOrderedChannelMentions(DiscordApi api, String message) {
+        return getOrderedChannelMentions(message).stream().map(api::getChannelById)
+                .collect(Collectors.toList());
     }
 
     /**
