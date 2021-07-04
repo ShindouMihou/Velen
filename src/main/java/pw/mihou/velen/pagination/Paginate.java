@@ -5,6 +5,7 @@ import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.util.logging.ExceptionLogger;
 import pw.mihou.velen.pagination.entities.Paginator;
 import pw.mihou.velen.pagination.events.PaginateEvent;
+import pw.mihou.velen.pagination.events.PaginateSimpleEvent;
 
 import java.time.Duration;
 import java.util.List;
@@ -130,6 +131,69 @@ public class Paginate<T> {
                         }
                     }).removeAfter(removeAfter.toMillis(), TimeUnit.MILLISECONDS).addRemoveHandler(message::removeAllReactions);
                 }).exceptionally(ExceptionLogger.get());
+    }
+
+    /**
+     * Starts a pagination event <b>but without the select reaction</b>,
+     * this is usually handy for cases where you only want the user to look
+     * through certain pages.
+     *
+     * @param event The MessageCreateEvent needed to start the event.
+     * @param paginateEvent The handler for each paginate event.
+     * @param removeAfter Remove the pagination event after (x) duration.
+     */
+    public void paginate(MessageCreateEvent event, PaginateSimpleEvent<T> paginateEvent, Duration removeAfter) {
+        if(paginator.isEmpty()) {
+            paginateEvent.onEmptyPaginator(event)
+                    .replyTo(event.getMessage())
+                    .send(event.getChannel())
+                    .exceptionally(ExceptionLogger.get());
+            return;
+        }
+
+        paginateEvent.onInit(event, paginator.current(), paginator.getArrow(), paginator)
+                .replyTo(event.getMessage()).send(event.getChannel()).thenAccept(message -> {
+            if(nextEmoji == null || reverseEmoji == null || selectEmoji == null || cancelEmoji == null) {
+                if (paginator.size() > 1) {
+                    message.addReactions(unicodeReverse, unicodeCancel, unicodeNext);
+                } else {
+                    message.addReactions(unicodeCancel);
+                }
+            } else {
+                if (paginator.size() > 1) {
+                    message.addReactions(reverseEmoji, cancelEmoji, nextEmoji);
+                } else {
+                    message.addReactions(cancelEmoji);
+                }
+            }
+
+            message.addReactionAddListener(e -> {
+                if(e.getUserId() != event.getApi().getYourself().getId()) {
+                    e.removeReaction();
+                }
+
+                if(e.getUserId() != event.getMessageAuthor().getId())
+                    return;
+
+                if(nextEmoji == null || reverseEmoji == null || cancelEmoji == null) {
+                    if (e.getEmoji().equalsEmoji(unicodeNext) && paginator.size() > 1) {
+                        paginator.next().ifPresent(t -> paginateEvent.onPaginate(event, message, t, paginator.getArrow(), paginator));
+                    } else if (e.getEmoji().equalsEmoji(unicodeReverse) && paginator.size() > 1) {
+                        paginator.reverse().ifPresent(t -> paginateEvent.onPaginate(event, message, t, paginator.getArrow(), paginator));
+                    } else if (e.getEmoji().equalsEmoji(unicodeCancel)) {
+                        paginateEvent.onCancel(event, message);
+                    }
+                } else {
+                    if (e.getEmoji().equalsEmoji(nextEmoji) && paginator.size() > 1) {
+                        paginator.next().ifPresent(t -> paginateEvent.onPaginate(event, message, t, paginator.getArrow(), paginator));
+                    } else if (e.getEmoji().equalsEmoji(reverseEmoji) && paginator.size() > 1) {
+                        paginator.reverse().ifPresent(t -> paginateEvent.onPaginate(event, message, t, paginator.getArrow(), paginator));
+                    } else if (e.getEmoji().equalsEmoji(cancelEmoji)) {
+                        paginateEvent.onCancel(event, message);
+                    }
+                }
+            }).removeAfter(removeAfter.toMillis(), TimeUnit.MILLISECONDS).addRemoveHandler(message::removeAllReactions);
+        }).exceptionally(ExceptionLogger.get());
     }
 
 }
