@@ -11,6 +11,7 @@ import org.javacord.api.event.interaction.SlashCommandCreateEvent;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.interaction.*;
 import org.javacord.api.util.logging.ExceptionLogger;
+import pw.mihou.velen.builders.VelenGenericMessage;
 import pw.mihou.velen.interfaces.*;
 import pw.mihou.velen.utils.Pair;
 import pw.mihou.velen.utils.Scheduler;
@@ -19,6 +20,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class VelenCommandImpl implements VelenCommand {
@@ -37,6 +39,9 @@ public class VelenCommandImpl implements VelenCommand {
     private final Velen velen;
 
     private final List<SlashCommandOption> options;
+    private final List<Function<MessageCreateEvent, Boolean>> conditions;
+    private final List<Function<SlashCommandCreateEvent, Boolean>> conditionsSlash;
+    private final VelenGenericMessage conditionalMessage;
     private final VelenSlashEvent velenSlashEvent;
     private final long serverId;
     private String stringValue;
@@ -44,6 +49,9 @@ public class VelenCommandImpl implements VelenCommand {
     public VelenCommandImpl(String name, String usage, String description, String category, Duration cooldown, List<Long> requiredRoles,
                             List<Long> requiredUsers, List<PermissionType> permissions, boolean serverOnly,
                             List<String> shortcuts, VelenEvent event, VelenSlashEvent slashEvent, List<SlashCommandOption> options,
+                            List<Function<MessageCreateEvent, Boolean>> conditions,
+                            List<Function<SlashCommandCreateEvent, Boolean>> conditionsSlash,
+                            VelenGenericMessage conditionalMessage,
                             long serverId,
                             Velen velen) {
         this.name = name;
@@ -59,6 +67,9 @@ public class VelenCommandImpl implements VelenCommand {
         this.velenEvent = event;
         this.velenSlashEvent = slashEvent;
         this.serverId = serverId;
+        this.conditions = conditions;
+        this.conditionsSlash = conditionsSlash;
+        this.conditionalMessage = conditionalMessage;
         this.velen = velen;
         this.options = options;
     }
@@ -76,6 +87,15 @@ public class VelenCommandImpl implements VelenCommand {
 
         if(!event.getChannel().isPresent())
             return;
+
+        if(!conditionsSlash.isEmpty()) {
+            if(!conditionsSlash.stream().allMatch(fun -> fun.apply(e))) {
+                if(conditionalMessage != null)
+                    event.createImmediateResponder().setContent(conditionalMessage.load(user, event.getChannel().get(), name))
+                            .respond();
+                return;
+            }
+        }
 
         if (event.getServer().isPresent()) {
             Server server = event.getServer().get();
@@ -121,6 +141,15 @@ public class VelenCommandImpl implements VelenCommand {
             return;
 
         User user = event.getMessageAuthor().asUser().get();
+
+        if(!conditions.isEmpty()) {
+            if(!conditions.stream().allMatch(fun -> fun.apply(event))) {
+                if(conditionalMessage != null)
+                    event.getMessage().reply(conditionalMessage.load(user, event.getChannel(), name));
+                return;
+            }
+        }
+
         if (serverOnly) {
             if (!event.getServer().isPresent())
                 return;

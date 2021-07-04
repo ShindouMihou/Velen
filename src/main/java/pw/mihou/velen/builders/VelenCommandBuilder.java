@@ -1,6 +1,8 @@
 package pw.mihou.velen.builders;
 
 import org.javacord.api.entity.permission.PermissionType;
+import org.javacord.api.event.interaction.SlashCommandCreateEvent;
+import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.interaction.SlashCommandOption;
 import org.javacord.api.interaction.SlashCommandOptionBuilder;
 import pw.mihou.velen.impl.VelenCommandImpl;
@@ -13,6 +15,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class VelenCommandBuilder {
@@ -21,6 +24,9 @@ public class VelenCommandBuilder {
     private final List<Long> requiredUsers = new ArrayList<>();
     private final List<PermissionType> permissions = new ArrayList<>();
     private final List<String> shortcuts = new ArrayList<>();
+    private final List<Function<MessageCreateEvent, Boolean>> conditions = new ArrayList<>();
+    private final List<Function<SlashCommandCreateEvent, Boolean>> conditionsSlash = new ArrayList<>();
+    private VelenGenericMessage conditionalMessage;
     private final List<SlashCommandOption> options = new ArrayList<>();
     private long serverId = 0L;
     private String category;
@@ -206,6 +212,57 @@ public class VelenCommandBuilder {
     }
 
     /**
+     * Adds a condition that the user or event has to meet
+     * before the command is triggered.
+     * <h3>This is for message commands, {@link VelenCommandBuilder#addConditionForSlash(Function)} should be used
+     * for slash commands.</h3>
+     *
+     * An example would be if {@link VelenCommandBuilder#requireRole(long)} and
+     * {@link VelenCommandBuilder#requirePermission(PermissionType)} is hardly enough
+     * to lock the user, for example, cases where the user has to optionally meet either
+     * instead all of them.
+     *
+     * @param condition The condition the event has to meet.
+     * @return VelenCommandBuilder for chain calling methods.
+     */
+    public VelenCommandBuilder addCondition(Function<MessageCreateEvent, Boolean> condition) {
+        this.conditions.add(condition);
+        return this;
+    }
+
+    /**
+     * Adds a condition that the user or event has to meet
+     * before the command is triggered.
+     * <h3>This is for slash commands, {@link VelenCommandBuilder#addCondition(Function)} should be used
+     * for message commands.</h3>
+     *
+     * An example would be if {@link VelenCommandBuilder#requireRole(long)} and
+     * {@link VelenCommandBuilder#requirePermission(PermissionType)} is hardly enough
+     * to lock the user, for example, cases where the user has to optionally meet either
+     * instead all of them.
+     *
+     * @param condition The condition the event has to meet.
+     * @return VelenCommandBuilder for chain calling methods.
+     */
+    public VelenCommandBuilder addConditionForSlash(Function<SlashCommandCreateEvent, Boolean> condition) {
+        this.conditionsSlash.add(condition);
+        return this;
+    }
+
+    /**
+     * Adds a message to be sent to the user whenever the conditions on {@link VelenCommandBuilder#addConditionForSlash(Function)}
+     * or {@link VelenCommandBuilder#addCondition(Function)} are not met. This is by defualt, null which means we don't send
+     * a message to the user.
+     *
+     * @param message The message to be sent.
+     * @return VelenCommandBuilder for chain calling methods.
+     */
+    public VelenCommandBuilder setConditionalMessage(VelenGenericMessage message) {
+        this.conditionalMessage = message;
+        return this;
+    }
+
+    /**
      * Adds an option that will be used for slash commands.
      * <h3>This is only applicable for slash commands!</h3>
      *
@@ -335,7 +392,7 @@ public class VelenCommandBuilder {
             category = "";
 
         return new VelenCommandImpl(name, usage, description, category, cooldown, requiredRoles, requiredUsers,
-                permissions, serverOnly, shortcuts, velenEvent, velenSlashEvent, options, serverId, velen);
+                permissions, serverOnly, shortcuts, velenEvent, velenSlashEvent, options, conditions, conditionsSlash, conditionalMessage, serverId, velen);
 
     }
 
