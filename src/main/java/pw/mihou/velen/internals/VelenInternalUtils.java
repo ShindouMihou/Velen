@@ -73,7 +73,7 @@ public class VelenInternalUtils {
             }
 
             if(iS == s) {
-                if(participants.get(i).length() > participants.get(iN).length()) {
+                if(participants.get(i).length() < participants.get(iN).length()) {
                     iN = i;
                     iS = s;
                 }
