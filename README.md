@@ -27,13 +27,13 @@ You can easily install Velen through Maven Central by adding these entries onto 
 <dependency>
   <groupId>pw.mihou</groupId>
   <artifactId>Velen</artifactId>
-  <version>1.0.5</version>
+  <version>1.0.6</version>
 </dependency>
 ```
 
 ### Gradle
 ```gradle
-implementation 'pw.mihou:Velen:1.0.5'
+implementation 'pw.mihou:Velen:1.0.6'
 ```
 
 ## ⛰️ Velen is used by
@@ -279,6 +279,21 @@ Locking a certain command to only a certain user:
 ```java
 VelenCommand.of("hello", velen, (event, message, user, arg) -> event.getChannel().sendMessage("Hi!"))
                 .requireUser(584322030934032393L)
+                .attach();
+```
+
+Adding conditions to a command:
+```java
+VelenCommand.of("say", velen, (event, message, user, args) -> message.reply("Hello World!"))
+                .addCondition(event -> event.getMessageContent().contains("Hello"))
+                .attach();
+```
+
+Adding conditions and condition not met message to a command:
+```java
+VelenCommand.of("say", velen, (event, message, user, args) -> message.reply("Hello World!"))
+                .addCondition(event -> event.getMessageContent().contains("Hello"))
+                .setConditionalMessage((user, channel, command) -> "You do meet the conditions to use this command!")
                 .attach();
 ```
 
