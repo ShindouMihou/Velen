@@ -5,6 +5,7 @@ import org.javacord.api.entity.channel.ServerChannel;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.interaction.SlashCommandInteractionOption;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -25,16 +26,18 @@ public class VelenArguments {
 
     /**
      * Gets a Slash Command option by its name.
+     *
      * @param name The name of the option.
      * @return The slash command option.
      */
     public Optional<SlashCommandInteractionOption> getOptionWithName(String name) {
         return options.stream().filter(slashCommandOption -> slashCommandOption.getName()
-        .equals(name)).findAny();
+                .equals(name)).findAny();
     }
 
     /**
      * Gets a Slash Command option by its name (ignore casing).
+     *
      * @param name The name of the option.
      * @return The slash command option.
      */
@@ -45,6 +48,7 @@ public class VelenArguments {
 
     /**
      * Gets a boolean option by its name.
+     *
      * @param name The name of the option.
      * @return The boolean value.
      */
@@ -57,6 +61,7 @@ public class VelenArguments {
 
     /**
      * Gets a boolean option by its name (ignore casing).
+     *
      * @param name The name of the option.
      * @return The boolean value.
      */
@@ -69,6 +74,7 @@ public class VelenArguments {
 
     /**
      * Gets a String option by its name.
+     *
      * @param name The name of the option.
      * @return The String value.
      */
@@ -81,6 +87,7 @@ public class VelenArguments {
 
     /**
      * Gets a String option by its name (ignore casing).
+     *
      * @param name The name of the option.
      * @return The String value.
      */
@@ -93,6 +100,7 @@ public class VelenArguments {
 
     /**
      * Gets a Integer option by its name.
+     *
      * @param name The name of the option.
      * @return The integer value.
      */
@@ -105,6 +113,7 @@ public class VelenArguments {
 
     /**
      * Gets a Integer option by its name (ignore casing).
+     *
      * @param name The name of the option.
      * @return The integer value.
      */
@@ -117,6 +126,7 @@ public class VelenArguments {
 
     /**
      * Gets a ServerChannel option by its name.
+     *
      * @param name The name of the option.
      * @return The ServerChannel value.
      */
@@ -129,6 +139,7 @@ public class VelenArguments {
 
     /**
      * Gets a ServerChannel option by its name (ignore casing).
+     *
      * @param name The name of the option.
      * @return The ServerChannel value.
      */
@@ -141,6 +152,7 @@ public class VelenArguments {
 
     /**
      * Gets a User option by its name.
+     *
      * @param name The name of the option.
      * @return The User value.
      */
@@ -153,6 +165,7 @@ public class VelenArguments {
 
     /**
      * Gets a User option by its name (ignore casing).
+     *
      * @param name The name of the option.
      * @return The User value.
      */
@@ -165,6 +178,7 @@ public class VelenArguments {
 
     /**
      * Gets a Role option by its name (ignore casing).
+     *
      * @param name The name of the option.
      * @return The Role value.
      */
@@ -177,6 +191,7 @@ public class VelenArguments {
 
     /**
      * Gets a Role option by its name.
+     *
      * @param name The name of the option.
      * @return The Role value.
      */

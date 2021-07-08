@@ -1,10 +1,7 @@
 package pw.mihou.velen.builders;
 
 import org.javacord.api.entity.channel.TextChannel;
-import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.user.User;
-
-import java.util.List;
 
 public interface VelenGenericMessage {
 
@@ -15,9 +12,9 @@ public interface VelenGenericMessage {
      * For example:
      * "You do not meet the required conditions: <b>something condition</b>"
      *
-     * @param user       The user.
-     * @param channel    The text channel.
-     * @param command    The command that the user executed.
+     * @param user    The user.
+     * @param channel The text channel.
+     * @param command The command that the user executed.
      * @return The no-permission message.
      */
     String load(User user, TextChannel channel, String command);

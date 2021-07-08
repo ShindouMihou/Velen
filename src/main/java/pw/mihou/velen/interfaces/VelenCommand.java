@@ -1,7 +1,6 @@
 package pw.mihou.velen.interfaces;
 
 import org.javacord.api.entity.permission.PermissionType;
-import org.javacord.api.interaction.SlashCommandBuilder;
 import org.javacord.api.interaction.SlashCommandOption;
 import org.javacord.api.interaction.SlashCommandOptionBuilder;
 import pw.mihou.velen.builders.VelenCommandBuilder;
@@ -31,11 +30,11 @@ public interface VelenCommand {
      * <h3>This creates a hybrid between slash command and message command, which means
      * it will listen into both message commands and slash commands.</h3>
      *
-     * @param name  The name of the command.
+     * @param name        The name of the command.
      * @param description The description of the command.
-     * @param event The event to execute when the command is invoked.
-     * @param slashEvent The slash event handler.
-     * @param velen The velen instance (which will be used to grab default rate-limiter, etc).
+     * @param event       The event to execute when the command is invoked.
+     * @param slashEvent  The slash event handler.
+     * @param velen       The velen instance (which will be used to grab default rate-limiter, etc).
      * @return A VelenCommandBuilder in case you want to add more options.
      */
     static VelenCommandBuilder ofHybrid(String name, String description, Velen velen, VelenEvent event, VelenSlashEvent slashEvent) {
@@ -53,12 +52,12 @@ public interface VelenCommand {
      * <h3>This creates a hybrid between slash command and message command, which means
      * it will listen into both message commands and slash commands.</h3>
      *
-     * @param name  The name of the command.
+     * @param name        The name of the command.
      * @param description The description of the command.
-     * @param event The event to execute when the command is invoked.
-     * @param slashEvent The slash event handler.
-     * @param options The options to add to the command.
-     * @param velen The velen instance (which will be used to grab default rate-limiter, etc).
+     * @param event       The event to execute when the command is invoked.
+     * @param slashEvent  The slash event handler.
+     * @param options     The options to add to the command.
+     * @param velen       The velen instance (which will be used to grab default rate-limiter, etc).
      * @return A VelenCommandBuilder in case you want to add more options.
      */
     static VelenCommandBuilder ofHybrid(String name, String description, Velen velen, VelenEvent event, VelenSlashEvent slashEvent,
@@ -78,12 +77,12 @@ public interface VelenCommand {
      * <h3>This creates a hybrid between slash command and message command, which means
      * it will listen into both message commands and slash commands.</h3>
      *
-     * @param name  The name of the command.
+     * @param name        The name of the command.
      * @param description The description of the command.
-     * @param event The event to execute when the command is invoked.
-     * @param slashEvent The slash event handler.
-     * @param options The options to add to the command.
-     * @param velen The velen instance (which will be used to grab default rate-limiter, etc).
+     * @param event       The event to execute when the command is invoked.
+     * @param slashEvent  The slash event handler.
+     * @param options     The options to add to the command.
+     * @param velen       The velen instance (which will be used to grab default rate-limiter, etc).
      * @return A VelenCommandBuilder in case you want to add more options.
      */
     static VelenCommandBuilder ofHybrid(String name, String description, Velen velen, VelenEvent event, VelenSlashEvent slashEvent,
@@ -102,11 +101,11 @@ public interface VelenCommand {
      * the required parameters filled.
      * <h3>This creates a slash command only.</h3>
      *
-     * @param name  The name of the command.
+     * @param name        The name of the command.
      * @param description The description of the command.
-     * @param slashEvent The slash event handler.
-     * @param options The options to add to the command.
-     * @param velen The velen instance (which will be used to grab default rate-limiter, etc).
+     * @param slashEvent  The slash event handler.
+     * @param options     The options to add to the command.
+     * @param velen       The velen instance (which will be used to grab default rate-limiter, etc).
      * @return A VelenCommandBuilder in case you want to add more options.
      */
     static VelenCommandBuilder ofSlash(String name, String description, Velen velen, VelenSlashEvent slashEvent, SlashCommandOptionBuilder... options) {

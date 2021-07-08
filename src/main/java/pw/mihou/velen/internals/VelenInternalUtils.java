@@ -16,12 +16,13 @@ public class VelenInternalUtils {
 
     /**
      * Fuzzy scoring algorithm.
+     *
      * @param s1 The first string (a.k.a word).
      * @param s2 The second string (a.k.a query).
      * @return the score of s2.
      */
     public int score(String s1, String s2) {
-        if ( s1 == null || s2 == null )
+        if (s1 == null || s2 == null)
             throw new IllegalArgumentException("Any of the arguments must not be null.");
 
         s1 = s1.toLowerCase(locale);
@@ -34,13 +35,13 @@ public class VelenInternalUtils {
             char q1 = s2.charAt(i);
 
             boolean matching = false;
-            for(int index = 0; index < s1.length() && !matching; index++) {
+            for (int index = 0; index < s1.length() && !matching; index++) {
                 char q2 = s1.charAt(index);
 
-                if(q1 == q2) {
+                if (q1 == q2) {
                     score++;
 
-                    if(lastMatch + 1 == index)
+                    if (lastMatch + 1 == index)
                         score += 2;
 
                     lastMatch = index;
@@ -56,7 +57,7 @@ public class VelenInternalUtils {
      * This uses Fuzzy scoring to score each one and returns back
      * the highest score.
      *
-     * @param query The query.
+     * @param query        The query.
      * @param participants All the potential matches.
      * @return the highest scored participant.
      */
@@ -67,13 +68,13 @@ public class VelenInternalUtils {
         for (int i = 0; i < participants.size(); i++) {
             int s = score(participants.get(i), query);
 
-            if(iS < s) {
+            if (iS < s) {
                 iN = i;
                 iS = s;
             }
 
-            if(iS == s) {
-                if(participants.get(i).length() < participants.get(iN).length()) {
+            if (iS == s) {
+                if (participants.get(i).length() < participants.get(iN).length()) {
                     iN = i;
                     iS = s;
                 }
@@ -89,7 +90,7 @@ public class VelenInternalUtils {
      * This uses Fuzzy scoring to score each one and returns back
      * the highest score.
      *
-     * @param query The query.
+     * @param query        The query.
      * @param participants All the potential matches.
      * @return the highest scored participant.
      */

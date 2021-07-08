@@ -26,8 +26,8 @@ public class VelenCommandBuilder {
     private final List<String> shortcuts = new ArrayList<>();
     private final List<Function<MessageCreateEvent, Boolean>> conditions = new ArrayList<>();
     private final List<Function<SlashCommandCreateEvent, Boolean>> conditionsSlash = new ArrayList<>();
-    private VelenGenericMessage conditionalMessage;
     private final List<SlashCommandOption> options = new ArrayList<>();
+    private VelenGenericMessage conditionalMessage;
     private long serverId = 0L;
     private String category;
     private String name;
@@ -216,7 +216,7 @@ public class VelenCommandBuilder {
      * before the command is triggered.
      * <h3>This is for message commands, {@link VelenCommandBuilder#addConditionForSlash(Function)} should be used
      * for slash commands.</h3>
-     *
+     * <p>
      * An example would be if {@link VelenCommandBuilder#requireRole(long)} and
      * {@link VelenCommandBuilder#requirePermission(PermissionType)} is hardly enough
      * to lock the user, for example, cases where the user has to optionally meet either
@@ -235,7 +235,7 @@ public class VelenCommandBuilder {
      * before the command is triggered.
      * <h3>This is for slash commands, {@link VelenCommandBuilder#addCondition(Function)} should be used
      * for message commands.</h3>
-     *
+     * <p>
      * An example would be if {@link VelenCommandBuilder#requireRole(long)} and
      * {@link VelenCommandBuilder#requirePermission(PermissionType)} is hardly enough
      * to lock the user, for example, cases where the user has to optionally meet either
@@ -300,7 +300,7 @@ public class VelenCommandBuilder {
 
     /**
      * Sets the handler for when the command is invoked through slash command, <b>THIS IS REQUIRED TO SET whenever
-     *  you are using a slash command</b>.
+     * you are using a slash command</b>.
      * You must set this one as this one will be executed when the command is invoked by a user.
      *
      * @param event The Velen Slash Event to use when the command is invoked.
@@ -333,8 +333,8 @@ public class VelenCommandBuilder {
      * doesn't restrict to only a certain server!</h3>
      *
      * @param serverOnly Is this command a server only command?
-     * @param serverId The server ID to register the slash command on (this limits the slash
-     *                 command to that server only).
+     * @param serverId   The server ID to register the slash command on (this limits the slash
+     *                   command to that server only).
      * @return VelenCommandBuilder for chain calling methods.
      */
     public VelenCommandBuilder setServerOnly(boolean serverOnly, long serverId) {
@@ -388,7 +388,7 @@ public class VelenCommandBuilder {
         if (usage == null)
             usage = "";
 
-        if(category == null)
+        if (category == null)
             category = "";
 
         return new VelenCommandImpl(name, usage, description, category, cooldown, requiredRoles, requiredUsers,

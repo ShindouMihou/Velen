@@ -148,7 +148,7 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      *
      * @return Does this Velen instance sport a blacklist?
      */
-     boolean supportsBlacklist();
+    boolean supportsBlacklist();
 
     /**
      * Gets the blacklist being used by this {@link Velen} instance.
@@ -158,7 +158,7 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      *
      * @return The blacklist instance that is being used.
      */
-     VelenBlacklist getBlacklist();
+    VelenBlacklist getBlacklist();
 
     /**
      * Gets the Prefix Manager used by the Velen.

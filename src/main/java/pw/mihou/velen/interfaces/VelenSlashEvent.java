@@ -12,10 +12,10 @@ public interface VelenSlashEvent {
     /**
      * This is called when the exact command is executed.
      *
-     * @param event   The event received from Javacord.
-     * @param args    The arguments received from the event's message.
-     * @param options The raw list of arguments received from the event.
-     * @param user    The user who executed the command.
+     * @param event          The event received from Javacord.
+     * @param args           The arguments received from the event's message.
+     * @param options        The raw list of arguments received from the event.
+     * @param user           The user who executed the command.
      * @param firstResponder The initial response sent to the user, this is required
      *                       to answer, you can choose to ignore this and instead use
      *                       {@link SlashCommandInteraction#respondLater()} to tell

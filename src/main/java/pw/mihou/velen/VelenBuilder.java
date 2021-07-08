@@ -23,6 +23,7 @@ public class VelenBuilder {
     private VelenRatelimiter ratelimiter = new VelenRatelimiter();
     private VelenPrefixManager prefixManager = new VelenPrefixManager("v.");
     private VelenBlacklist blacklist;
+    private boolean allowMentionPrefix = true;
 
     /**
      * Sets the default prefix to use, this is by default, <b>v.</b>
@@ -76,7 +77,7 @@ public class VelenBuilder {
     /**
      * Sets the blacklist to use by {@link Velen}, this will be used by {@link Velen} to
      * check if the user is ignored or not.<br>
-     *
+     * <p>
      * We highly recommend that if you are not using the blacklist, set this to
      * null since that will tell {@link Velen} that you are not using one and so the application
      * does not have to check.
@@ -115,13 +116,28 @@ public class VelenBuilder {
     }
 
     /**
+     * Sets whether to allow Velen to respond to prefixes that only mentions the bot, this is
+     * usually enabled by default in compliance of the best practices that has circulated online.
+     * <p>
+     * An example of this would be: <code>@Velen help</code>
+     * or <code>@Velen help someCommand</code>
+     *
+     * @param allow Whether to allow the bot to respond to mention as prefixes.
+     * @return VelenBuilder for chain calling methods.
+     */
+    public VelenBuilder allowMentionAsPrefix(boolean allow) {
+        this.allowMentionPrefix = allow;
+        return this;
+    }
+
+    /**
      * Builds the Velen component which you can then use
      * to add commands, etc.
      *
      * @return the Velen component.
      */
     public Velen build() {
-        return new VelenImpl(ratelimiter, prefixManager, ratelimitMessage, noPermissionMessage, noRoleMessage, blacklist);
+        return new VelenImpl(ratelimiter, prefixManager, ratelimitMessage, noPermissionMessage, noRoleMessage, blacklist, allowMentionPrefix);
     }
 
 }

@@ -33,11 +33,11 @@ public class VelenBlacklist {
      * the blacklisted users from a persistent database or a database in general.
      *
      * @param loader This is used by {@link pw.mihou.velen.internals.VelenBlacklist} to check if
-     *     a user is blacklisted or not (this should be used if you are running a persistent blacklist
-     *     that utilizes a database like MongoDB or Redis).
-     *
-     *     The method requires you to return a boolean because the library will check if
-     *     the user is blacklisted through the state of the boolean <b>(true = blacklisted; false = not blacklisted)</b>.
+     *               a user is blacklisted or not (this should be used if you are running a persistent blacklist
+     *               that utilizes a database like MongoDB or Redis).
+     *               <p>
+     *               The method requires you to return a boolean because the library will check if
+     *               the user is blacklisted through the state of the boolean <b>(true = blacklisted; false = not blacklisted)</b>.
      */
     public VelenBlacklist(Function<Long, Boolean> loader) {
         this.loader = loader;
@@ -52,10 +52,10 @@ public class VelenBlacklist {
      * @return is this user blacklisted?
      */
     public boolean isBlacklisted(long user) {
-        if(blacklist.contains(user))
+        if (blacklist.contains(user))
             return true;
 
-        if(loader != null) {
+        if (loader != null) {
             boolean t = loader.apply(user);
             if (t)
                 blacklist.add(user);
@@ -75,7 +75,7 @@ public class VelenBlacklist {
      * @param user The user to refresh.
      */
     public void refresh(long user) {
-        if(loader != null) {
+        if (loader != null) {
             if (loader.apply(user))
                 blacklist.add(user);
             else

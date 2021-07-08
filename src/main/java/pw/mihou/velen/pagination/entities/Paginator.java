@@ -14,11 +14,22 @@ public class Paginator<T> {
     }
 
     /**
+     * Creates a new Paginator of type.
+     *
+     * @param items The items inside the paginator.
+     * @param <T>   The type of the items.
+     * @return A paginator.
+     */
+    public static <T> Paginator<T> of(List<T> items) {
+        return new Paginator<T>(items);
+    }
+
+    /**
      * Gets the current item in the current index.
      * <br><br>
      * <b>Important:</b> This can return null if you move the arrow by yourself, if you want to move
-     *  to another position, please use {@link Paginator#reverse()} to move backwards or {@link Paginator#next()} to
-     *  move forward instead since they won't cause {@link Paginator#current()} to become null.
+     * to another position, please use {@link Paginator#reverse()} to move backwards or {@link Paginator#next()} to
+     * move forward instead since they won't cause {@link Paginator#current()} to become null.
      *
      * @return The item inside the current position.
      */
@@ -33,7 +44,7 @@ public class Paginator<T> {
      * @return An optional containing the next item or empty (to indicate nothing behind).
      */
     public Optional<T> reverse() {
-        if(arrow.get() > 0) {
+        if (arrow.get() > 0) {
             return Optional.of(items.get(arrow.decrementAndGet()));
         }
 
@@ -47,7 +58,7 @@ public class Paginator<T> {
      * @return An optional containing the next item or empty (to indicate nothing next).
      */
     public Optional<T> next() {
-        if(arrow.get() < items.size() - 1) {
+        if (arrow.get() < items.size() - 1) {
             return Optional.of(items.get(arrow.incrementAndGet()));
         }
 
@@ -102,17 +113,6 @@ public class Paginator<T> {
      */
     public int size() {
         return items.size();
-    }
-
-    /**
-     * Creates a new Paginator of type.
-     *
-     * @param items The items inside the paginator.
-     * @param <T> The type of the items.
-     * @return A paginator.
-     */
-    public static <T> Paginator<T> of(List<T> items) {
-        return new Paginator<T>(items);
     }
 
 }
