@@ -24,6 +24,7 @@ where everything is more organized and easier to read.
 
 ## 📚 Wiki & Guide
 We highly recommend reading our wiki where everything is explained more in detailed: https://github.com/ShindouMihou/Velen/wiki
+- [Getting Started](https://github.com/ShindouMihou/Velen/wiki/Getting-Started)
 - [Building Velen Component](https://github.com/ShindouMihou/Velen/wiki/Velen-Main-Component)
 - [Building Message Commands](https://github.com/ShindouMihou/Velen/wiki/Building-Commands!)
 - [Building Slash and Hybrid Commands](https://github.com/ShindouMihou/Velen/wiki/Building-Slash-&-Hybrid-Commands!)
