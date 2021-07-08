@@ -22,6 +22,12 @@ where everything is more organized and easier to read.
 |      Mention as Prefix     	|     ✔️     	|
 |        Fast Updates        	|     ✔️     	|
 
+## 🔌 Requirements
+Velen only has one requirements and that is the latest Javacord, this will be
+updated everytime Javacord releases a new patch. Please ensure your Javacord version
+will be always up-to-date when using Velen!
+- Javacord v3.3.2
+
 ## 📚 Wiki & Guide
 We highly recommend reading our wiki where everything is explained more in detailed: https://github.com/ShindouMihou/Velen/wiki
 - [Getting Started](https://github.com/ShindouMihou/Velen/wiki/Getting-Started)
@@ -77,13 +83,13 @@ You can easily install Velen through Maven Central by adding these entries onto 
 <dependency>
   <groupId>pw.mihou</groupId>
   <artifactId>Velen</artifactId>
-  <version>1.0.8</version>
+  <version>1.0.9</version>
 </dependency>
 ```
 
 ### Gradle
 ```gradle
-implementation 'pw.mihou:Velen:1.0.8'
+implementation 'pw.mihou:Velen:1.0.9'
 ```
 
 ## ⛰️ Velen is used by
