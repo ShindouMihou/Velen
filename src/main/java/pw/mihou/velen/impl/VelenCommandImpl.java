@@ -96,7 +96,9 @@ public class VelenCommandImpl implements VelenCommand {
         if (!conditionsSlash.isEmpty()) {
             if (!conditionsSlash.stream().allMatch(fun -> fun.apply(e))) {
                 if (conditionalMessage != null)
-                    event.createImmediateResponder().setContent(conditionalMessage.load(user, event.getChannel().get(), name))
+                    event.createImmediateResponder()
+                            .setFlags(MessageFlag.EPHEMERAL)
+                            .setContent(conditionalMessage.load(user, event.getChannel().get(), name))
                             .respond();
                 return;
             }
@@ -110,6 +112,7 @@ public class VelenCommandImpl implements VelenCommand {
                     event.createImmediateResponder()
                             .setAllowedMentions(new AllowedMentionsBuilder().setMentionRoles(false)
                                     .setMentionUsers(false).setMentionEveryoneAndHere(false).build())
+                            .setFlags(MessageFlag.EPHEMERAL)
                             .setContent(velen.getNoRoleMessage().load(requiredRoles.stream().map(aLong -> "<@&" + aLong + ">")
                                     .collect(Collectors.joining(", ")), user, event.getChannel().get(), name))
                             .respond()
@@ -122,6 +125,7 @@ public class VelenCommandImpl implements VelenCommand {
                 Collection<PermissionType> userPerms = server.getPermissions(user).getAllowedPermission();
                 if (!userPerms.containsAll(permissions)) {
                     event.createImmediateResponder()
+                            .setFlags(MessageFlag.EPHEMERAL)
                             .setContent(velen.getNoPermissionMessage()
                                     .load(permissions, user, event.getChannel().get(), name))
                             .respond().exceptionally(ExceptionLogger.get());
