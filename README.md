@@ -96,7 +96,21 @@ implementation 'pw.mihou:Velen:1.0.9'
 - [Amelia](https://github.com/ManaNet/Amelia): A Discord bot that is dedicated to a webnovel site called ScribbleHub.
 - More to be added, feel free to create an issue if you want to add yours here!
 
+## 🔮 Version Policy
+Velen has a specific version policy, in which, unless there is a critical change to be made, an update will only be released on
+either of these conditions (this is to prevent me from overworking):
+- 3+ issues (bug fixes, feature requests, improvements, etc).
+- A critical bug fix.
+- A new Javacord update.
+
+The library also follows a similar version number policy with Javacord:
+- A change in the first digit of the version will mean: **major update or a major breaking change**.
+- A change in the second digit of the version will mean: **a large quantity of __accumulated__ updates**.
+- A change in the last digit of teh version will mean: **a minor update, usually new features or fixes**.
+
 ## 🏎️ How does Velen work?
-Velen works through a single monolith listener who then processes each command invocation onto their own
-respective commands in a multi-threaded fashion (which means each command is on their own threads) when executed,
-similar to a Listener in Javacord (or rather, they are pretty much the same).
+Velen functions through a single class that acts as the processor of the events, it handles and dispatches
+the events accordingly to the command that was invoked, for example, if a command with the name `help` was invoked
+and received by Velen. It will start to look for the command `help` to see if it is registered or not and if it
+is then it will trigger that event in an **asynchronous** manner, which means all the events are handled in
+different threads.
