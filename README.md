@@ -29,7 +29,7 @@ will be always up-to-date when using Velen!
 - Javacord v3.3.2
 
 ## 📚 Wiki & Guide
-We highly recommend reading our wiki where everything is explained more in detailed: https://github.com/ShindouMihou/Velen/wiki
+We highly recommend reading our wiki where everything is explained more in detailed
 - [Getting Started](https://github.com/ShindouMihou/Velen/wiki/Getting-Started)
 - [Building Velen Component](https://github.com/ShindouMihou/Velen/wiki/Velen-Main-Component)
 - [Building Message Commands](https://github.com/ShindouMihou/Velen/wiki/Building-Commands!)
@@ -106,7 +106,7 @@ either of these conditions (this is to prevent me from overworking):
 The library also follows a similar version number policy with Javacord:
 - A change in the first digit of the version will mean: **major update or a major breaking change**.
 - A change in the second digit of the version will mean: **a large quantity of __accumulated__ updates**.
-- A change in the last digit of teh version will mean: **a minor update, usually new features or fixes**.
+- A change in the last digit of the version will mean: **a minor update, usually new features or fixes**.
 
 ## 🏎️ How does Velen work?
 Velen functions through a single class that acts as the processor of the events, it handles and dispatches
