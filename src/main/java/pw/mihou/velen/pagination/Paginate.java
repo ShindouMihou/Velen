@@ -151,8 +151,6 @@ public class Paginate<T> {
      *
      * @param uniqueId      The unique ID to use for this paginate event (it must be unique
      *                      unless you want conflicts to happen while listening for events).
-     *
-     * @param event         The MessageCreateEvent to respond to.
      * @param event         The MessageCreateEvent needed to start the event.
      * @param paginateEvent The handler for each paginate event.
      * @param removeAfter   Remove the pagination event after (x) duration.
@@ -195,6 +193,9 @@ public class Paginate<T> {
             ListenerManager<ButtonClickListener> listener = event.getApi().addButtonClickListener(e -> {
                 String customId = e.getButtonInteraction().getCustomId();
 
+                if(e.getButtonInteraction().getUser().getId() != event.getMessageAuthor().getId())
+                    return;
+
                 if(customId.equals(uniqueId+"-REVERSE"))
                     paginator.reverse().ifPresent(t -> paginateEvent.onPaginate(e.getButtonInteraction().createImmediateResponder(), event, message, t, paginator.getArrow(), paginator));
 
@@ -234,8 +235,6 @@ public class Paginate<T> {
      *
      * @param uniqueId      The unique ID to use for this paginate event (it must be unique
      *                      unless you want conflicts to happen while listening for events).
-     *
-     * @param event         The MessageCreateEvent to respond to.
      * @param event         The MessageCreateEvent needed to start the event.
      * @param paginateEvent The handler for each paginate event.
      * @param removeAfter   Remove the pagination event after (x) duration.
@@ -274,6 +273,9 @@ public class Paginate<T> {
         builder.send(event.getChannel()).thenAccept(message -> {
             ListenerManager<ButtonClickListener> listener = event.getApi().addButtonClickListener(e -> {
                 String customId = e.getButtonInteraction().getCustomId();
+
+                if(e.getButtonInteraction().getUser().getId() != event.getMessageAuthor().getId())
+                    return;
 
                 if(customId.equals(uniqueId+"-REVERSE"))
                     paginator.reverse().ifPresent(t -> paginateEvent.onPaginate(e.getButtonInteraction().createImmediateResponder(), event, message, t, paginator.getArrow(), paginator));
