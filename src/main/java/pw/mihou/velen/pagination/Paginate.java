@@ -3,7 +3,6 @@ package pw.mihou.velen.pagination;
 import org.javacord.api.entity.emoji.Emoji;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.component.Button;
-import org.javacord.api.event.interaction.ButtonClickEvent;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.interaction.ButtonClickListener;
 import org.javacord.api.util.event.ListenerManager;

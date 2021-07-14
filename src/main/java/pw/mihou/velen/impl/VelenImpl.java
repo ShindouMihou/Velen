@@ -16,7 +16,7 @@ import pw.mihou.velen.internals.VelenBlacklist;
 import pw.mihou.velen.prefix.VelenPrefixManager;
 import pw.mihou.velen.ratelimiter.VelenRatelimiter;
 import pw.mihou.velen.utils.Pair;
-import pw.mihou.velen.utils.Scheduler;
+import pw.mihou.velen.utils.VelenThreadPool;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -184,7 +184,7 @@ public class VelenImpl implements Velen {
                         || isMessageOfAnyCommandMention(args, command.getShortcuts());
 
             return false;
-        }).forEachOrdered(command -> Scheduler.executorService
+        }).forEachOrdered(command -> VelenThreadPool.executorService
                 .submit(() -> ((VelenCommandImpl) command)
                         .execute(event, newArgs)));
     }
@@ -212,6 +212,6 @@ public class VelenImpl implements Velen {
 
         commands.stream().filter(velenCommand -> velenCommand.supportsSlashCommand()
                 && velenCommand.getName().toLowerCase().equals(event.getSlashCommandInteraction().getCommandName()))
-                .forEachOrdered(velenCommand -> Scheduler.executorService.submit(() -> ((VelenCommandImpl) velenCommand).execute(event)));
+                .forEachOrdered(velenCommand -> VelenThreadPool.executorService.submit(() -> ((VelenCommandImpl) velenCommand).execute(event)));
     }
 }

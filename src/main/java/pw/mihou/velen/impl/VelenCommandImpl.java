@@ -18,7 +18,7 @@ import org.javacord.api.util.logging.ExceptionLogger;
 import pw.mihou.velen.builders.VelenGenericMessage;
 import pw.mihou.velen.interfaces.*;
 import pw.mihou.velen.utils.Pair;
-import pw.mihou.velen.utils.Scheduler;
+import pw.mihou.velen.utils.VelenThreadPool;
 
 import java.time.Duration;
 import java.util.Collection;
@@ -225,7 +225,7 @@ public class VelenCommandImpl implements VelenCommand {
                                     user,
                                     event.getChannel(),
                                     name)).thenAccept(message ->
-                            Scheduler.schedule(() -> {
+                            VelenThreadPool.schedule(() -> {
                                 velen.getRatelimiter().release(user.getId(), server, toString());
                                 message.delete().thenAccept(unused -> event.getMessage().delete());
                             }, remaining, TimeUnit.SECONDS)).exceptionally(ExceptionLogger.get());
@@ -250,7 +250,7 @@ public class VelenCommandImpl implements VelenCommand {
                             .setContent(velen.getRatelimitedMessage()
                                     .load(remaining, user, event.getChannel().get(), name))
                             .setFlags(MessageFlag.EPHEMERAL)
-                            .respond().thenAccept(eg -> Scheduler.schedule(() -> {
+                            .respond().thenAccept(eg -> VelenThreadPool.schedule(() -> {
                         velen.getRatelimiter().release(user.getId(), server, toString());
                         eg.delete();
                     }, remaining, TimeUnit.SECONDS)).exceptionally(ExceptionLogger.get());

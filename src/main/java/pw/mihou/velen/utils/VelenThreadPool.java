@@ -2,7 +2,7 @@ package pw.mihou.velen.utils;
 
 import java.util.concurrent.*;
 
-public class Scheduler {
+public class VelenThreadPool {
 
     private static final int CORE_POOL_SIZE = 1;
     public static final ScheduledExecutorService scheduledExecutorService =
