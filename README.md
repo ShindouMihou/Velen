@@ -15,6 +15,7 @@ where everything is more organized and easier to read.
 |       Prefix Manager       	|     ✔️     	|
 |    Customizable Messages   	|     ✔️     	|
 |         Pagination         	|     ✔️     	|
+|    Pagination (Buttons)     |     ✔️     	|
 |   Rate-limiter (Cooldown)  	|     ✔️     	|
 |       Slash Comamnds       	|     ✔️     	|
 |       Hybrid Commands      	|     ✔️     	|
