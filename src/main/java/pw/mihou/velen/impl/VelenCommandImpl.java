@@ -39,6 +39,7 @@ public class VelenCommandImpl implements VelenCommand {
     private final List<Long> requiredUsers;
     private final List<PermissionType> permissions;
     private final boolean serverOnly;
+    private final boolean privateOnly;
     private final List<String> shortcuts;
     private final VelenEvent velenEvent;
     private final Velen velen;
@@ -53,6 +54,7 @@ public class VelenCommandImpl implements VelenCommand {
 
     public VelenCommandImpl(String name, String usage, String description, String category, Duration cooldown, List<Long> requiredRoles,
                             List<Long> requiredUsers, List<PermissionType> permissions, boolean serverOnly,
+                            boolean privateOnly,
                             List<String> shortcuts, VelenEvent event, VelenSlashEvent slashEvent, List<SlashCommandOption> options,
                             List<Function<MessageCreateEvent, Boolean>> conditions,
                             List<Function<SlashCommandCreateEvent, Boolean>> conditionsSlash,
@@ -75,6 +77,7 @@ public class VelenCommandImpl implements VelenCommand {
         this.conditions = conditions;
         this.conditionsSlash = conditionsSlash;
         this.conditionalMessage = conditionalMessage;
+        this.privateOnly = privateOnly;
         this.velen = velen;
         this.options = options;
     }
@@ -87,6 +90,11 @@ public class VelenCommandImpl implements VelenCommand {
         User user = event.getUser();
         if (serverOnly) {
             if (!event.getServer().isPresent())
+                return;
+        }
+
+        if(privateOnly) {
+            if(event.getServer().isPresent())
                 return;
         }
 
@@ -161,6 +169,14 @@ public class VelenCommandImpl implements VelenCommand {
 
         if (serverOnly) {
             if (!event.getServer().isPresent())
+                return;
+
+            if(serverId != 0L && event.getServer().get().getId() != serverId)
+                return;
+        }
+
+        if(privateOnly) {
+            if(event.getServer().isPresent())
                 return;
         }
 

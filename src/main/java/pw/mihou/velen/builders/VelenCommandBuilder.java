@@ -36,6 +36,7 @@ public class VelenCommandBuilder {
     private VelenSlashEvent velenSlashEvent;
     private Duration cooldown;
     private boolean serverOnly = false;
+    private boolean privateOnly = false;
     private VelenEvent velenEvent;
     private Velen velen;
 
@@ -325,12 +326,20 @@ public class VelenCommandBuilder {
     }
 
     /**
-     * Should this slash command be for a server only?
+     * Should this command be private-channel only?
+     * <h3> This is only for making the command work only for servers, please use
+     * {@link VelenCommandBuilder#setServerOnly(boolean, long)} for slash commands!</h3>
      *
-     * <h3> THIS IS FOR SLASH COMMANDS!!!! </h3>
-     * <h3> This is only for making the slash command work only for a certain server, please use
-     * {@link VelenCommandBuilder#setServerOnly(boolean)} for normal (or hybrid commands) which
-     * doesn't restrict to only a certain server!</h3>
+     * @param privateChannelOnly Is this command a private channel only command?
+     * @return VelenCommandBuilder for chain calling methods.
+     */
+    public VelenCommandBuilder setPrivateChannelOnly(boolean privateChannelOnly) {
+        this.privateOnly = privateChannelOnly;
+        return this;
+    }
+
+    /**
+     * Should this slash command be for a server only?
      *
      * @param serverOnly Is this command a server only command?
      * @param serverId   The server ID to register the slash command on (this limits the slash
@@ -392,7 +401,7 @@ public class VelenCommandBuilder {
             category = "";
 
         return new VelenCommandImpl(name, usage, description, category, cooldown, requiredRoles, requiredUsers,
-                permissions, serverOnly, shortcuts, velenEvent, velenSlashEvent, options, conditions, conditionsSlash, conditionalMessage, serverId, velen);
+                permissions, serverOnly, privateOnly, shortcuts, velenEvent, velenSlashEvent, options, conditions, conditionsSlash, conditionalMessage, serverId, velen);
 
     }
 
