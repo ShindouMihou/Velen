@@ -15,7 +15,7 @@ where everything is more organized and easier to read.
 |       Prefix Manager       	|     ✔️     	|
 |    Customizable Messages   	|     ✔️     	|
 |         Pagination         	|     ✔️     	|
-|    Pagination (Buttons)     |     ✔️     	|
+|    Pagination (Buttons)       |     ✔️     	|
 |   Rate-limiter (Cooldown)  	|     ✔️     	|
 |       Slash Comamnds       	|     ✔️     	|
 |       Hybrid Commands      	|     ✔️     	|
@@ -84,13 +84,13 @@ You can easily install Velen through Maven Central by adding these entries onto 
 <dependency>
   <groupId>pw.mihou</groupId>
   <artifactId>Velen</artifactId>
-  <version>1.1.0</version>
+  <version>1.1.1</version>
 </dependency>
 ```
 
 ### Gradle
 ```gradle
-implementation 'pw.mihou:Velen:1.1.0'
+implementation 'pw.mihou:Velen:1.1.1'
 ```
 
 ## ⛰️ Velen is used by
