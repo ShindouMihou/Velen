@@ -89,7 +89,13 @@ public class VelenPrefixManager {
      */
     public void reloadPrefix(long server) {
         if (prefixLoader != null) {
-            prefixes.put(server, prefixLoader.load(server));
+            String prefix = prefixLoader.load(server);
+
+            if(prefix != null)
+                prefixes.put(server, prefixLoader.load(server));
+
+            if(prefix == null)
+                prefixes.put(server, defaultPrefix);
         }
     }
 
@@ -120,7 +126,9 @@ public class VelenPrefixManager {
             return defaultPrefix;
 
         String prefix = prefixLoader.load(server);
-        prefixes.put(server, prefix == null ? defaultPrefix : prefix);
+        prefix = prefix == null ? defaultPrefix : prefix;
+
+        prefixes.put(server, prefix);
         return prefix;
     }
 
