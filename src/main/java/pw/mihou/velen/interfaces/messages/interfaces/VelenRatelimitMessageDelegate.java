@@ -1,9 +1,10 @@
-package pw.mihou.velen.builders;
+package pw.mihou.velen.interfaces.messages.interfaces;
 
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.user.User;
+import pw.mihou.velen.interfaces.messages.types.VelenRatelimitMessage;
 
-public interface VelenMessage {
+public interface VelenRatelimitMessageDelegate<R> extends VelenRatelimitMessage {
 
     /**
      * Create a new Velen Message which will be used to retrieve
@@ -20,6 +21,6 @@ public interface VelenMessage {
      * @param command          The command that the user is rate-limited on.
      * @return The rate-limited message.
      */
-    String load(long remainingSeconds, User user, TextChannel channel, String command);
+    R load(long remainingSeconds, User user, TextChannel channel, String command);
 
 }

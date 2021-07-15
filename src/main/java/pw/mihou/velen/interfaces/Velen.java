@@ -4,9 +4,9 @@ import org.javacord.api.DiscordApi;
 import org.javacord.api.listener.interaction.SlashCommandCreateListener;
 import org.javacord.api.listener.message.MessageCreateListener;
 import pw.mihou.velen.VelenBuilder;
-import pw.mihou.velen.builders.VelenMessage;
-import pw.mihou.velen.builders.VelenPermissionMessage;
-import pw.mihou.velen.builders.VelenRoleMessage;
+import pw.mihou.velen.interfaces.messages.types.VelenPermissionMessage;
+import pw.mihou.velen.interfaces.messages.types.VelenRatelimitMessage;
+import pw.mihou.velen.interfaces.messages.types.VelenRoleMessage;
 import pw.mihou.velen.internals.VelenBlacklist;
 import pw.mihou.velen.prefix.VelenPrefixManager;
 import pw.mihou.velen.ratelimiter.VelenRatelimiter;
@@ -68,7 +68,7 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      *
      * @return The rate-limited message.
      */
-    VelenMessage getRatelimitedMessage();
+    VelenRatelimitMessage getRatelimitedMessage();
 
     /**
      * Gets the message sent whenever the user lacks

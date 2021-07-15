@@ -1,12 +1,13 @@
-package pw.mihou.velen.builders;
+package pw.mihou.velen.interfaces.messages.interfaces;
 
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.user.User;
+import pw.mihou.velen.interfaces.messages.types.VelenPermissionMessage;
 
 import java.util.List;
 
-public interface VelenPermissionMessage {
+public interface VelenPermissionMessageDelegate<R> extends VelenPermissionMessage {
 
     /**
      * Create a new Velen Message which will be used to retrieve
@@ -21,6 +22,6 @@ public interface VelenPermissionMessage {
      * @param command    The command that the user executed.
      * @return The no-permission message.
      */
-    String load(List<PermissionType> permission, User user, TextChannel channel, String command);
+    R load(List<PermissionType> permission, User user, TextChannel channel, String command);
 
 }

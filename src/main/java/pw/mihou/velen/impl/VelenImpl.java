@@ -7,11 +7,14 @@ import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.interaction.SlashCommandBuilder;
 import org.javacord.api.util.DiscordRegexPattern;
 import org.javacord.api.util.logging.ExceptionLogger;
-import pw.mihou.velen.builders.VelenMessage;
-import pw.mihou.velen.builders.VelenPermissionMessage;
-import pw.mihou.velen.builders.VelenRoleMessage;
+import pw.mihou.velen.interfaces.messages.surface.text.VelenRatelimitOrdinaryMessage;
+import pw.mihou.velen.interfaces.messages.surface.text.VelenPermissionOrdinaryMessage;
+import pw.mihou.velen.interfaces.messages.surface.text.VelenRoleOrdinaryMessage;
 import pw.mihou.velen.interfaces.Velen;
 import pw.mihou.velen.interfaces.VelenCommand;
+import pw.mihou.velen.interfaces.messages.types.VelenPermissionMessage;
+import pw.mihou.velen.interfaces.messages.types.VelenRatelimitMessage;
+import pw.mihou.velen.interfaces.messages.types.VelenRoleMessage;
 import pw.mihou.velen.internals.VelenBlacklist;
 import pw.mihou.velen.prefix.VelenPrefixManager;
 import pw.mihou.velen.ratelimiter.VelenRatelimiter;
@@ -29,7 +32,7 @@ import java.util.stream.Collectors;
 
 public class VelenImpl implements Velen {
 
-    private final VelenMessage ratelimitedMessage;
+    private final VelenRatelimitMessage ratelimitedMessage;
     private final VelenRatelimiter ratelimiter;
     private final List<VelenCommand> commands;
     private final VelenPrefixManager prefixManager;
@@ -38,7 +41,7 @@ public class VelenImpl implements Velen {
     private final VelenBlacklist blacklist;
     private final boolean allowMentionPrefix;
 
-    public VelenImpl(VelenRatelimiter ratelimiter, VelenPrefixManager prefixManager, VelenMessage ratelimitedMessage,
+    public VelenImpl(VelenRatelimiter ratelimiter, VelenPrefixManager prefixManager, VelenRatelimitMessage ratelimitedMessage,
                      VelenPermissionMessage noPermissionMessage, VelenRoleMessage noRoleMessage,
                      VelenBlacklist blacklist, boolean allowMentionPrefix) {
         this.ratelimiter = ratelimiter;
@@ -69,7 +72,7 @@ public class VelenImpl implements Velen {
     }
 
     @Override
-    public VelenMessage getRatelimitedMessage() {
+    public VelenRatelimitMessage getRatelimitedMessage() {
         return ratelimitedMessage;
     }
 

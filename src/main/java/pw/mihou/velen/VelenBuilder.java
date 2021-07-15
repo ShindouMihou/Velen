@@ -1,10 +1,10 @@
 package pw.mihou.velen;
 
-import pw.mihou.velen.builders.VelenMessage;
-import pw.mihou.velen.builders.VelenPermissionMessage;
-import pw.mihou.velen.builders.VelenRoleMessage;
 import pw.mihou.velen.impl.VelenImpl;
 import pw.mihou.velen.interfaces.Velen;
+import pw.mihou.velen.interfaces.messages.types.VelenPermissionMessage;
+import pw.mihou.velen.interfaces.messages.types.VelenRatelimitMessage;
+import pw.mihou.velen.interfaces.messages.types.VelenRoleMessage;
 import pw.mihou.velen.internals.VelenBlacklist;
 import pw.mihou.velen.prefix.VelenPrefixManager;
 import pw.mihou.velen.ratelimiter.VelenRatelimiter;
@@ -14,12 +14,18 @@ import java.util.stream.Collectors;
 
 public class VelenBuilder {
 
-    private VelenMessage ratelimitMessage = (remainingSeconds, user, channel, command) -> "You can use this command in **" + remainingSeconds + " seconds**, " +
+    private VelenRatelimitMessage ratelimitMessage = VelenRatelimitMessage.ofNormal((remainingSeconds, user, channel, command)
+            -> "You can use this command in **" + remainingSeconds + " seconds**, " +
             "during this period, the bot will not respond to to any invocation of the command: **" + command + "** for the user. " +
-            "This message will delete itself when cooldown is over.";
-    private VelenPermissionMessage noPermissionMessage = (permission, user, channel, command) -> "You need these permission(s): " + permission
-            .stream().map(Enum::name).collect(Collectors.joining(", ")) + " to run this command!";
-    private VelenRoleMessage noRoleMessage = (role, user, channel, command) -> "You need to have any of the role(s): " + role + " to run this command!";
+            "This message will delete itself when cooldown is over.");
+
+    private VelenPermissionMessage noPermissionMessage = VelenPermissionMessage.ofNormal((permission, user, channel, command)
+            -> "You need these permission(s): " + permission.stream().map(Enum::name).collect(Collectors.joining(", ")) +
+            " to run this command!");
+
+    private VelenRoleMessage noRoleMessage = VelenRoleMessage.ofNormal((role, user, channel, command)
+            -> "You need to have any of the role(s): " + role + " to run this command!");
+
     private VelenRatelimiter ratelimiter = new VelenRatelimiter();
     private VelenPrefixManager prefixManager = new VelenPrefixManager("v.");
     private VelenBlacklist blacklist;
@@ -57,7 +63,7 @@ public class VelenBuilder {
      * @param ratelimitMessage The message to send.
      * @return VelenBuilder for chain calling methods.
      */
-    public VelenBuilder setRatelimitedMessage(VelenMessage ratelimitMessage) {
+    public VelenBuilder setRatelimitedMessage(VelenRatelimitMessage ratelimitMessage) {
         this.ratelimitMessage = ratelimitMessage;
         return this;
     }

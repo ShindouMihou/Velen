@@ -10,6 +10,7 @@ import pw.mihou.velen.interfaces.Velen;
 import pw.mihou.velen.interfaces.VelenCommand;
 import pw.mihou.velen.interfaces.VelenEvent;
 import pw.mihou.velen.interfaces.VelenSlashEvent;
+import pw.mihou.velen.interfaces.messages.types.VelenConditionalMessage;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class VelenCommandBuilder {
     private final List<Function<MessageCreateEvent, Boolean>> conditions = new ArrayList<>();
     private final List<Function<SlashCommandCreateEvent, Boolean>> conditionsSlash = new ArrayList<>();
     private final List<SlashCommandOption> options = new ArrayList<>();
-    private VelenGenericMessage conditionalMessage;
+    private VelenConditionalMessage conditionalMessage;
     private long serverId = 0L;
     private String category;
     private String name;
@@ -258,7 +259,7 @@ public class VelenCommandBuilder {
      * @param message The message to be sent.
      * @return VelenCommandBuilder for chain calling methods.
      */
-    public VelenCommandBuilder setConditionalMessage(VelenGenericMessage message) {
+    public VelenCommandBuilder setConditionalMessage(VelenConditionalMessage message) {
         this.conditionalMessage = message;
         return this;
     }
