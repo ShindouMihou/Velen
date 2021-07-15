@@ -1,9 +1,11 @@
 package pw.mihou.velen.prefix;
 
 import pw.mihou.velen.prefix.loaders.PrefixLoader;
+import pw.mihou.velen.utils.Pair;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /**
  * This is a prefix manager that can be used to provide prefixes
@@ -14,6 +16,7 @@ public class VelenPrefixManager {
     private final Map<Long, String> prefixes = new ConcurrentHashMap<>();
     private final PrefixLoader prefixLoader;
     private final String defaultPrefix;
+    private final Consumer<Pair<Long, String>> prefixModifier;
 
     /**
      * Creates a new prefix manager that supports per-server prefixes.
@@ -30,6 +33,28 @@ public class VelenPrefixManager {
     public VelenPrefixManager(String defaultPrefix, PrefixLoader prefixLoader) {
         this.prefixLoader = prefixLoader;
         this.defaultPrefix = defaultPrefix;
+        this.prefixModifier = null;
+    }
+
+    /**
+     * Creates a new prefix manager that supports per-server prefixes.
+     * The per-server prefixes is done with the help of a user-provided {@link PrefixLoader} which
+     * is used to provide the prefix of the server, you can run database methods on it, etc.
+     * <p>
+     * An example of a PrefixLoader can be found on
+     * <a href="https://github.com/ShindouMihou/Velen/">Velen's README GitHub repository</a> where we
+     * go in detail over how a Prefix Loader works.
+     *
+     * @param defaultPrefix The default prefix to use.
+     * @param prefixLoader  The prefix loader.
+     * @param prefixModifier The prefix modifier to use when doing {@link VelenPrefixManager#setPrefix(long, String)},
+     *                       this will be used if you want to change your database's prefix through the manager.
+     */
+    public VelenPrefixManager(String defaultPrefix, PrefixLoader prefixLoader,
+                              Consumer<Pair<Long, String>> prefixModifier) {
+        this.prefixLoader = prefixLoader;
+        this.defaultPrefix = defaultPrefix;
+        this.prefixModifier = prefixModifier;
     }
 
     /**
@@ -40,6 +65,7 @@ public class VelenPrefixManager {
     public VelenPrefixManager(String defaultPrefix) {
         this.defaultPrefix = defaultPrefix;
         this.prefixLoader = null;
+        this.prefixModifier = null;
     }
 
     /**
@@ -109,6 +135,9 @@ public class VelenPrefixManager {
      */
     public void setPrefix(long server, String prefix) {
         prefixes.put(server, prefix);
+
+        if(prefixModifier != null)
+            prefixModifier.accept(Pair.of(server, prefix));
     }
 
     /**
