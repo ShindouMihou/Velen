@@ -14,20 +14,8 @@ public class VelenThreadPool {
             CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE_TIME, TIME_UNIT, new SynchronousQueue<>(),
             new ThreadFactory("Velen - Executor - %d", false));
 
-    public static ScheduledExecutorService getScheduler() {
-        return scheduledExecutorService;
-    }
-
-    public static ScheduledFuture<?> schedule(Runnable task, long delay, long time, TimeUnit measurement) {
-        return scheduledExecutorService.scheduleAtFixedRate(task, delay, time, measurement);
-    }
-
     public static ScheduledFuture<?> schedule(Runnable task, long delay, TimeUnit measurement) {
         return scheduledExecutorService.schedule(task, delay, measurement);
-    }
-
-    public static CompletableFuture<Void> submit(Runnable task) {
-        return CompletableFuture.runAsync(task, executorService);
     }
 
 }

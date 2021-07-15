@@ -71,8 +71,10 @@ public class VelenUtils {
      * @param message The message to parse.
      * @return A correctly ordered list of channel mentions.
      */
-    public static Collection<Optional<Role>> getOrderedRoleMentions(DiscordApi api, String message) {
+    public static Collection<Role> getOrderedRoleMentions(DiscordApi api, String message) {
         return getOrderedRoleMentions(message).stream().map(api::getRoleById)
+                .map(role -> role.orElse(null))
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
@@ -98,8 +100,10 @@ public class VelenUtils {
      * @param message The message to parse.
      * @return A correctly ordered list of channel mentions.
      */
-    public static Collection<Optional<Channel>> getOrderedChannelMentions(DiscordApi api, String message) {
+    public static Collection<Channel> getOrderedChannelMentions(DiscordApi api, String message) {
         return getOrderedChannelMentions(message).stream().map(api::getChannelById)
+                .map(channel -> channel.orElse(null))
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
