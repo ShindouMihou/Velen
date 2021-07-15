@@ -86,13 +86,13 @@ You can easily install Velen through Maven Central by adding these entries onto 
 <dependency>
   <groupId>pw.mihou</groupId>
   <artifactId>Velen</artifactId>
-  <version>1.1.1</version>
+  <version>1.2.0</version>
 </dependency>
 ```
 
 ### Gradle
 ```gradle
-implementation 'pw.mihou:Velen:1.1.1'
+implementation 'pw.mihou:Velen:1.2.0'
 ```
 
 ## ⛰️ Velen is used by
@@ -107,8 +107,8 @@ either of these conditions (this is to prevent me from overworking):
 - A new Javacord update.
 
 The library also follows a similar version number policy with Javacord:
-- A change in the first digit of the version will mean: **major update or a major breaking change**.
-- A change in the second digit of the version will mean: **a large quantity of __accumulated__ updates**.
+- A change in the first digit of the version will mean: **major update or two-three major breaking change**.
+- A change in the second digit of the version will mean: **a large quantity of __accumulated__ updates or a breaking change**.
 - A change in the last digit of the version will mean: **a minor update, usually new features or fixes**.
 
 ## 🏎️ How does Velen work?
