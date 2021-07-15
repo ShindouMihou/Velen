@@ -1,9 +1,7 @@
 package pw.mihou.velen.interfaces.messages.types;
 
 import pw.mihou.velen.interfaces.messages.surface.embed.VelenPermissionEmbedMessage;
-import pw.mihou.velen.interfaces.messages.surface.embed.VelenRatelimitEmbedMessage;
 import pw.mihou.velen.interfaces.messages.surface.text.VelenPermissionOrdinaryMessage;
-import pw.mihou.velen.interfaces.messages.surface.text.VelenRatelimitOrdinaryMessage;
 
 /**
  * This message is intended to be used to

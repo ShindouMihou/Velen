@@ -1,7 +1,5 @@
 package pw.mihou.velen.ratelimiter.entities;
 
-import pw.mihou.velen.interfaces.VelenCommand;
-
 import java.util.Objects;
 
 public class RatelimitObject {
@@ -14,8 +12,8 @@ public class RatelimitObject {
      * Creates a new rate-limit object which is used
      * to handle interceptors for rate-limit.
      *
-     * @param user The user who was rate-limited.
-     * @param server The server where the user was rate-limited.
+     * @param user    The user who was rate-limited.
+     * @param server  The server where the user was rate-limited.
      * @param command The command in which the user was rate-limited.
      */
     public RatelimitObject(long user, long server, String command) {
@@ -46,8 +44,8 @@ public class RatelimitObject {
 
     /**
      * Retrieves the name of the command and
-     * the cooldown, this utilizes {@link VelenCommand#toString()}
-     * deep inside.
+     * the cooldown, this utilizes the toString method
+     * of the command deep inside.
      *
      * @return The command name.
      */

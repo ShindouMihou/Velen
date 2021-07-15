@@ -45,8 +45,8 @@ public class VelenPrefixManager {
      * <a href="https://github.com/ShindouMihou/Velen/">Velen's README GitHub repository</a> where we
      * go in detail over how a Prefix Loader works.
      *
-     * @param defaultPrefix The default prefix to use.
-     * @param prefixLoader  The prefix loader.
+     * @param defaultPrefix  The default prefix to use.
+     * @param prefixLoader   The prefix loader.
      * @param prefixModifier The prefix modifier to use when doing {@link VelenPrefixManager#setPrefix(long, String)},
      *                       this will be used if you want to change your database's prefix through the manager.
      */
@@ -117,10 +117,10 @@ public class VelenPrefixManager {
         if (prefixLoader != null) {
             String prefix = prefixLoader.load(server);
 
-            if(prefix != null)
+            if (prefix != null)
                 prefixes.put(server, prefixLoader.load(server));
 
-            if(prefix == null)
+            if (prefix == null)
                 prefixes.put(server, defaultPrefix);
         }
     }
@@ -136,7 +136,7 @@ public class VelenPrefixManager {
     public void setPrefix(long server, String prefix) {
         prefixes.put(server, prefix);
 
-        if(prefixModifier != null)
+        if (prefixModifier != null)
             prefixModifier.accept(Pair.of(server, prefix));
     }
 

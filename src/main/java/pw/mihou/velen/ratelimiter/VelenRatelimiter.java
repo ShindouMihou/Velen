@@ -62,21 +62,21 @@ public class VelenRatelimiter {
      * to log specific events like when the user is about to be rate-limited,
      * when the user is released from the rate-limit or when the user
      * has used the command successfully.
-     *
+     * <p>
      * All of these events are ran asynchronously to not affect with the operations
      * of the normal commands.
      *
-     * @param event The interceptor event to trigger.
+     * @param event    The interceptor event to trigger.
      * @param position The position where the event should be triggered.
      */
     public void addInterceptor(Consumer<RatelimitObject> event, RatelimitInterceptorPosition position) {
-        if(position == RatelimitInterceptorPosition.EXECUTION)
+        if (position == RatelimitInterceptorPosition.EXECUTION)
             interceptorExecution.add(event);
 
-        if(position == RatelimitInterceptorPosition.NOTIFICATION)
+        if (position == RatelimitInterceptorPosition.NOTIFICATION)
             interceptorNotification.add(event);
 
-        if(position == RatelimitInterceptorPosition.RELEASE)
+        if (position == RatelimitInterceptorPosition.RELEASE)
             interceptorRelease.add(event);
     }
 
@@ -111,7 +111,7 @@ public class VelenRatelimiter {
                     onLimited.accept((TimeUnit.MILLISECONDS.toSeconds(entity.getRemainingTime(server) + cooldown))
                             - (TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())));
 
-                    if(!interceptorNotification.isEmpty())
+                    if (!interceptorNotification.isEmpty())
                         interceptorNotification.forEach(ratelimitObjectConsumer ->
                                 VelenThreadPool.executorService.submit(() -> ratelimitObjectConsumer.accept(ratelimitObject)));
 
@@ -126,7 +126,7 @@ public class VelenRatelimiter {
 
         entity.ratelimit(server);
 
-        if(!interceptorExecution.isEmpty())
+        if (!interceptorExecution.isEmpty())
             interceptorExecution.forEach(ratelimitObjectConsumer ->
                     VelenThreadPool.executorService.submit(() -> ratelimitObjectConsumer.accept(ratelimitObject)));
         onSuccess.accept(entity);
@@ -144,7 +144,7 @@ public class VelenRatelimiter {
         if (!ratelimits.containsKey(pair))
             ratelimits.put(pair, new RatelimitEntity(user));
 
-        if(!interceptorRelease.isEmpty())
+        if (!interceptorRelease.isEmpty())
             interceptorExecution.forEach(ratelimitObjectConsumer ->
                     VelenThreadPool.executorService.submit(() -> ratelimitObjectConsumer
                             .accept(new RatelimitObject(user, server, command))));

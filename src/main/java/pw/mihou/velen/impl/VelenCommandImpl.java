@@ -103,8 +103,8 @@ public class VelenCommandImpl implements VelenCommand {
                 return;
         }
 
-        if(privateOnly) {
-            if(event.getServer().isPresent())
+        if (privateOnly) {
+            if (event.getServer().isPresent())
                 return;
         }
 
@@ -117,7 +117,7 @@ public class VelenCommandImpl implements VelenCommand {
                     InteractionImmediateResponseBuilder builder =
                             event.createImmediateResponder()
                                     .setFlags(MessageFlag.EPHEMERAL);
-                    if(conditionalMessage instanceof VelenOrdinaryMessage)
+                    if (conditionalMessage instanceof VelenOrdinaryMessage)
                         builder.setContent(((VelenConditionalOrdinaryMessage) conditionalMessage).load(user, event.getChannel().get(), name));
                     else
                         builder.addEmbed(((VelenConditionalEmbedMessage) conditionalMessage).load(user, event.getChannel().get(), name));
@@ -140,10 +140,10 @@ public class VelenCommandImpl implements VelenCommand {
                                     .build())
                             .setFlags(MessageFlag.EPHEMERAL);
 
-                    if(velen.getNoRoleMessage() instanceof VelenOrdinaryMessage)
+                    if (velen.getNoRoleMessage() instanceof VelenOrdinaryMessage)
                         builder.setContent(((VelenRoleOrdinaryMessage) velen.getNoRoleMessage())
                                 .load(requiredRoles.stream().map(aLong -> "<@&" + aLong + ">")
-                                .collect(Collectors.joining(", ")), user, event.getChannel().get(), name));
+                                        .collect(Collectors.joining(", ")), user, event.getChannel().get(), name));
                     else
                         builder.addEmbed(((VelenRoleEmbedMessage) velen.getNoRoleMessage())
                                 .load(requiredRoles.stream().map(aLong -> "<@&" + aLong + ">")
@@ -160,7 +160,7 @@ public class VelenCommandImpl implements VelenCommand {
                     InteractionImmediateResponseBuilder builder = event.createImmediateResponder()
                             .setFlags(MessageFlag.EPHEMERAL);
 
-                    if(velen.getNoPermissionMessage() instanceof VelenOrdinaryMessage)
+                    if (velen.getNoPermissionMessage() instanceof VelenOrdinaryMessage)
                         builder.setContent(((VelenPermissionOrdinaryMessage) velen.getNoPermissionMessage())
                                 .load(permissions, user, event.getChannel().get(), name));
                     else
@@ -194,7 +194,7 @@ public class VelenCommandImpl implements VelenCommand {
             if (!conditions.stream().allMatch(fun -> fun.apply(event))) {
                 if (conditionalMessage != null) {
                     MessageBuilder builder = new MessageBuilder().replyTo(event.getMessage());
-                    if(conditionalMessage instanceof VelenOrdinaryMessage)
+                    if (conditionalMessage instanceof VelenOrdinaryMessage)
                         builder.setContent(((VelenConditionalOrdinaryMessage) conditionalMessage).load(user, event.getChannel(), name));
                     else
                         builder.addEmbed(((VelenConditionalEmbedMessage) conditionalMessage).load(user, event.getChannel(), name));
@@ -208,12 +208,12 @@ public class VelenCommandImpl implements VelenCommand {
             if (!event.getServer().isPresent())
                 return;
 
-            if(serverId != 0L && event.getServer().get().getId() != serverId)
+            if (serverId != 0L && event.getServer().get().getId() != serverId)
                 return;
         }
 
-        if(privateOnly) {
-            if(event.getServer().isPresent())
+        if (privateOnly) {
+            if (event.getServer().isPresent())
                 return;
         }
 
@@ -230,7 +230,7 @@ public class VelenCommandImpl implements VelenCommand {
                                     .build())
                             .replyTo(event.getMessage());
 
-                    if(velen.getNoRoleMessage() instanceof VelenOrdinaryMessage)
+                    if (velen.getNoRoleMessage() instanceof VelenOrdinaryMessage)
                         builder.setContent(((VelenRoleOrdinaryMessage) velen.getNoRoleMessage())
                                 .load(requiredRoles.stream().map(aLong -> "<@&" + aLong + ">")
                                         .collect(Collectors.joining(", ")), user, event.getChannel(), name));
@@ -249,7 +249,7 @@ public class VelenCommandImpl implements VelenCommand {
                 if (!permissionTypes.containsAll(permissions)) {
                     MessageBuilder builder = new MessageBuilder().replyTo(event.getMessage());
 
-                    if(velen.getNoPermissionMessage() instanceof VelenOrdinaryMessage)
+                    if (velen.getNoPermissionMessage() instanceof VelenOrdinaryMessage)
                         builder.setContent(((VelenPermissionOrdinaryMessage) velen.getNoPermissionMessage())
                                 .load(permissions, user, event.getChannel(), name));
                     else
@@ -277,7 +277,7 @@ public class VelenCommandImpl implements VelenCommand {
                 if (remaining > 0) {
                     MessageBuilder builder = new MessageBuilder().replyTo(event.getMessage());
 
-                    if(velen.getRatelimitedMessage() instanceof VelenOrdinaryMessage) {
+                    if (velen.getRatelimitedMessage() instanceof VelenOrdinaryMessage) {
                         builder.setContent(((VelenRatelimitOrdinaryMessage) velen.getRatelimitedMessage())
                                 .load(remaining,
                                         user,
@@ -316,7 +316,7 @@ public class VelenCommandImpl implements VelenCommand {
                     InteractionImmediateResponseBuilder builder = event.createImmediateResponder()
                             .setFlags(MessageFlag.EPHEMERAL);
 
-                    if(velen.getRatelimitedMessage() instanceof VelenOrdinaryMessage) {
+                    if (velen.getRatelimitedMessage() instanceof VelenOrdinaryMessage) {
                         builder.setContent(((VelenRatelimitOrdinaryMessage) velen.getRatelimitedMessage())
                                 .load(remaining, user, event.getChannel().get(), name));
                     } else {
@@ -327,7 +327,7 @@ public class VelenCommandImpl implements VelenCommand {
                     builder.respond().thenAccept(eg -> VelenThreadPool.schedule(() -> {
                         velen.getRatelimiter().release(user.getId(), server, toString());
                         eg.delete();
-                        }, remaining, TimeUnit.SECONDS)).exceptionally(ExceptionLogger.get());
+                    }, remaining, TimeUnit.SECONDS)).exceptionally(ExceptionLogger.get());
 
                 } else {
                     velen.getRatelimiter().release(user.getId(), server, toString());

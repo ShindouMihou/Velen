@@ -1,7 +1,5 @@
 package pw.mihou.velen.interfaces.messages.surface.text;
 
-import org.javacord.api.entity.message.embed.EmbedBuilder;
-import pw.mihou.velen.interfaces.messages.VelenEmbedMessage;
 import pw.mihou.velen.interfaces.messages.VelenOrdinaryMessage;
 import pw.mihou.velen.interfaces.messages.interfaces.VelenConditionalMessageDelegate;
 

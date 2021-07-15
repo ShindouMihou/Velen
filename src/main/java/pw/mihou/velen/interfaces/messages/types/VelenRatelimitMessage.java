@@ -24,7 +24,7 @@ public interface VelenRatelimitMessage {
 
     /**
      * Creates a embed rate-limit message that will be sent
-     * to the user. Embed means the message will be sent as an embed, 
+     * to the user. Embed means the message will be sent as an embed,
      * if you want simple text, please use {@link VelenRatelimitMessage#ofNormal(VelenRatelimitOrdinaryMessage)} )}.
      *
      * @param message The message to be sent to the user.

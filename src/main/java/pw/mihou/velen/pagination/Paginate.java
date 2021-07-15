@@ -155,7 +155,7 @@ public class Paginate<T> {
      * @param removeAfter   Remove the pagination event after (x) duration.
      */
     public void paginateWithButtons(String uniqueId, MessageCreateEvent event, PaginateButtonEvent<T> paginateEvent, Duration removeAfter) {
-        if(paginator.isEmpty()) {
+        if (paginator.isEmpty()) {
             paginateEvent.onEmptyPaginator(event)
                     .replyTo(event.getMessage())
                     .send(event.getChannel())
@@ -168,23 +168,23 @@ public class Paginate<T> {
 
         if (nextEmoji == null || reverseEmoji == null || selectEmoji == null || cancelEmoji == null) {
             if (paginator.size() > 1) {
-                builder.addActionRow(Button.primary(uniqueId+"-REVERSE", unicodeReverse),
-                        Button.success(uniqueId+"-SUCCESS", unicodeSelect),
-                        Button.danger(uniqueId+"-CANCEL", unicodeCancel),
-                        Button.primary(uniqueId+"-NEXT", unicodeNext));
+                builder.addActionRow(Button.primary(uniqueId + "-REVERSE", unicodeReverse),
+                        Button.success(uniqueId + "-SUCCESS", unicodeSelect),
+                        Button.danger(uniqueId + "-CANCEL", unicodeCancel),
+                        Button.primary(uniqueId + "-NEXT", unicodeNext));
             } else {
-                builder.addActionRow(Button.success(uniqueId+"-SUCCESS", unicodeSelect),
-                        Button.danger(uniqueId+"-CANCEL", unicodeCancel));
+                builder.addActionRow(Button.success(uniqueId + "-SUCCESS", unicodeSelect),
+                        Button.danger(uniqueId + "-CANCEL", unicodeCancel));
             }
         } else {
             if (paginator.size() > 1) {
-                builder.addActionRow(Button.primary(uniqueId+"-REVERSE", reverseEmoji),
-                        Button.success(uniqueId+"-SUCCESS", selectEmoji),
-                        Button.danger(uniqueId+"-CANCEL", cancelEmoji),
-                        Button.primary(uniqueId+"-NEXT", nextEmoji));
+                builder.addActionRow(Button.primary(uniqueId + "-REVERSE", reverseEmoji),
+                        Button.success(uniqueId + "-SUCCESS", selectEmoji),
+                        Button.danger(uniqueId + "-CANCEL", cancelEmoji),
+                        Button.primary(uniqueId + "-NEXT", nextEmoji));
             } else {
-                builder.addActionRow(Button.success(uniqueId+"-SUCCESS", selectEmoji),
-                        Button.danger(uniqueId+"-CANCEL", cancelEmoji));
+                builder.addActionRow(Button.success(uniqueId + "-SUCCESS", selectEmoji),
+                        Button.danger(uniqueId + "-CANCEL", cancelEmoji));
             }
         }
 
@@ -192,20 +192,20 @@ public class Paginate<T> {
             ListenerManager<ButtonClickListener> listener = event.getApi().addButtonClickListener(e -> {
                 String customId = e.getButtonInteraction().getCustomId();
 
-                if(e.getButtonInteraction().getUser().getId() != event.getMessageAuthor().getId())
+                if (e.getButtonInteraction().getUser().getId() != event.getMessageAuthor().getId())
                     return;
 
-                if(customId.equals(uniqueId+"-REVERSE"))
+                if (customId.equals(uniqueId + "-REVERSE"))
                     paginator.reverse().ifPresent(t -> paginateEvent.onPaginate(e.getButtonInteraction().createImmediateResponder(), event, message, t, paginator.getArrow(), paginator));
 
-                if(customId.equals(uniqueId+"-NEXT"))
+                if (customId.equals(uniqueId + "-NEXT"))
                     paginator.next().ifPresent(t -> paginateEvent.onPaginate(e.getButtonInteraction().createImmediateResponder(),
                             event, message, t, paginator.getArrow(), paginator));
 
-                if(customId.equals(uniqueId+"-SUCCESS"))
+                if (customId.equals(uniqueId + "-SUCCESS"))
                     paginateEvent.onSelect(e.getButtonInteraction().createImmediateResponder(), event, message, paginator.current(), paginator.getArrow(), paginator);
 
-                if(customId.equals(uniqueId+"-CANCEL")) {
+                if (customId.equals(uniqueId + "-CANCEL")) {
                     paginateEvent.onCancel(event, message);
                     e.getButtonInteraction().createImmediateResponder().respond();
                 }
@@ -218,7 +218,7 @@ public class Paginate<T> {
 
             // This is extremely limited atm since Javacord offers no way
             // of removing components.
-            if(!removeAfter.isZero() && !removeAfter.isNegative())
+            if (!removeAfter.isZero() && !removeAfter.isNegative())
                 listener.removeAfter(removeAfter.toMillis(), TimeUnit.MILLISECONDS);
         });
     }
@@ -239,7 +239,7 @@ public class Paginate<T> {
      * @param removeAfter   Remove the pagination event after (x) duration.
      */
     public void paginateWithButtons(String uniqueId, MessageCreateEvent event, PaginateButtonSimpleEvent<T> paginateEvent, Duration removeAfter) {
-        if(paginator.isEmpty()) {
+        if (paginator.isEmpty()) {
             paginateEvent.onEmptyPaginator(event)
                     .replyTo(event.getMessage())
                     .send(event.getChannel())
@@ -252,20 +252,20 @@ public class Paginate<T> {
 
         if (nextEmoji == null || reverseEmoji == null || selectEmoji == null || cancelEmoji == null) {
             if (paginator.size() > 1) {
-                builder.addActionRow(Button.primary(uniqueId+"-REVERSE", unicodeReverse),
-                        Button.danger(uniqueId+"-CANCEL", unicodeCancel),
-                        Button.primary(uniqueId+"-NEXT", unicodeNext));
+                builder.addActionRow(Button.primary(uniqueId + "-REVERSE", unicodeReverse),
+                        Button.danger(uniqueId + "-CANCEL", unicodeCancel),
+                        Button.primary(uniqueId + "-NEXT", unicodeNext));
             } else {
-                builder.addActionRow(Button.danger(uniqueId+"-CANCEL", unicodeCancel));
+                builder.addActionRow(Button.danger(uniqueId + "-CANCEL", unicodeCancel));
             }
         } else {
             if (paginator.size() > 1) {
-                builder.addActionRow(Button.primary(uniqueId+"-REVERSE", reverseEmoji),
-                        Button.danger(uniqueId+"-CANCEL", cancelEmoji),
-                        Button.primary(uniqueId+"-NEXT", nextEmoji));
+                builder.addActionRow(Button.primary(uniqueId + "-REVERSE", reverseEmoji),
+                        Button.danger(uniqueId + "-CANCEL", cancelEmoji),
+                        Button.primary(uniqueId + "-NEXT", nextEmoji));
             } else {
-                builder.addActionRow(Button.success(uniqueId+"-SUCCESS", selectEmoji),
-                        Button.danger(uniqueId+"-CANCEL", cancelEmoji));
+                builder.addActionRow(Button.success(uniqueId + "-SUCCESS", selectEmoji),
+                        Button.danger(uniqueId + "-CANCEL", cancelEmoji));
             }
         }
 
@@ -273,17 +273,17 @@ public class Paginate<T> {
             ListenerManager<ButtonClickListener> listener = event.getApi().addButtonClickListener(e -> {
                 String customId = e.getButtonInteraction().getCustomId();
 
-                if(e.getButtonInteraction().getUser().getId() != event.getMessageAuthor().getId())
+                if (e.getButtonInteraction().getUser().getId() != event.getMessageAuthor().getId())
                     return;
 
-                if(customId.equals(uniqueId+"-REVERSE"))
+                if (customId.equals(uniqueId + "-REVERSE"))
                     paginator.reverse().ifPresent(t -> paginateEvent.onPaginate(e.getButtonInteraction().createImmediateResponder(), event, message, t, paginator.getArrow(), paginator));
 
-                if(customId.equals(uniqueId+"-NEXT"))
+                if (customId.equals(uniqueId + "-NEXT"))
                     paginator.next().ifPresent(t -> paginateEvent.onPaginate(e.getButtonInteraction().createImmediateResponder(),
                             event, message, t, paginator.getArrow(), paginator));
 
-                if(customId.equals(uniqueId+"-CANCEL")) {
+                if (customId.equals(uniqueId + "-CANCEL")) {
                     paginateEvent.onCancel(event, message);
                     e.getButtonInteraction().createImmediateResponder().respond();
                 }
@@ -296,7 +296,7 @@ public class Paginate<T> {
 
             // This is extremely limited atm since Javacord offers no way
             // of removing components.
-            if(!removeAfter.isZero() && !removeAfter.isNegative())
+            if (!removeAfter.isZero() && !removeAfter.isNegative())
                 listener.removeAfter(removeAfter.toMillis(), TimeUnit.MILLISECONDS);
         });
     }
