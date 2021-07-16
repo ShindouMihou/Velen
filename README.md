@@ -78,6 +78,10 @@ feel free to look at our Wiki where we explain everything more in detail:
 - [Slash Commands and Hybrid Commands](https://github.com/ShindouMihou/Velen/wiki/Building-Slash-&-Hybrid-Commands!)
 - [Message Commands](https://github.com/ShindouMihou/Velen/wiki/Building-Commands!)
 
+You can also check out our example bot that utilizes Velen `v2.0` and Javacord `v3.3.2` paired with Redis to create
+a persistent per-server prefix and blacklist:
+- [Javacord & Velen Example Discord Bot](https://github.com/ShindouMihou/Javacord-Velen-Example)
+
 ## ❤️ Installation
 You can easily install Velen through Maven Central by adding these entries onto your `build.gradle` or `pom.xml`:
 
