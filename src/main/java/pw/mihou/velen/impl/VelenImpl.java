@@ -17,6 +17,7 @@ import pw.mihou.velen.prefix.VelenPrefixManager;
 import pw.mihou.velen.ratelimiter.VelenRatelimiter;
 import pw.mihou.velen.utils.Pair;
 import pw.mihou.velen.utils.VelenThreadPool;
+import pw.mihou.velen.utils.VelenUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -155,67 +156,6 @@ public class VelenImpl implements Velen {
                 prefixManager.getPrefix(event.getServer().get().getId()) : prefixManager.getDefaultPrefix());
     }
 
-    private boolean startsWithMention(String content, String mentionId) {
-        return content.startsWith("<@") && (
-                content.startsWith(String.format("<@%s>", mentionId))
-                || content.startsWith(String.format("<@!%s>", mentionId))
-        );
-    }
-
-    private String[] splitContent(String content) {
-        // if string without double quotes just return the normal split
-        if (!content.contains("\"")) return content.split("\\s+");
-
-        List<String> split = new ArrayList<>();
-
-        boolean inDoubleQuotes = false;
-        boolean currentCharEscaped = false;
-
-        StringBuilder current = new StringBuilder();
-
-        for (char ch : content.toCharArray()) {
-            if (ch == '\\') {
-                if (currentCharEscaped) {
-                    current.append(ch); // append \ as it is escaped
-                    currentCharEscaped = false;
-                } else {
-                    currentCharEscaped = true; // next char is escaped
-                }
-            } else {
-                if (inDoubleQuotes) {
-                    if (!currentCharEscaped && ch == '"') { // current char isn't escaped and a double quote
-                        inDoubleQuotes = false; // leaves this double quote state
-                    } else {
-                        current.append(ch); // just apppend the char
-                    }
-                } else if (!currentCharEscaped // if not escaped
-                        && Character.isWhitespace(ch)) { // if is white space
-                    if (current.length() > 0) { // only add if there is something
-                        split.add(current.toString());
-                        current = new StringBuilder();
-                    }
-                } else if (!currentCharEscaped && ch == '"') {
-                    // now in double qoutes
-                    inDoubleQuotes = true;
-                } else {
-                    current.append(ch); // just apppend the char
-                }
-
-                if (currentCharEscaped) {
-                    // this char was escaped; next isn't anymore
-                    currentCharEscaped = false;
-                }
-            }
-        }
-
-        if (current.length() > 0) {
-            // add remaining string to list
-            split.add(current.toString());
-        }
-
-        return split.toArray(new String[0]);
-    }
-
     private void dispatch(MessageCreateEvent event, String prefix) {
         if (supportsBlacklist() && blacklist.isBlacklisted(event.getMessageAuthor().getId()))
             return;
@@ -224,7 +164,7 @@ public class VelenImpl implements Velen {
 
         if (content.startsWith(prefix)) {
             content = content.substring(prefix.length()).trim();
-        } else if (allowMentionPrefix && startsWithMention(content, event.getApi().getYourself().getIdAsString())) {
+        } else if (allowMentionPrefix && VelenUtils.startsWithMention(content, event.getApi().getYourself().getIdAsString())) {
             content = DiscordRegexPattern.USER_MENTION.matcher(content).replaceFirst("").trim();
         } else {
             // is not a command
@@ -239,7 +179,7 @@ public class VelenImpl implements Velen {
                         ((VelenCommandImpl) command).execute(event, new String[0]);
                     } else if (content.startsWith(name + " ")) {
                         String argsStr = content.substring(name.length()).trim(); // don't modify content as maybe another command matches too
-                        ((VelenCommandImpl) command).execute(event, splitContent(argsStr));
+                        ((VelenCommandImpl) command).execute(event, VelenUtils.splitContent(argsStr));
                     }
                 }
             }

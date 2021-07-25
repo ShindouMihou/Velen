@@ -128,4 +128,83 @@ public class VelenUtils {
                 .collect(Collectors.toList())).getLeft();
     }
 
+    /**
+     * Checks if a string starts with the mention of a user/bot with a id.
+     *
+     * @param content The string to check.
+     * @param mentionId The id of the user.
+     * @return whether the content starts with the mention
+     */
+    public static boolean startsWithMention(String content, String mentionId) {
+        return content.startsWith("<@") && (
+                content.startsWith(String.format("<@%s>", mentionId))
+                        || content.startsWith(String.format("<@!%s>", mentionId))
+        );
+    }
+
+    /**
+     * Splits a String with respect to escapes and double quotes.
+     * This is internally used to get the args from a message.
+     *
+     * "1 2" 3 4 → 1 2, 3, 4
+     * "1 \" 2 3" 4 → 1 2 " 3, 4
+     * 1\ 2 3 4 → 1 2, 3, 4
+     *
+     * @param content The String to split.
+     * @return The split String as Array.
+     */
+    public static String[] splitContent(String content) {
+        // if string without " and \ just return the normal split
+        if (!(content.contains("\"") || content.contains("\\"))) return content.split("\\s+");
+
+        List<String> split = new ArrayList<>();
+
+        boolean inDoubleQuotes = false;
+        boolean currentCharEscaped = false;
+
+        StringBuilder current = new StringBuilder();
+
+        for (char ch : content.toCharArray()) {
+            if (ch == '\\') {
+                if (currentCharEscaped) {
+                    current.append(ch); // append \ as it is escaped
+                    currentCharEscaped = false;
+                } else {
+                    currentCharEscaped = true; // next char is escaped
+                }
+            } else {
+                if (inDoubleQuotes) {
+                    if (!currentCharEscaped && ch == '"') { // current char isn't escaped and a double quote
+                        inDoubleQuotes = false; // leaves this double quote state
+                    } else {
+                        current.append(ch); // just apppend the char
+                    }
+                } else if (!currentCharEscaped // if not escaped
+                        && Character.isWhitespace(ch)) { // if is white space
+                    if (current.length() > 0) { // only add if there is something
+                        split.add(current.toString());
+                        current = new StringBuilder();
+                    }
+                } else if (!currentCharEscaped && ch == '"') {
+                    // now in double qoutes
+                    inDoubleQuotes = true;
+                } else {
+                    current.append(ch); // just apppend the char
+                }
+
+                if (currentCharEscaped) {
+                    // this char was escaped; next isn't anymore
+                    currentCharEscaped = false;
+                }
+            }
+        }
+
+        if (current.length() > 0) {
+            // add remaining string to list
+            split.add(current.toString());
+        }
+
+        return split.toArray(new String[0]);
+    }
+
 }
