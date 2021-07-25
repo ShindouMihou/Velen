@@ -21,6 +21,7 @@ import pw.mihou.velen.utils.VelenThreadPool;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -154,39 +155,44 @@ public class VelenImpl implements Velen {
 
     @Override
     public void onMessageCreate(MessageCreateEvent event) {
-        dispatch(event, event.getMessageContent().split("\\s+"), event.isServerMessage() && event.getServer().isPresent() ?
+        dispatch(event, event.isServerMessage() && event.getServer().isPresent() ?
                 prefixManager.getPrefix(event.getServer().get().getId()) : prefixManager.getDefaultPrefix());
     }
 
-    private void dispatch(MessageCreateEvent event, String[] args, String prefix) {
+    private boolean startsWithMention(String content, String mentionId) {
+        return content.startsWith("<@") && (
+                content.startsWith(String.format("<@%s>", mentionId))
+                || content.startsWith(String.format("<@!%s>", mentionId))
+        );
+    }
+
+    private void dispatch(MessageCreateEvent event, String prefix) {
         if (supportsBlacklist() && blacklist.isBlacklisted(event.getMessageAuthor().getId()))
             return;
 
+        String content = event.getMessageContent().trim();
 
-        // AtomicBoolean to bypass that "Variables must be final" in lambdas.
-        AtomicBoolean isUsingMention = new AtomicBoolean(false);
-        if (allowMentionPrefix) {
-            Matcher pattern = DiscordRegexPattern.USER_MENTION.matcher(args[0]);
-            isUsingMention.set(pattern.matches() && pattern.group("id")
-                    .equalsIgnoreCase(event.getApi().getYourself().getIdAsString()));
+        if (content.startsWith(prefix)) {
+            content = content.substring(prefix.length()).trim();
+        } else if (allowMentionPrefix && startsWithMention(content, event.getApi().getYourself().getIdAsString())) {
+            content = DiscordRegexPattern.USER_MENTION.matcher(content).replaceFirst("").trim();
+        } else {
+            // is not a command
+            return;
         }
 
-        String[] newArgs = (args.length > (isUsingMention.get() ? 2 : 1)
-                ? Arrays.copyOfRange(args, isUsingMention.get() ? 2 : 1, args.length) : new String[]{});
-
-        commands.stream().filter(command -> {
-            if (isCommand(prefix, args[0], command.getName()) ||
-                    isCommand(prefix, args[0], command.getShortcuts()) && !command.isSlashCommandOnly())
-                return true;
-
-            if (allowMentionPrefix && isUsingMention.get() && !event.getMessage().getMentionedUsers().isEmpty())
-                return isMessageOfCommandMention(args, command.getName())
-                        || isMessageOfAnyCommandMention(args, command.getShortcuts());
-
-            return false;
-        }).forEachOrdered(command -> VelenThreadPool.executorService
-                .submit(() -> ((VelenCommandImpl) command)
-                        .execute(event, newArgs)));
+        for (VelenCommand command : commands) {
+            if (!command.isSlashCommandOnly()) {
+                for (String name : command.getShortcuts()) {
+                    if (content.startsWith(name + " ")) {
+                        String argsStr = content.substring(name.length()).trim();
+                        // https://stackoverflow.com/questions/18893390/splitting-on-comma-outside-quotes
+                        String[] args = argsStr.split(" (?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+                        ((VelenCommandImpl) command).execute(event, args);
+                    }
+                }
+            }
+        }
     }
 
     private boolean isCommand(String prefix, String arg, String command) {
