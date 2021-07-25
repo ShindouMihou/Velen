@@ -176,7 +176,7 @@ public class VelenImpl implements Velen {
         for (char ch : content.toCharArray()) {
             if (ch == '\\') {
                 if (currentCharEscaped) {
-                    current.append(ch);
+                    current.append(ch); // append \ as it is escaped
                     currentCharEscaped = false;
                 } else {
                     currentCharEscaped = true; // next char is escaped
@@ -188,8 +188,9 @@ public class VelenImpl implements Velen {
                     } else {
                         current.append(ch); // just apppend the char
                     }
-                } else if (Character.isWhitespace(ch)) { // if is white space
-                    if (current.length() > 0) {
+                } else if (!currentCharEscaped // if not escaped
+                        && Character.isWhitespace(ch)) { // if is white space
+                    if (current.length() > 0) { // only add if there is something
                         split.add(current.toString());
                         current = new StringBuilder();
                     }
