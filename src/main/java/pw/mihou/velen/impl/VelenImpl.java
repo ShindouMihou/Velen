@@ -19,13 +19,9 @@ import pw.mihou.velen.utils.Pair;
 import pw.mihou.velen.utils.VelenThreadPool;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 public class VelenImpl implements Velen {
@@ -166,6 +162,59 @@ public class VelenImpl implements Velen {
         );
     }
 
+    private String[] splitContent(String content) {
+        // if string without double quotes just return the normal split
+        if (!content.contains("\"")) return content.split("\\s+");
+
+        List<String> split = new ArrayList<>();
+
+        boolean inDoubleQuotes = false;
+        boolean currentCharEscaped = false;
+
+        StringBuilder current = new StringBuilder();
+
+        for (char ch : content.toCharArray()) {
+            if (ch == '\\') {
+                if (currentCharEscaped) {
+                    current.append(ch);
+                    currentCharEscaped = false;
+                } else {
+                    currentCharEscaped = true; // next char is escaped
+                }
+            } else {
+                if (inDoubleQuotes) {
+                    if (!currentCharEscaped && ch == '"') { // current char isn't escaped and a double quote
+                        inDoubleQuotes = false; // leaves this double quote state
+                    } else {
+                        current.append(ch); // just apppend the char
+                    }
+                } else if (Character.isWhitespace(ch)) { // if is white space
+                    if (current.length() > 0) {
+                        split.add(current.toString());
+                        current = new StringBuilder();
+                    }
+                } else if (!currentCharEscaped && ch == '"') {
+                    // now in double qoutes
+                    inDoubleQuotes = true;
+                } else {
+                    current.append(ch); // just apppend the char
+                }
+
+                if (currentCharEscaped) {
+                    // this char was escaped; next isn't anymore
+                    currentCharEscaped = false;
+                }
+            }
+        }
+
+        if (current.length() > 0) {
+            // add remaining string to list
+            split.add(current.toString());
+        }
+
+        return split.toArray(new String[0]);
+    }
+
     private void dispatch(MessageCreateEvent event, String prefix) {
         if (supportsBlacklist() && blacklist.isBlacklisted(event.getMessageAuthor().getId()))
             return;
@@ -184,11 +233,12 @@ public class VelenImpl implements Velen {
         for (VelenCommand command : commands) {
             if (!command.isSlashCommandOnly()) {
                 for (String name : command.getShortcuts()) {
-                    if (content.startsWith(name + " ")) {
-                        String argsStr = content.substring(name.length()).trim();
-                        // https://stackoverflow.com/questions/18893390/splitting-on-comma-outside-quotes
-                        String[] args = argsStr.split(" (?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
-                        ((VelenCommandImpl) command).execute(event, args);
+                    if (content.equals(name)) {
+                        // empty args as the content is only the command name
+                        ((VelenCommandImpl) command).execute(event, new String[0]);
+                    } else if (content.startsWith(name + " ")) {
+                        String argsStr = content.substring(name.length()).trim(); // don't modify content as maybe another command matches too
+                        ((VelenCommandImpl) command).execute(event, splitContent(argsStr));
                     }
                 }
             }
