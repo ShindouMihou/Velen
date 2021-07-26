@@ -207,4 +207,72 @@ public class VelenUtils {
         return split.toArray(new String[0]);
     }
 
+    /**
+     * Parses an argument array into named args and an array of unnamed args.
+     *
+     * Examples:
+     * "00 --arg --arg2=123 --arg3 456 789" → Pair({"arg": "", "arg2": "123", "arg3", "456"}, ["00", "789"])
+     * "--arg 123 --arg=456" → Pair({"arg": "456"}, [])
+     *
+     * @param args The argument array to parse.
+     * @return A Pair of a HashMap with the named args and a String[] with the unnamed args.
+     */
+    public static Pair<HashMap<String, String>, String[]> parseArgumentArgsArray(String[] args) {
+        HashMap<String, String> namedArgs = new HashMap<>(); // {name: value, ...}
+        List<String> normalArgs = new ArrayList<>(); // list of the unnamed args
+
+        boolean nextIsValue = false;
+        for (int i = 0; i < args.length; i++) {
+            String arg = args[i];
+            if (arg.startsWith("--")) {
+                if (nextIsValue) {
+                    // this can be used if it is used as a boolean flag
+                    // "--arg --arg2=123" → {"arg": "", ...}
+                    namedArgs.put(
+                            args[i -1 ] // args[i -1 ] = the one before ("--arg" in the example)
+                                    .substring(2) // substring(2) to remove the "--"
+                            , "" // empty String to indicate that the arg is there but has no value
+                    );
+
+                    nextIsValue = false; // set it back to false
+                }
+                String[] argSplitOnEquals = arg.split("=", 2);
+                if (argSplitOnEquals.length == 2) {
+                    // "--arg=123" → {"arg": "123"}
+                    namedArgs.put(
+                            argSplitOnEquals[0] // name of the arg ("--arg" in the example)
+                                    .substring(2), // substring(2) to remove the "--"
+                            argSplitOnEquals[1] // the part after the equals ("123" in the example)
+                    );
+                } else {
+                    nextIsValue = true;
+                }
+            } else if (nextIsValue) {
+                // "--arg 123" → {"arg": "123"}
+                namedArgs.put(
+                        args[i -1 ]  // args[i -1 ] = the one before ("--arg" in the example)
+                                .substring(2), // substring(2) to remove the "--"
+                        arg // the current arg as the value ("123" in the example)
+                );
+                nextIsValue = false; // set it back to false
+            } else {
+                normalArgs.add(arg); // not a named arg, so add it to the list
+            }
+        }
+
+        // last named arg wasn't added yet.
+        if (nextIsValue) {
+            // this can be used if it is used as a boolean flag
+            // "--arg" → {"arg": ""}
+            namedArgs.put(
+                    args[args.length -1] //the last elemtent in the array. ("--arg" in the example)
+                            .substring(2) // substring(2) to remove the "--"
+                    , ""
+            );
+        }
+
+
+        return new Pair<>(namedArgs, normalArgs.toArray(new String[0]));
+    }
+
 }
