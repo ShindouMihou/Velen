@@ -36,6 +36,7 @@ We highly recommend reading our wiki where everything is explained more in detai
 - [Getting Started](https://github.com/ShindouMihou/Velen/wiki/Getting-Started)
 - [Building Velen Component](https://github.com/ShindouMihou/Velen/wiki/Velen-Main-Component)
 - [Building Message Commands](https://github.com/ShindouMihou/Velen/wiki/Building-Commands!)
+- [Advanced Argument Extraction](https://github.com/ShindouMihou/Velen/wiki/Advanced-Argument-Extraction)
 - [Building Slash and Hybrid Commands](https://github.com/ShindouMihou/Velen/wiki/Building-Slash-&-Hybrid-Commands!)
 - [Customizing Prefix Manager](https://github.com/ShindouMihou/Velen/wiki/Prefix-Manager)
 - [Customizing Messages](https://github.com/ShindouMihou/Velen/wiki/Velen-Message-Component)
