@@ -31,6 +31,7 @@ import pw.mihou.velen.utils.Pair;
 import pw.mihou.velen.utils.VelenThreadPool;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -50,7 +51,7 @@ public class VelenCommandImpl implements VelenCommand {
     private final List<PermissionType> permissions;
     private final boolean serverOnly;
     private final boolean privateOnly;
-    private final List<String> shortcuts;
+    private final String[] shortcuts;
     private final VelenEvent velenEvent;
     private final Velen velen;
 
@@ -80,7 +81,13 @@ public class VelenCommandImpl implements VelenCommand {
         this.requiredUsers = requiredUsers;
         this.permissions = permissions;
         this.serverOnly = serverOnly;
-        this.shortcuts = shortcuts;
+        // add the name as it can be used for invocation too
+        // but don't edit the shortcuts list as it may be immutable which would lead to bugs
+        String[] shortcutsArray = shortcuts.toArray(new String[0]);
+        String[] shortcutsArrayFinal = Arrays.copyOf(shortcutsArray, shortcutsArray.length + 1);
+        shortcutsArrayFinal[shortcutsArrayFinal.length - 1] = name;
+
+        this.shortcuts = shortcutsArrayFinal;
         this.velenEvent = event;
         this.velenSlashEvent = slashEvent;
         this.serverId = serverId;
@@ -418,7 +425,7 @@ public class VelenCommandImpl implements VelenCommand {
     }
 
     @Override
-    public List<String> getShortcuts() {
+    public String[] getShortcuts() {
         return shortcuts;
     }
 

@@ -212,7 +212,7 @@ public interface VelenCommand {
      *
      * @return The shortcuts of the command.
      */
-    List<String> getShortcuts();
+    String[] getShortcuts();
 
     /**
      * Gets the category of the command.
