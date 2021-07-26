@@ -376,7 +376,7 @@ public class VelenCommandImpl implements VelenCommand {
                     " handler for the slash command found!");
 
         velenSlashEvent.onEvent(event, event.getUser(),
-                new VelenArguments(event.getOptions()), event.getOptions(),
+                new VelenSlashCommandArguments(event.getOptions()), event.getOptions(),
                 event.createImmediateResponder());
     }
 

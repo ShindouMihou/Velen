@@ -21,7 +21,7 @@ public interface VelenSlashEvent {
      *                       {@link SlashCommandInteraction#respondLater()} to tell
      *                       Discord that you will respond later.
      */
-    void onEvent(SlashCommandInteraction event, User user, VelenArguments args, List<SlashCommandInteractionOption> options,
+    void onEvent(SlashCommandInteraction event, User user, VelenSlashCommandArguments args, List<SlashCommandInteractionOption> options,
                  InteractionImmediateResponseBuilder firstResponder);
 
 }

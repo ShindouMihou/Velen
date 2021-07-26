@@ -218,6 +218,37 @@ public class VelenUtils {
      * @return A Pair of a HashMap with the named args and a String[] with the unnamed args.
      */
     public static Pair<HashMap<String, String>, String[]> parseArgumentArgsArray(String[] args) {
+        return parseArgumentArgsArray(args, false);
+    }
+
+    /**
+     * Strip first to chars of the String and maybe make it lower case.
+     *
+     * @param argumentName The name of the argument (should start with --)
+     * @param makeLowercase Whether or not to make the String lower case.
+     * @return  The modified String.
+     */
+    public static String argumentsNameToKey(String argumentName, boolean makeLowercase) {
+        // substring(2) to remove the "--"
+        if (makeLowercase) {
+            return argumentName.substring(2).toLowerCase();
+        } else {
+            return argumentName.substring(2);
+        }
+    }
+
+    /**
+     * Parses an argument array into named args and an array of unnamed args.
+     *
+     * Examples:
+     * "00 --arg --arg2=123 --arg3 456 789" → Pair({"arg": "", "arg2": "123", "arg3", "456"}, ["00", "789"])
+     * "--arg 123 --arg=456" → Pair({"arg": "456"}, [])
+     *
+     * @param args The argument array to parse.
+     * @param argumentsNameLowercase If true the argument names are made all lower case.
+     * @return A Pair of a HashMap with the named args and a String[] with the unnamed args.
+     */
+    public static Pair<HashMap<String, String>, String[]> parseArgumentArgsArray(String[] args, boolean argumentsNameLowercase) {
         HashMap<String, String> namedArgs = new HashMap<>(); // {name: value, ...}
         List<String> normalArgs = new ArrayList<>(); // list of the unnamed args
 
@@ -229,9 +260,11 @@ public class VelenUtils {
                     // this can be used if it is used as a boolean flag
                     // "--arg --arg2=123" → {"arg": "", ...}
                     namedArgs.put(
-                            args[i -1 ] // args[i -1 ] = the one before ("--arg" in the example)
-                                    .substring(2) // substring(2) to remove the "--"
-                            , "" // empty String to indicate that the arg is there but has no value
+                            argumentsNameToKey(
+                                    args[i -1 ], // args[i -1 ] = the one before ("--arg" in the example)
+                                    argumentsNameLowercase
+                            ),
+                            "" // empty String to indicate that the arg is there but has no value
                     );
 
                     nextIsValue = false; // set it back to false
@@ -240,8 +273,10 @@ public class VelenUtils {
                 if (argSplitOnEquals.length == 2) {
                     // "--arg=123" → {"arg": "123"}
                     namedArgs.put(
-                            argSplitOnEquals[0] // name of the arg ("--arg" in the example)
-                                    .substring(2), // substring(2) to remove the "--"
+                            argumentsNameToKey(
+                                    argSplitOnEquals[0], // name of the arg ("--arg" in the example)
+                                    argumentsNameLowercase
+                            ),
                             argSplitOnEquals[1] // the part after the equals ("123" in the example)
                     );
                 } else {
@@ -250,8 +285,10 @@ public class VelenUtils {
             } else if (nextIsValue) {
                 // "--arg 123" → {"arg": "123"}
                 namedArgs.put(
-                        args[i -1 ]  // args[i -1 ] = the one before ("--arg" in the example)
-                                .substring(2), // substring(2) to remove the "--"
+                        argumentsNameToKey(
+                                args[i -1 ], // args[i -1 ] = the one before ("--arg" in the example)
+                                argumentsNameLowercase
+                        ),
                         arg // the current arg as the value ("123" in the example)
                 );
                 nextIsValue = false; // set it back to false
@@ -265,9 +302,11 @@ public class VelenUtils {
             // this can be used if it is used as a boolean flag
             // "--arg" → {"arg": ""}
             namedArgs.put(
-                    args[args.length -1] //the last elemtent in the array. ("--arg" in the example)
-                            .substring(2) // substring(2) to remove the "--"
-                    , ""
+                    argumentsNameToKey(
+                            args[args.length -1], //the last elemtent in the array. ("--arg" in the example)
+                            argumentsNameLowercase
+                    ),
+                    ""
             );
         }
 
