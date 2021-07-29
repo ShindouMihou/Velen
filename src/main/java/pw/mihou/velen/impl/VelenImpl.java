@@ -4,7 +4,9 @@ import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.event.interaction.SlashCommandCreateEvent;
 import org.javacord.api.event.message.MessageCreateEvent;
+import org.javacord.api.interaction.SlashCommand;
 import org.javacord.api.interaction.SlashCommandBuilder;
+import org.javacord.api.interaction.SlashCommandUpdater;
 import org.javacord.api.util.logging.ExceptionLogger;
 import pw.mihou.velen.interfaces.Velen;
 import pw.mihou.velen.interfaces.VelenCommand;
@@ -152,6 +154,63 @@ public class VelenImpl implements Velen {
 
                     return pair.getRight().createGlobal(api);
                 }).toArray(CompletableFuture[]::new)).exceptionally(ExceptionLogger.get());
+    }
+
+    @Override
+    public CompletableFuture<SlashCommand> registerSlashCommand(String command, DiscordApi api) {
+        if(!commands.containsKey(command.toLowerCase()))
+            throw new IllegalArgumentException("The command " + command + " couldn't be found!");
+
+        VelenCommand c = commands.get(command.toLowerCase());
+        if(!c.supportsSlashCommand())
+            throw new IllegalArgumentException("The command " + command + " does not support slash commands!");
+
+        Pair<Long, SlashCommandBuilder> pair = ((VelenCommandImpl) c).asSlashCommand();
+        if (pair.getLeft() != null && pair.getLeft() != 0L) {
+            Optional<Server> server = api.getServerById(pair.getLeft());
+            if (server.isPresent()) {
+                return pair.getRight().createForServer(server.get());
+            } else {
+                throw new IllegalArgumentException("Server " + pair.getLeft() + " couldn't be found for " +
+                        "slash command: " + pair.getRight().toString());
+            }
+        }
+
+        return pair.getRight().createGlobal(api);
+    }
+
+    @Override
+    public CompletableFuture<SlashCommand> updateSlashCommand(long id, String command, DiscordApi api) {
+        if(!commands.containsKey(command.toLowerCase()))
+            throw new IllegalArgumentException("The command " + command + " couldn't be found!");
+
+        VelenCommand c = commands.get(command.toLowerCase());
+        if(!c.supportsSlashCommand())
+            throw new IllegalArgumentException("The command " + command + " does not support slash commands!");
+
+        return updateSlashCommand(id, c, api);
+    }
+
+    @Override
+    public CompletableFuture<SlashCommand> updateSlashCommand(long id, VelenCommand command, DiscordApi api) {
+        Pair<Long, SlashCommandUpdater> pair = ((VelenCommandImpl) command).asSlashCommandUpdater(id);
+        if (pair.getLeft() != null && pair.getLeft() != 0L) {
+            Optional<Server> server = api.getServerById(pair.getLeft());
+            if (server.isPresent()) {
+                return pair.getRight().updateForServer(server.get());
+            } else {
+                throw new IllegalArgumentException("Server " + pair.getLeft() + " couldn't be found for " +
+                        "slash command: " + pair.getRight().toString());
+            }
+        }
+
+        return pair.getRight().updateGlobal(api);
+    }
+
+    @Override
+    public CompletableFuture<Map<Long, String>> getAllSlashCommandIds(DiscordApi api) {
+        return api.getGlobalSlashCommands().thenApply(slashCommands -> slashCommands.stream()
+                .collect(Collectors.toMap(SlashCommand::getId, SlashCommand::getName)));
     }
 
     @Override

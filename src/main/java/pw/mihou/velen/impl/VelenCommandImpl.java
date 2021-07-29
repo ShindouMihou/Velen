@@ -10,10 +10,7 @@ import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.interaction.SlashCommandCreateEvent;
 import org.javacord.api.event.message.MessageCreateEvent;
-import org.javacord.api.interaction.SlashCommand;
-import org.javacord.api.interaction.SlashCommandBuilder;
-import org.javacord.api.interaction.SlashCommandInteraction;
-import org.javacord.api.interaction.SlashCommandOption;
+import org.javacord.api.interaction.*;
 import org.javacord.api.interaction.callback.InteractionImmediateResponseBuilder;
 import org.javacord.api.util.logging.ExceptionLogger;
 import pw.mihou.velen.interfaces.*;
@@ -365,6 +362,18 @@ public class VelenCommandImpl implements VelenCommand {
         return Pair.of(serverId, builder);
     }
 
+    public Pair<Long, SlashCommandUpdater> asSlashCommandUpdater(long commandId) {
+        SlashCommandUpdater updater = new SlashCommandUpdater(commandId)
+                .setName(name)
+                .setDescription(description);
+
+        if(options != null && !options.isEmpty()) {
+            updater.setSlashCommandOptions(options);
+        }
+
+        return Pair.of(serverId, updater);
+    }
+
     @Override
     public boolean isSlashCommandOnly() {
         return velenEvent == null;
@@ -447,7 +456,7 @@ public class VelenCommandImpl implements VelenCommand {
                 Objects.equals(getRequiredRoles(), that.getRequiredRoles()) &&
                 Objects.equals(getRequiredUsers(), that.getRequiredUsers()) &&
                 Objects.equals(getPermissions(), that.getPermissions()) &&
-                Objects.equals(getShortcuts(), that.getShortcuts()) &&
+                Arrays.equals(getShortcuts(), that.getShortcuts()) &&
                 velenEvent.equals(that.velenEvent) &&
                 velen.equals(that.velen);
     }

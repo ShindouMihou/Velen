@@ -1,6 +1,7 @@
 package pw.mihou.velen.interfaces;
 
 import org.javacord.api.DiscordApi;
+import org.javacord.api.interaction.SlashCommand;
 import org.javacord.api.listener.interaction.SlashCommandCreateListener;
 import org.javacord.api.listener.message.MessageCreateListener;
 import pw.mihou.velen.VelenBuilder;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 
 public interface Velen extends MessageCreateListener, SlashCommandCreateListener {
 
@@ -153,6 +155,64 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * @return A CompletableFuture to mark its completion.
      */
     CompletableFuture<Void> registerAllSlashCommands(DiscordApi api);
+
+    /**
+     * Registers a specific slash command that is being utilized by
+     * Velen, this is opposed to {@link Velen#registerAllSlashCommands(DiscordApi)} which
+     * registers all the slash commands.
+     * <br>
+     * This will throw an {@link IllegalArgumentException} if the command is not
+     * found.
+     *
+     * @param command The command to search for.
+     * @param api The DiscordApi to use for registering the command.
+     * @return The slash command returned.
+     */
+    CompletableFuture<SlashCommand> registerSlashCommand(String command, DiscordApi api);
+
+    /**
+     * Updates a specific slash command with the help of Velen, this can be used if
+     * you want to keep the values that you made with {@link VelenCommand} but want to
+     * update a specific part such as the description.
+     * <br><br>
+     * You can use {@link Velen#getAllSlashCommandIds(DiscordApi)} to retrieve the ID of the slash
+     * command that you want to update.
+     *
+     * <br><br>
+     * This also proxies to {@link Velen#updateSlashCommand(long, VelenCommand, DiscordApi)} after retrieving
+     * the VelenCommand if it exists, otherwise throws an {@link IllegalArgumentException}.
+     *
+     * @param id The ID of the slash command that you want to update.
+     * @param command The command to search.
+     * @param api The DiscordApi to use for updating.
+     * @return A new Slash Command instance.
+     */
+    CompletableFuture<SlashCommand> updateSlashCommand(long id, String command, DiscordApi api);
+
+    /**
+     * Updates a specific slash command with the help of Velen, this can be used if
+     * you want to keep the values that you made with {@link VelenCommand} but want to
+     * update a specific part such as the description.
+     * <br><br>
+     * You can use {@link Velen#getAllSlashCommandIds(DiscordApi)} to retrieve the ID of the slash
+     * command that you want to update.
+     *
+     * @param id The ID of the slash command that you want to update.
+     * @param command The command to search.
+     * @param api The DiscordApi to use for updating.
+     * @return A new Slash Command instance.
+     */
+    CompletableFuture<SlashCommand> updateSlashCommand(long id, VelenCommand command, DiscordApi api);
+
+    /**
+     * Retrieves all the IDs of the slash commands that are registered
+     * under your Discord bot. This will return them in the format of [ID, Command Name]
+     * which you can then use {@link Map#forEach(BiConsumer)} if you want to scroll through them.
+     *
+     * @param api The DiscordApi to use to retrieve the commands.
+     * @return A map of slash command ids and name
+     */
+    CompletableFuture<Map<Long, String>> getAllSlashCommandIds(DiscordApi api);
 
     /**
      * This is used to check if the Velen instance currently
