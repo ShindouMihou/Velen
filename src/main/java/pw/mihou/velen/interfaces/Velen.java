@@ -12,6 +12,7 @@ import pw.mihou.velen.prefix.VelenPrefixManager;
 import pw.mihou.velen.ratelimiter.VelenRatelimiter;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -125,11 +126,22 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
     Optional<VelenCommand> getCommand(String command);
 
     /**
-     * Gets a certain command through its name (ignoring casing).
+     * Gets all the categories of all commands in Velen.
      *
+     * @return a Map with the category name
+     * and immutable list of VelenCommand.
+     */
+    Map<String, List<VelenCommand>> getCategories();
+
+    /**
+     * Gets a certain command through its name (ignoring casing).
+     * <br>
+     * <b>This is deprecated since we are now using HashMaps to store commands, you can use {@link Velen#getCommand(String)}
+     * instead for the same behavior.</b>
      * @param command The command to find.
      * @return An optional that possibly contains the command.
      */
+    @Deprecated
     Optional<VelenCommand> getCommandIgnoreCasing(String command);
 
     /**

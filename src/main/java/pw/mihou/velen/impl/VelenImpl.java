@@ -5,7 +5,6 @@ import org.javacord.api.entity.server.Server;
 import org.javacord.api.event.interaction.SlashCommandCreateEvent;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.interaction.SlashCommandBuilder;
-import org.javacord.api.util.DiscordRegexPattern;
 import org.javacord.api.util.logging.ExceptionLogger;
 import pw.mihou.velen.interfaces.Velen;
 import pw.mihou.velen.interfaces.VelenCommand;
@@ -19,9 +18,7 @@ import pw.mihou.velen.utils.Pair;
 import pw.mihou.velen.utils.VelenThreadPool;
 import pw.mihou.velen.utils.VelenUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -29,7 +26,8 @@ public class VelenImpl implements Velen {
 
     private final VelenRatelimitMessage ratelimitedMessage;
     private final VelenRatelimiter ratelimiter;
-    private final List<VelenCommand> commands;
+    // We want to use O(1) for full commands and the normal way for shortcuts.
+    private final HashMap<String, VelenCommand> commands;
     private final VelenPrefixManager prefixManager;
     private final VelenPermissionMessage noPermissionMessage;
     private final VelenRoleMessage noRoleMessage;
@@ -41,7 +39,7 @@ public class VelenImpl implements Velen {
                      VelenBlacklist blacklist, boolean allowMentionPrefix) {
         this.ratelimiter = ratelimiter;
         this.ratelimitedMessage = ratelimitedMessage;
-        this.commands = new ArrayList<>();
+        this.commands = new HashMap<>();
         this.prefixManager = prefixManager;
         this.noPermissionMessage = noPermissionMessage;
         this.noRoleMessage = noRoleMessage;
@@ -51,13 +49,13 @@ public class VelenImpl implements Velen {
 
     @Override
     public Velen addCommand(VelenCommand command) {
-        commands.add(command);
+        commands.put(command.getName().toLowerCase(), command);
         return this;
     }
 
     @Override
     public Velen removeCommand(VelenCommand command) {
-        commands.remove(command);
+        commands.remove(command.getName().toLowerCase());
         return this;
     }
 
@@ -88,36 +86,57 @@ public class VelenImpl implements Velen {
 
     @Override
     public List<VelenCommand> getCommands() {
-        return commands;
+        return new ArrayList<>(commands.values());
     }
 
     @Override
     public List<VelenCommand> getCategory(String category) {
-        return commands.stream()
+        return commands.values().stream()
                 .filter(velenCommand -> velenCommand.getCategory().equals(category))
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<VelenCommand> getCategoryIgnoreCasing(String category) {
-        return commands.stream()
+        return commands.values().stream()
                 .filter(velenCommand -> velenCommand.getCategory().equalsIgnoreCase(category))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<VelenCommand> getCommand(String command) {
-        return commands.stream().filter(velenCommand -> velenCommand.getName().equals(command)).findFirst();
+    public Map<String, List<VelenCommand>> getCategories() {
+        Map<String, List<VelenCommand>> catMap = new HashMap<>();
+        commands.values()
+                .forEach(velenCommand -> {
+                    if(velenCommand.getCategory().isEmpty())
+                        return;
+
+                    if(!catMap.containsKey(velenCommand.getCategory()))
+                        catMap.put(velenCommand.getCategory(), new ArrayList<>());
+
+                    catMap.get(velenCommand.getCategory()).add(velenCommand);
+                });
+
+        // We want the list to be returned as an immutable list.
+        return catMap.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        e -> Collections.unmodifiableList(e.getValue())));
     }
 
     @Override
+    public Optional<VelenCommand> getCommand(String command) {
+        return Optional.ofNullable(commands.get(command.toLowerCase()));
+    }
+
+    @Override
+    @Deprecated
     public Optional<VelenCommand> getCommandIgnoreCasing(String command) {
-        return commands.stream().filter(velenCommand -> velenCommand.getName().equalsIgnoreCase(command)).findFirst();
+        return getCommand(command);
     }
 
     @Override
     public CompletableFuture<Void> registerAllSlashCommands(DiscordApi api) {
-        return CompletableFuture.allOf(commands.stream().filter(VelenCommand::supportsSlashCommand)
+        return CompletableFuture.allOf(commands.values().stream().filter(VelenCommand::supportsSlashCommand)
                 .map(velenCommand -> {
                     Pair<Long, SlashCommandBuilder> pair = ((VelenCommandImpl) velenCommand).asSlashCommand();
 
@@ -152,54 +171,44 @@ public class VelenImpl implements Velen {
 
     @Override
     public void onMessageCreate(MessageCreateEvent event) {
-        dispatch(event, event.isServerMessage() && event.getServer().isPresent() ?
+        dispatch(event, event.getMessageContent().split("\\s+"), event.isServerMessage() && event.getServer().isPresent() ?
                 prefixManager.getPrefix(event.getServer().get().getId()) : prefixManager.getDefaultPrefix());
     }
 
-    private void dispatch(MessageCreateEvent event, String prefix) {
+    private void dispatch(MessageCreateEvent event, String[] args, String prefix) {
         if (supportsBlacklist() && blacklist.isBlacklisted(event.getMessageAuthor().getId()))
             return;
 
-        String content = event.getMessageContent().trim();
+        boolean isUsingMention = allowMentionPrefix && VelenUtils
+                .startsWithMention(event.getMessageContent(), event.getApi().getYourself().getIdAsString());
 
-        if (content.startsWith(prefix)) {
-            content = content.substring(prefix.length()).trim();
-        } else if (allowMentionPrefix && VelenUtils.startsWithMention(content, event.getApi().getYourself().getIdAsString())) {
-            content = DiscordRegexPattern.USER_MENTION.matcher(content).replaceFirst("").trim();
+        // This exists to prevent an issue where cmd returns over index exception.
+        if(isUsingMention) {
+            if(args.length < 2)
+                return;
         } else {
-            // is not a command
-            return;
+            if(!args[0].startsWith(prefix))
+                return;
         }
 
-        for (VelenCommand command : commands) {
-            if (!command.isSlashCommandOnly()) {
-                for (String name : command.getShortcuts()) {
-                    if (content.equals(name)) {
-                        // empty args as the content is only the command name
-                        ((VelenCommandImpl) command).execute(event, new String[0]);
-                    } else if (content.startsWith(name + " ")) {
-                        String argsStr = content.substring(name.length()).trim(); // don't modify content as maybe another command matches too
-                        ((VelenCommandImpl) command).execute(event, VelenUtils.splitContent(argsStr));
-                    }
-                }
+        // kArgs will already default to String[0] if there is no arguments.
+        String kArgs = String.join(" ", (args.length > (isUsingMention ? 2 : 1)
+                ? Arrays.copyOfRange(args, isUsingMention ? 2 : 1, args.length) : new String[0]));
+
+        String cmd = isUsingMention ? args[1] : args[0].substring(prefix.length());
+        if(commands.containsKey(cmd)) {
+            VelenCommand command = commands.get(cmd);
+            if(!command.isSlashCommandOnly()) {
+                VelenThreadPool.executorService.submit(() -> ((VelenCommandImpl) command).execute(event,
+                        VelenUtils.splitContent(kArgs)));
             }
+        } else {
+            commands.values().stream()
+                    .filter(velenCommand -> !velenCommand.isSlashCommandOnly())
+                    .filter(velenCommand -> Arrays.stream(velenCommand.getShortcuts()).anyMatch(cmd::equalsIgnoreCase))
+                    .forEachOrdered(command -> VelenThreadPool.executorService.submit(() -> ((VelenCommandImpl) command).execute(event,
+                            VelenUtils.splitContent(kArgs))));
         }
-    }
-
-    private boolean isCommand(String prefix, String arg, String command) {
-        return (prefix + command).equalsIgnoreCase(arg);
-    }
-
-    private boolean isCommand(String prefix, String message, List<String> commands) {
-        return commands.stream().anyMatch(s -> isCommand(prefix, message, s));
-    }
-
-    private boolean isMessageOfCommandMention(String[] rawArgs, String command) {
-        return rawArgs.length > 1 && rawArgs[1].equalsIgnoreCase(command);
-    }
-
-    private boolean isMessageOfAnyCommandMention(String[] rawArgs, List<String> commands) {
-        return commands.stream().anyMatch(s -> isMessageOfCommandMention(rawArgs, s));
     }
 
     @Override
@@ -207,8 +216,10 @@ public class VelenImpl implements Velen {
         if (supportsBlacklist() && blacklist.isBlacklisted(event.getSlashCommandInteraction()
                 .getUser().getId())) return;
 
-        commands.stream().filter(velenCommand -> velenCommand.supportsSlashCommand()
-                && velenCommand.getName().toLowerCase().equals(event.getSlashCommandInteraction().getCommandName()))
-                .forEachOrdered(velenCommand -> VelenThreadPool.executorService.submit(() -> ((VelenCommandImpl) velenCommand).execute(event)));
+        if(commands.containsKey(event.getSlashCommandInteraction().getCommandName())
+                && commands.get(event.getSlashCommandInteraction().getCommandName().toLowerCase()).supportsSlashCommand()) {
+            VelenThreadPool.executorService.submit(() -> ((VelenCommandImpl) commands.get(event.getSlashCommandInteraction()
+                    .getCommandName().toLowerCase())).execute(event));
+        }
     }
 }
