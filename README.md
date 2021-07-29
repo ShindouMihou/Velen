@@ -91,13 +91,13 @@ You can easily install Velen through Maven Central by adding these entries onto 
 <dependency>
   <groupId>pw.mihou</groupId>
   <artifactId>Velen</artifactId>
-  <version>2.1.0</version>
+  <version>2.1.1</version>
 </dependency>
 ```
 
 ### Gradle
 ```gradle
-implementation 'pw.mihou:Velen:2.1.0'
+implementation 'pw.mihou:Velen:2.1.1'
 ```
 
 ## ⛰️ Velen is used by
