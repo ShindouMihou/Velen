@@ -219,7 +219,7 @@ public class Paginate<T> {
             if (!removeAfter.isZero() && !removeAfter.isNegative())
                 listener.removeAfter(removeAfter.toMillis(), TimeUnit.MILLISECONDS).addRemoveHandler(() -> new MessageUpdater(message)
                         .removeAllComponents()
-                        .replaceMessage());
+                        .applyChanges());
         });
     }
 
@@ -296,7 +296,7 @@ public class Paginate<T> {
             if (!removeAfter.isZero() && !removeAfter.isNegative())
                 listener.removeAfter(removeAfter.toMillis(), TimeUnit.MILLISECONDS).addRemoveHandler(() -> new MessageUpdater(message)
                         .removeAllComponents()
-                        .replaceMessage());
+                        .applyChanges());
         });
     }
 
