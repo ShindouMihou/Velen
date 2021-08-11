@@ -2,6 +2,7 @@ package pw.mihou.velen.pagination;
 
 import org.javacord.api.entity.emoji.Emoji;
 import org.javacord.api.entity.message.MessageBuilder;
+import org.javacord.api.entity.message.MessageUpdater;
 import org.javacord.api.entity.message.component.Button;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.interaction.ButtonClickListener;
@@ -215,11 +216,10 @@ public class Paginate<T> {
 
             // We are adding this in case the user wants to automatically
             // free up the listener once time has passed.
-
-            // This is extremely limited atm since Javacord offers no way
-            // of removing components.
             if (!removeAfter.isZero() && !removeAfter.isNegative())
-                listener.removeAfter(removeAfter.toMillis(), TimeUnit.MILLISECONDS);
+                listener.removeAfter(removeAfter.toMillis(), TimeUnit.MILLISECONDS).addRemoveHandler(() -> new MessageUpdater(message)
+                        .removeAllComponents()
+                        .replaceMessage());
         });
     }
 
@@ -293,11 +293,10 @@ public class Paginate<T> {
 
             // We are adding this in case the user wants to automatically
             // free up the listener once time has passed.
-
-            // This is extremely limited atm since Javacord offers no way
-            // of removing components.
             if (!removeAfter.isZero() && !removeAfter.isNegative())
-                listener.removeAfter(removeAfter.toMillis(), TimeUnit.MILLISECONDS);
+                listener.removeAfter(removeAfter.toMillis(), TimeUnit.MILLISECONDS).addRemoveHandler(() -> new MessageUpdater(message)
+                        .removeAllComponents()
+                        .replaceMessage());
         });
     }
 
