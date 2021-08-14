@@ -6,10 +6,7 @@ import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.interaction.SlashCommandOption;
 import org.javacord.api.interaction.SlashCommandOptionBuilder;
 import pw.mihou.velen.impl.VelenCommandImpl;
-import pw.mihou.velen.interfaces.Velen;
-import pw.mihou.velen.interfaces.VelenCommand;
-import pw.mihou.velen.interfaces.VelenEvent;
-import pw.mihou.velen.interfaces.VelenSlashEvent;
+import pw.mihou.velen.interfaces.*;
 import pw.mihou.velen.interfaces.messages.types.VelenConditionalMessage;
 
 import java.time.Duration;
@@ -35,6 +32,7 @@ public class VelenCommandBuilder {
     private String usage;
     private String description;
     private VelenSlashEvent velenSlashEvent;
+    private VelenHybridHandler velenHybridHandler;
     private Duration cooldown;
     private boolean serverOnly = false;
     private boolean privateOnly = false;
@@ -314,6 +312,21 @@ public class VelenCommandBuilder {
     }
 
     /**
+     * Sets the hybrid handler for when this command is invoked through either slash command or message command. This
+     * will remove any previously set slash event or {@link VelenEvent} as a {@link VelenHybridHandler} is priority.
+     *
+     * @param handler The handler for the event.
+     * @return VelenCommandBuilder for chain calling methods.
+     */
+    public VelenCommandBuilder setHybridHandler(VelenHybridHandler handler) {
+        this.velenHybridHandler = handler;
+        this.velenSlashEvent = null;
+        this.velenEvent = null;
+
+        return this;
+    }
+
+    /**
      * Should this command be server only?
      * <h3> This is only for making the command work only for servers, please use
      * {@link VelenCommandBuilder#setServerOnly(boolean, long)} for slash commands!</h3>
@@ -385,9 +398,15 @@ public class VelenCommandBuilder {
         if (velen == null)
             throw new IllegalArgumentException("Velen cannot be null when creating a command!");
 
-        if (velenEvent == null && velenSlashEvent == null)
-            throw new IllegalArgumentException("Velen Event or Velen Slash Event cannot be null when creating a command since it will be executed" +
+        if (velenHybridHandler == null && velenEvent == null && velenSlashEvent == null)
+            throw new IllegalArgumentException("Velen Hybrid handler, Velen Message Handler or Velen Slash Handler cannot be null when creating a command since it will be executed" +
                     " when the command is triggered!");
+
+        // Velen Hybrid Handler is always a priority over the others.
+        if(velenHybridHandler != null && (velenEvent != null || velenSlashEvent != null)) {
+            this.velenEvent = null;
+            this.velenSlashEvent = null;
+        }
 
         if (cooldown == null)
             cooldown = velen.getRatelimiter().getDefaultCooldown();
@@ -402,7 +421,8 @@ public class VelenCommandBuilder {
             category = "";
 
         return new VelenCommandImpl(name, usage, description, category, cooldown, requiredRoles, requiredUsers,
-                permissions, serverOnly, privateOnly, shortcuts, velenEvent, velenSlashEvent, options, conditions, conditionsSlash, conditionalMessage, serverId, velen);
+                permissions, serverOnly, privateOnly, shortcuts, velenEvent, velenSlashEvent, velenHybridHandler, options,
+                conditions, conditionsSlash, conditionalMessage, serverId, velen);
 
     }
 

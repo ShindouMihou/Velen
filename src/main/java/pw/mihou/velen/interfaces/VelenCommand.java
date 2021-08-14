@@ -54,6 +54,72 @@ public interface VelenCommand {
      *
      * @param name        The name of the command.
      * @param description The description of the command.
+     * @param handler     The handler to handle this event.
+     * @param velen       The velen instance (which will be used to grab default rate-limiter, etc).
+     * @return A VelenCommandBuilder in case you want to add more options.
+     */
+    static VelenCommandBuilder ofHybrid(String name, String description, Velen velen, VelenHybridHandler handler) {
+        return new VelenCommandBuilder()
+                .setName(name)
+                .setHybridHandler(handler)
+                .setVelen(velen)
+                .setDescription(description);
+    }
+
+    /**
+     * Creates a new Velen command builder with all
+     * the required parameters filled.
+     * <h3>This creates a hybrid between slash command and message command, which means
+     * it will listen into both message commands and slash commands.</h3>
+     *
+     * @param name        The name of the command.
+     * @param description The description of the command.
+     * @param handler     The handler to handle this event.
+     * @param velen       The velen instance (which will be used to grab default rate-limiter, etc).
+     * @param options     The options to add to the command.
+     * @return A VelenCommandBuilder in case you want to add more options.
+     */
+    static VelenCommandBuilder ofHybrid(String name, String description, Velen velen, VelenHybridHandler handler,
+                                        SlashCommandOptionBuilder... options) {
+        return new VelenCommandBuilder()
+                .setName(name)
+                .setHybridHandler(handler)
+                .setVelen(velen)
+                .setDescription(description)
+                .addOptions(options);
+    }
+
+    /**
+     * Creates a new Velen command builder with all
+     * the required parameters filled.
+     * <h3>This creates a hybrid between slash command and message command, which means
+     * it will listen into both message commands and slash commands.</h3>
+     *
+     * @param name        The name of the command.
+     * @param description The description of the command.
+     * @param handler     The handler to handle this event.
+     * @param velen       The velen instance (which will be used to grab default rate-limiter, etc).
+     * @param options     The options to add to the command.
+     * @return A VelenCommandBuilder in case you want to add more options.
+     */
+    static VelenCommandBuilder ofHybrid(String name, String description, Velen velen, VelenHybridHandler handler,
+                                        SlashCommandOption... options) {
+        return new VelenCommandBuilder()
+                .setName(name)
+                .setHybridHandler(handler)
+                .setVelen(velen)
+                .setDescription(description)
+                .addOptions(options);
+    }
+
+    /**
+     * Creates a new Velen command builder with all
+     * the required parameters filled.
+     * <h3>This creates a hybrid between slash command and message command, which means
+     * it will listen into both message commands and slash commands.</h3>
+     *
+     * @param name        The name of the command.
+     * @param description The description of the command.
      * @param event       The event to execute when the command is invoked.
      * @param slashEvent  The slash event handler.
      * @param options     The options to add to the command.
@@ -206,6 +272,13 @@ public interface VelenCommand {
      * as well.
      */
     boolean supportsSlashCommand();
+
+    /**
+     * This is used to check if the command is a hybrid command.
+     *
+     * @return Is this command a hybrid command?
+     */
+    boolean isHybrid();
 
     /**
      * Gets all the shortcuts of the command.
