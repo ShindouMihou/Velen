@@ -7,6 +7,7 @@ import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.interaction.SlashCommandInteractionOption;
 import org.javacord.api.util.DiscordRegexPattern;
+import pw.mihou.velen.interfaces.hybrid.objects.subcommands.VelenSubcommand;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -18,12 +19,16 @@ public class VelenOption {
     private final String arg;
     private final SlashCommandInteractionOption option;
     private final DiscordApi api;
+    private final VelenHybridArguments arguments;
+    private final int index;
 
-    private VelenOption(String arg,
-                        SlashCommandInteractionOption option, DiscordApi api) {
+    private VelenOption(int index, String arg, SlashCommandInteractionOption option, DiscordApi api,
+                        VelenHybridArguments arguments) {
+        this.index = index;
         this.arg = arg;
         this.option = option;
         this.api = api;
+        this.arguments = arguments;
     }
 
     /**
@@ -31,8 +36,8 @@ public class VelenOption {
      *
      * @param arg The argument vaule.
      */
-    public VelenOption(String arg, DiscordApi api) {
-        this(arg, null, api);
+    public VelenOption(int index, String arg, DiscordApi api, VelenHybridArguments arguments) {
+        this(index, arg, null, api, arguments);
     }
 
     /**
@@ -40,8 +45,8 @@ public class VelenOption {
      *
      * @param option The option value.
      */
-    public VelenOption(SlashCommandInteractionOption option) {
-        this(null, option, null);
+    public VelenOption(int index, SlashCommandInteractionOption option, VelenHybridArguments arguments) {
+        this(index, null, option, null, arguments);
     }
 
     /**
@@ -203,5 +208,36 @@ public class VelenOption {
             return optionalMentionable.map(CompletableFuture::completedFuture);
 
         return requestUser().map(future -> future.thenApply(Mentionable.class::cast));
+    }
+
+    /**
+     * Retrieves all the options available, this is a proxy of {@link VelenHybridArguments#getOptions()}.
+     *
+     * @return The arguments to fetch.
+     */
+    public VelenOption[] getOptions() {
+        return arguments.getOptions();
+    }
+
+    /**
+     * Retrieves this option as a subcommand.
+     *
+     * @return A {@link VelenSubcommand} instance containing all its options.
+     */
+    public VelenSubcommand asSubcommand() {
+        return new VelenSubcommand(getIndex(),
+                api,
+                option != null ? option.isSubcommandOrGroup() ? option.getOptions() : null : null,
+                arguments.asMessageOptions().orElse(null),
+                arguments);
+    }
+
+    /**
+     * Retrieves the index of this option.
+     *
+     * @return The index of this option.
+     */
+    public int getIndex() {
+        return index;
     }
 }

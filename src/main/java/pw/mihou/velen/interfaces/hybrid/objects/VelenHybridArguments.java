@@ -2,20 +2,34 @@ package pw.mihou.velen.interfaces.hybrid.objects;
 
 import org.javacord.api.DiscordApi;
 import org.javacord.api.interaction.SlashCommandInteractionOption;
+import pw.mihou.velen.interfaces.hybrid.objects.interfaces.VelenCommonsArguments;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class VelenHybridArguments {
+public class VelenHybridArguments implements VelenCommonsArguments {
 
     private final VelenOption[] options;
     private final List<SlashCommandInteractionOption> provider;
     private final String[] args;
 
-    private VelenHybridArguments(VelenOption[] options, List<SlashCommandInteractionOption> provider, String[] args) {
-        this.options = options;
+    private VelenHybridArguments(DiscordApi api, List<SlashCommandInteractionOption> provider, String[] args) {
         this.provider = provider;
         this.args = args;
+
+        AtomicInteger integer = new AtomicInteger(0);
+        if(provider != null && args == null) {
+            this.options = provider.stream()
+                    .map(option -> new VelenOption(integer.getAndIncrement(), option, this))
+                    .toArray(VelenOption[]::new);
+        } else {
+            this.options = Arrays.stream(args)
+                    .filter(s -> s.length() > 0)
+                    .map(s -> new VelenOption(integer.getAndIncrement(), s, api, this))
+                    .toArray(VelenOption[]::new);
+        }
     }
 
     /**
@@ -26,9 +40,7 @@ public class VelenHybridArguments {
      */
     public VelenHybridArguments(String[] args, DiscordApi api) {
         // The length() filter is because of an issue where args has a length, somehow.
-        this(Arrays.stream(args)
-                .filter(s -> s.length() > 0)
-                .map(s -> new VelenOption(s, api)).toArray(VelenOption[]::new), null, args);
+        this(api, null, args);
     }
 
     /**
@@ -37,51 +49,21 @@ public class VelenHybridArguments {
      * @param provider The provider to use for the options.
      */
     public VelenHybridArguments(List<SlashCommandInteractionOption> provider) {
-        this(provider.stream().map(VelenOption::new).toArray(VelenOption[]::new), provider, null);
+        this(null, provider, null);
     }
 
-    /**
-     * Retrieves all the options available.
-     *
-     * @return All the options available.
-     */
+    @Override
     public VelenOption[] getOptions() {
         return options;
     }
 
-    /**
-     * Gets the amount of options that this event contains.
-     *
-     * @return The amount of options that this event contains.
-     */
-    public int length() {
-        return getOptions().length;
-    }
-
-    /**
-     * Gets the option at the specific index.
-     *
-     * @param index The index to fetch.
-     * @return The Velen Option at the index specified.
-     */
-    public VelenOption get(int index) {
-        return options[index];
-    }
-
-    /**
-     * Retrieves the slash command options from this event.
-     *
-     * @return The slash command options from this event.
-     */
+    @Override
     public Optional<List<SlashCommandInteractionOption>> asSlashCommandOptions() {
          return Optional.ofNullable(provider);
     }
 
-    /**
-     * Retrieves the message command options from this event.
-     *
-     * @return The message options from this event.
-     */
+
+    @Override
     public Optional<String[]> asMessageOptions() {
         return Optional.ofNullable(args);
     }
