@@ -225,7 +225,9 @@ public class VelenOption {
      * @return A {@link VelenSubcommand} instance containing all its options.
      */
     public VelenSubcommand asSubcommand() {
-        return new VelenSubcommand(getIndex(),
+        return new VelenSubcommand(
+                arg == null ? Objects.requireNonNull(option).getName() : arg,
+                getIndex(),
                 api,
                 option != null ? option.isSubcommandOrGroup() ? option.getOptions() : null : null,
                 arguments.asMessageOptions().orElse(null),

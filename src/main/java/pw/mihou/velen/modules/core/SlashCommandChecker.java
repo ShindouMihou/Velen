@@ -65,25 +65,21 @@ public class SlashCommandChecker {
 
                     if (!internals.getDifferences().isEmpty()) {
                         logger.info("Found {} differences (excluding not-added commands), attempting to update...", internals.getDifferences().size());
-                        internals.getDifferences().forEach((aLong, velenCommand) -> {
-                            velen.updateSlashCommand(aLong, velenCommand, api)
-                                    .thenAccept(slashCommand -> {
-                                        logger.debug("Successfully updated a command! (name={}, description={})",
-                                                slashCommand.getName(), slashCommand.getDescription());
-                                        counter.incrementAndGet();
-                                    }).join();
-                        });
+                        internals.getDifferences().forEach((aLong, velenCommand) -> velen.updateSlashCommand(aLong, velenCommand, api)
+                                .thenAccept(slashCommand -> {
+                                    logger.debug("Successfully updated a command! (name={}, description={})",
+                                            slashCommand.getName(), slashCommand.getDescription());
+                                    counter.incrementAndGet();
+                                }).join());
                     }
 
                     if (mode == SlashCommandCheckerMode.NORMAL) {
                         internals.getAllNotRegistered(commands, slashCommands)
-                                .forEach(velenCommand -> {
-                                    ((VelenCommandImpl) velenCommand).asSlashCommand().getRight().createGlobal(api).thenAccept(slashCommand -> {
-                                        logger.debug("Successfully created a command! (name={}, description={})",
-                                                slashCommand.getName(), slashCommand.getDescription());
-                                        counter.incrementAndGet();
-                                    }).join();
-                                });
+                                .forEach(velenCommand -> ((VelenCommandImpl) velenCommand).asSlashCommand().getRight().createGlobal(api).thenAccept(slashCommand -> {
+                                    logger.debug("Successfully created a command! (name={}, description={})",
+                                            slashCommand.getName(), slashCommand.getDescription());
+                                    counter.incrementAndGet();
+                                }).join());
                     }
 
                     return counter.get();

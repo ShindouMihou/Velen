@@ -18,9 +18,11 @@ public class VelenSubcommand implements VelenCommonsArguments {
     private final VelenHybridArguments arguments;
     private final List<SlashCommandInteractionOption> provider;
     private final String[] args;
+    private final String name;
 
-    public VelenSubcommand(int index, DiscordApi api, List<SlashCommandInteractionOption> provider,
+    public VelenSubcommand(String name, int index, DiscordApi api, List<SlashCommandInteractionOption> provider,
                            String[] args, VelenHybridArguments arguments) {
+        this.name = name;
         this.provider = provider;
         VelenOption[] t = null;
         AtomicInteger integer = new AtomicInteger(0);
@@ -54,6 +56,15 @@ public class VelenSubcommand implements VelenCommonsArguments {
      */
     public VelenHybridArguments getParent() {
         return arguments;
+    }
+
+    /**
+     * Gets the name of the sub command.
+     *
+     * @return The name value of the subcommand.
+     */
+    public String getName() {
+        return name;
     }
 
     @Override
