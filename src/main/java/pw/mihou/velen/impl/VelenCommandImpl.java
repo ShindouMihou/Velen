@@ -30,10 +30,7 @@ import pw.mihou.velen.utils.Pair;
 import pw.mihou.velen.utils.VelenThreadPool;
 
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -388,8 +385,13 @@ public class VelenCommandImpl implements VelenCommand {
     }
 
     @Override
+    public List<SlashCommandOption> getOptions() {
+        return options == null ? Collections.emptyList() : options;
+    }
+
+    @Override
     public boolean isSlashCommandOnly() {
-        return velenEvent == null && hybridHandler == null;
+        return velenEvent == null && hybridHandler == null && velenSlashEvent != null;
     }
 
     private void runEvent(SlashCommandCreateEvent event) {

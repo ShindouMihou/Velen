@@ -8,6 +8,8 @@ import org.javacord.api.interaction.SlashCommand;
 import org.javacord.api.interaction.SlashCommandBuilder;
 import org.javacord.api.interaction.SlashCommandUpdater;
 import org.javacord.api.util.logging.ExceptionLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pw.mihou.velen.interfaces.Velen;
 import pw.mihou.velen.interfaces.VelenCommand;
 import pw.mihou.velen.interfaces.messages.types.VelenPermissionMessage;
@@ -35,6 +37,7 @@ public class VelenImpl implements Velen {
     private final VelenRoleMessage noRoleMessage;
     private final VelenBlacklist blacklist;
     private final boolean allowMentionPrefix;
+    private static final Logger commandInterceptorLogger = LoggerFactory.getLogger("Velen - Command Interceptor");
 
     public VelenImpl(VelenRatelimiter ratelimiter, VelenPrefixManager prefixManager, VelenRatelimitMessage ratelimitedMessage,
                      VelenPermissionMessage noPermissionMessage, VelenRoleMessage noRoleMessage,
@@ -235,6 +238,9 @@ public class VelenImpl implements Velen {
     }
 
     private void dispatch(MessageCreateEvent event, String[] args, String prefix) {
+        if(!event.getMessageAuthor().isRegularUser())
+            return;
+
         if (supportsBlacklist() && blacklist.isBlacklisted(event.getMessageAuthor().getId()))
             return;
 
@@ -258,6 +264,11 @@ public class VelenImpl implements Velen {
         if(commands.containsKey(cmd)) {
             VelenCommand command = commands.get(cmd);
             if(!command.isSlashCommandOnly()) {
+                commandInterceptorLogger.debug("Intercepted trigger for command ({}) with packet (message={}, args={}, user={}).",
+                        command.getName(), event.getMessageContent(),
+                        Arrays.toString(VelenUtils.splitContent(kArgs)),
+                        event.getMessageAuthor().getId());
+
                 VelenThreadPool.executorService.submit(() -> ((VelenCommandImpl) command).execute(event,
                         VelenUtils.splitContent(kArgs)));
             }
@@ -265,8 +276,15 @@ public class VelenImpl implements Velen {
             commands.values().stream()
                     .filter(velenCommand -> !velenCommand.isSlashCommandOnly())
                     .filter(velenCommand -> Arrays.stream(velenCommand.getShortcuts()).anyMatch(cmd::equalsIgnoreCase))
-                    .forEachOrdered(command -> VelenThreadPool.executorService.submit(() -> ((VelenCommandImpl) command).execute(event,
-                            VelenUtils.splitContent(kArgs))));
+                    .forEachOrdered(command -> {
+                        commandInterceptorLogger.debug("Intercepted trigger for command ({}) with packet (message={}, args={}, user={}).",
+                                command.getName(), event.getMessageContent(),
+                                Arrays.toString(VelenUtils.splitContent(kArgs)),
+                                event.getMessageAuthor().getId());
+
+                        VelenThreadPool.executorService.submit(() -> ((VelenCommandImpl) command).execute(event,
+                                VelenUtils.splitContent(kArgs)));
+                    });
         }
     }
 
@@ -277,6 +295,11 @@ public class VelenImpl implements Velen {
 
         if(commands.containsKey(event.getSlashCommandInteraction().getCommandName())
                 && commands.get(event.getSlashCommandInteraction().getCommandName().toLowerCase()).supportsSlashCommand()) {
+            // Log it!
+            commandInterceptorLogger.debug("Intercepted trigger for command ({}) with packet (type=interaction, user={}).",
+                    commands.get(event.getSlashCommandInteraction().getCommandName().toLowerCase()).getName(),
+                    event.getInteraction().getUser().getId());
+
             VelenThreadPool.executorService.submit(() -> ((VelenCommandImpl) commands.get(event.getSlashCommandInteraction()
                     .getCommandName().toLowerCase())).execute(event));
         }

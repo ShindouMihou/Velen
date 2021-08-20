@@ -265,6 +265,14 @@ public interface VelenCommand {
     boolean isSlashCommandOnly();
 
     /**
+     * Gets all the slash command options for this command, this will return
+     * an empty list if there are none or if the command is not of slash command.
+     *
+     * @return The slash command options for this command.
+     */
+    List<SlashCommandOption> getOptions();
+
+    /**
      * Does this command support slash command?
      *
      * @return Does this command support slash command or not,
