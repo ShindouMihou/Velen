@@ -74,12 +74,13 @@ public class SlashCommandChecker {
                     }
 
                     if (mode == SlashCommandCheckerMode.NORMAL) {
-                        internals.getAllNotRegistered(commands, slashCommands)
-                                .forEach(velenCommand -> ((VelenCommandImpl) velenCommand).asSlashCommand().getRight().createGlobal(api).thenAccept(slashCommand -> {
-                                    logger.debug("Successfully created a command! (name={}, description={})",
-                                            slashCommand.getName(), slashCommand.getDescription());
-                                    counter.incrementAndGet();
-                                }).join());
+                        api.bulkOverwriteGlobalSlashCommands(internals.getAllNotRegistered(commands, slashCommands)
+                                .stream().map(velenCommand -> ((VelenCommandImpl) velenCommand).asSlashCommand().getRight())
+                                .collect(Collectors.toList())).thenAccept(c -> c.forEach(slashCommand -> {
+                            logger.debug("Successfully created a command! (name={}, description={})",
+                                    slashCommand.getName(), slashCommand.getDescription());
+                            counter.incrementAndGet();
+                        }));
                     }
 
                     return counter.get();
