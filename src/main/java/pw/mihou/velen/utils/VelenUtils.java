@@ -3,6 +3,7 @@ package pw.mihou.velen.utils;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.Channel;
 import org.javacord.api.entity.permission.Role;
+import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.util.DiscordRegexPattern;
 import pw.mihou.velen.interfaces.Velen;
@@ -126,6 +127,31 @@ public class VelenUtils {
     public static String getCommandSuggestion(Velen velen, String query) {
         return internals.closest(query, velen.getCommands().stream().map(VelenCommand::getName)
                 .collect(Collectors.toList())).getLeft();
+    }
+
+    /**
+     * Checks if Role 1 is higher than Role 2 hierarchically.
+     *
+     * @param role1 The role to check.
+     * @param role2 The role to compare with.
+     * @return is Role 1 higher than Role 2?
+     */
+    public static boolean isRoleHigher(Role role1, Role role2) {
+        return role1.getPosition() > role2.getPosition();
+    }
+
+    /**
+     * Checks if the user has a higher role than the other user.
+     *
+     * @param user The user to check.
+     * @param userToCompareAgainst The user to compare with.
+     * @param server The server where the comparison should happen.
+     * @return is User's Role higher than User?
+     */
+    public static boolean isUserRoleHigherThanUser(User user, User userToCompareAgainst, Server server) {
+        return user.getRoles(server).stream()
+                .anyMatch(r -> userToCompareAgainst.getRoles(server).stream()
+                        .anyMatch(role -> isRoleHigher(r, role)));
     }
 
     /**
