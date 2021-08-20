@@ -66,7 +66,6 @@ public class SlashCommandChecker {
                     if (!internals.getDifferences().isEmpty()) {
                         logger.info("Found {} differences (excluding not-added commands), attempting to update...", internals.getDifferences().size());
                         internals.getDifferences().forEach((aLong, velenCommand) -> {
-                            System.out.println("Found differing command: " + velenCommand.getName());
                             velen.updateSlashCommand(aLong, velenCommand, api)
                                     .thenAccept(slashCommand -> {
                                         logger.debug("Successfully updated a command! (name={}, description={})",
@@ -79,7 +78,6 @@ public class SlashCommandChecker {
                     if (mode == SlashCommandCheckerMode.NORMAL) {
                         internals.getAllNotRegistered(commands, slashCommands)
                                 .forEach(velenCommand -> {
-                                    System.out.println("Found non-registered command: " + velenCommand.getName());
                                     ((VelenCommandImpl) velenCommand).asSlashCommand().getRight().createGlobal(api).thenAccept(slashCommand -> {
                                         logger.debug("Successfully created a command! (name={}, description={})",
                                                 slashCommand.getName(), slashCommand.getDescription());
