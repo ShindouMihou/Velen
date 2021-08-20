@@ -1,7 +1,7 @@
 <img src="https://i.ibb.co/Ny1V3sg/Velen-Banner.png" width="800px" width="250px">
 
 # ✨ Velen ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/ShindouMihou/Velen?label=version&style=flat-square) [![Discord](https://img.shields.io/discord/807084089013174272?color=blue&label=Discord&style=flat-square)](https://discord.gg/9FefYq4p83) ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/ShindouMihou/Velen?color=red&style=flat-square) ![GitHub last commit](https://img.shields.io/github/last-commit/ShindouMihou/Velen?color=orange&style=flat-square)
-Velen is a command framework (or library) that is created mainly for Javacord with the aim to make everything more easier
+Velen is a framework (or library) that is created mainly for Javacord with the aim to make everything more easier
 and faster to create, for example, slash commands, hybrid commands, cooldowns (rate-limiters), per-server prefixes, pagination and more!
 
 For a more organized look-through at Velen, please check our [GitHub Wiki](https://github.com/ShindouMihou/Velen/wiki) instead
@@ -17,7 +17,7 @@ where everything is more organized and easier to read.
 |       Prefix Manager       	|     ✔️     	|
 |    Customizable Messages   	|     ✔️     	|
 |         Pagination         	|     ✔️     	|
-|    Pagination (Buttons)       |     ✔️     	|
+|    Pagination (Buttons)     |     ✔️     	|
 |   Rate-limiter (Cooldown)  	|     ✔️     	|
 |       Slash Comamnds       	|     ✔️     	|
 |       Hybrid Commands      	|     ✔️     	|
@@ -29,7 +29,7 @@ where everything is more organized and easier to read.
 Velen only has one requirements and that is the latest Javacord, this will be
 updated everytime Javacord releases a new patch. Please ensure your Javacord version
 will be always up-to-date when using Velen!
-- Javacord v3.3.2
+- Javacord v3.4.0
 
 ## 📚 Wiki & Guide
 We highly recommend reading our wiki where everything is explained more in detailed
@@ -58,19 +58,22 @@ DiscordApi api = new DiscordApiBuilder().setToken(token)
 
 An example of slash command in Velen is:
 ```java
-Velen velen = Velen.builder().setDefaultPrefix("v.").build();
-VelenCommand.ofSlash("velenSlash", "A normal velen slash command.", velen, (event, user, args, options, firstResponder) -> 
-          firstResponder.setContent("Hello!").respond()).attach();
-
-DiscordApi api = new DiscordApiBuilder().setToken(token)
-                 .addListener(velen).login().join();
+VelenCommand.ofSlash("ping", "A normal velen slash command.", velen, (event, user, args, options, firstResponder) -> 
+          firstResponder.setContent("Pong!").respond()).attach();
 ```
 
-An example of a hybrid command in Velen is:
+An example of a hybrid command (single handler a.k.a semi-true hybrid command) in Velen is:
 ```java
-VelenCommand.ofHybrid("velenHybrid", "A velen hybrid command!", velen, 
-                (event, message, user, args) -> message.reply("Hello!"),
-                (event, user, args1, options, firstResponder) -> firstResponder.setContent("Hello").respond())
+VelenCommand.ofHybrid("ping", "This is a hybrid (message and slash) command.", velen, (event, responder, user, args) -> 
+          responder.setContent("Pong!").respond()) .attach();
+```
+
+
+An example of a (separate-handlers) hybrid command in Velen is:
+```java
+VelenCommand.ofHybrid("ping", "A velen separate handling hybrid command!", velen, 
+                (event, message, user, args) -> message.reply("Pong!"),
+                (event, user, args1, options, firstResponder) -> firstResponder.setContent("Pong").respond())
                 .attach();
 ```
 
@@ -91,13 +94,13 @@ You can easily install Velen through Maven Central by adding these entries onto 
 <dependency>
   <groupId>pw.mihou</groupId>
   <artifactId>Velen</artifactId>
-  <version>2.1.1</version>
+  <version>2.2.0</version>
 </dependency>
 ```
 
 ### Gradle
 ```gradle
-implementation 'pw.mihou:Velen:2.1.1'
+implementation 'pw.mihou:Velen:2.2.0'
 ```
 
 ## ⛰️ Velen is used by
