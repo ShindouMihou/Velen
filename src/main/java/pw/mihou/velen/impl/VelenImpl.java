@@ -256,9 +256,10 @@ public class VelenImpl implements Velen {
                 return;
         }
 
-        // kArgs will already default to String[0] if there is no arguments.
-        String kArgs = String.join(" ", (args.length > (isUsingMention ? 2 : 1)
-                ? Arrays.copyOfRange(args, isUsingMention ? 2 : 1, args.length) : new String[0]));
+        // kArgs will erase the mention if
+        String kArgs = isUsingMention ? event.getMessageContent()
+                .replaceFirst(args[0], "") :
+                event.getMessageContent();
 
         String cmd = isUsingMention ? args[1] : args[0].substring(prefix.length());
         if(commands.containsKey(cmd)) {
