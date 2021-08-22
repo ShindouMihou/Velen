@@ -180,6 +180,10 @@ public class VelenUtils {
      * @return The split String as Array.
      */
     public static String[] splitContent(String content) {
+        // If there are no spaces then don't split.
+        if(!(content.contains(" ")))
+            return new String[0];
+
         // if string without " and \ just return the normal split
         if (!(content.contains("\"") || content.contains("\\"))) return content.split("\\s+");
 
