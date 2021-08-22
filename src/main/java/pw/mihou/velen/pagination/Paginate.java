@@ -7,9 +7,9 @@ import org.javacord.api.entity.message.MessageUpdater;
 import org.javacord.api.entity.message.component.ActionRow;
 import org.javacord.api.entity.message.component.Button;
 import org.javacord.api.event.interaction.ButtonClickEvent;
-import org.javacord.api.event.interaction.InteractionCreateEvent;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.event.message.reaction.ReactionAddEvent;
+import org.javacord.api.interaction.Interaction;
 import org.javacord.api.interaction.callback.InteractionOriginalResponseUpdater;
 import org.javacord.api.listener.interaction.ButtonClickListener;
 import org.javacord.api.util.event.ListenerManager;
@@ -102,7 +102,7 @@ public class Paginate<T> {
      * @param paginateEvent The handler for each paginate event.
      * @param removeAfter   Remove the pagination event after (x) duration.
      */
-    public void paginate(InteractionCreateEvent event, PaginateEvent<InteractionOriginalResponseUpdater, InteractionCreateEvent, T> paginateEvent, Duration removeAfter) {
+    public void paginate(Interaction event, PaginateEvent<InteractionOriginalResponseUpdater, Interaction, T> paginateEvent, Duration removeAfter) {
         startEvent(true, event, paginateEvent, removeAfter);
     }
 
@@ -128,7 +128,7 @@ public class Paginate<T> {
      * @param paginateEvent The handler for each paginate event.
      * @param removeAfter   Remove the pagination event after (x) duration.
      */
-    public void paginate(InteractionCreateEvent event, PaginateSimpleEvent<InteractionOriginalResponseUpdater, InteractionCreateEvent, T> paginateEvent, Duration removeAfter) {
+    public void paginate(Interaction event, PaginateSimpleEvent<InteractionOriginalResponseUpdater, Interaction, T> paginateEvent, Duration removeAfter) {
         startEvent(false, event, paginateEvent, removeAfter);
     }
 
@@ -174,8 +174,8 @@ public class Paginate<T> {
      * @param paginateEvent The handler for each paginate event.
      * @param removeAfter   Remove the pagination event after (x) duration.
      */
-    public void paginateWithButtons(String uniqueId, InteractionCreateEvent event,
-                                    PaginateButtonSimpleEvent<InteractionOriginalResponseUpdater, InteractionCreateEvent, T> paginateEvent,
+    public void paginateWithButtons(String uniqueId, Interaction event,
+                                    PaginateButtonSimpleEvent<InteractionOriginalResponseUpdater, Interaction, T> paginateEvent,
                                     Duration removeAfter) {
         startEvent(false, uniqueId, event, paginateEvent, removeAfter);
     }
@@ -191,8 +191,8 @@ public class Paginate<T> {
      * @param paginateEvent The handler for each paginate event.
      * @param removeAfter   Remove the pagination event after (x) duration.
      */
-    public void paginateWithButtons(String uniqueId, InteractionCreateEvent event,
-                                    PaginateButtonEvent<InteractionOriginalResponseUpdater, InteractionCreateEvent, T> paginateEvent,
+    public void paginateWithButtons(String uniqueId, Interaction event,
+                                    PaginateButtonEvent<InteractionOriginalResponseUpdater, Interaction, T> paginateEvent,
                                     Duration removeAfter) {
         startEvent(true, uniqueId, event, paginateEvent, removeAfter);
     }
@@ -229,8 +229,8 @@ public class Paginate<T> {
         });
     }
 
-    private void startEvent(boolean includeSelect, String uniqueId, InteractionCreateEvent event,
-                            PaginateButtonSimpleEvent<InteractionOriginalResponseUpdater, InteractionCreateEvent, T> paginateEvent, Duration removeAfter) {
+    private void startEvent(boolean includeSelect, String uniqueId, Interaction event,
+                            PaginateButtonSimpleEvent<InteractionOriginalResponseUpdater, Interaction, T> paginateEvent, Duration removeAfter) {
         if (paginator.isEmpty()) {
             paginateEvent.onEmptyPaginator(event)
                     .update().exceptionally(ExceptionLogger.get());
@@ -276,8 +276,8 @@ public class Paginate<T> {
                 }).exceptionally(ExceptionLogger.get());
     }
 
-    private void startEvent(boolean includeSelected, InteractionCreateEvent event, PaginateSimpleEvent<InteractionOriginalResponseUpdater,
-            InteractionCreateEvent, T> paginateEvent, Duration removeAfter) {
+    private void startEvent(boolean includeSelected, Interaction event, PaginateSimpleEvent<InteractionOriginalResponseUpdater,
+            Interaction, T> paginateEvent, Duration removeAfter) {
         if(paginator.isEmpty()) {
             paginateEvent.onEmptyPaginator(event)
                     .update().exceptionally(ExceptionLogger.get());
@@ -336,37 +336,38 @@ public class Paginate<T> {
         }
     }
 
-    private void handlePaginateReactionEventInteraction(ReactionAddEvent e, InteractionCreateEvent event,
-                                                        PaginationEvent<InteractionOriginalResponseUpdater, InteractionCreateEvent, T> paginateEvent, Message message) {
+    private void handlePaginateReactionEventInteraction(ReactionAddEvent e, Interaction event,
+                                                        PaginationEvent<InteractionOriginalResponseUpdater, Interaction, T> paginateEvent, Message message) {
         if (e.getUserId() != event.getApi().getYourself().getId()) {
             e.removeReaction();
         }
 
-        if (e.getUserId() != event.getInteraction().getUser().getId())
+        if (e.getUserId() != event.getUser().getId())
             return;
+
 
         if (nextEmoji == null || reverseEmoji == null || selectEmoji == null || cancelEmoji == null) {
             if (e.getEmoji().equalsEmoji(unicodeNext) && paginator.size() > 1) {
-                paginator.next().ifPresent(t -> ((PaginateSimpleEvent<InteractionOriginalResponseUpdater, InteractionCreateEvent, T>) paginateEvent)
+                paginator.next().ifPresent(t -> ((PaginateSimpleEvent<InteractionOriginalResponseUpdater, Interaction, T>) paginateEvent)
                         .onPaginate(event, message, t, paginator.getArrow(), paginator));
             } else if (e.getEmoji().equalsEmoji(unicodeReverse) && paginator.size() > 1) {
-                paginator.reverse().ifPresent(t -> ((PaginateSimpleEvent<InteractionOriginalResponseUpdater, InteractionCreateEvent, T>) paginateEvent)
+                paginator.reverse().ifPresent(t -> ((PaginateSimpleEvent<InteractionOriginalResponseUpdater, Interaction, T>) paginateEvent)
                         .onPaginate(event, message, t, paginator.getArrow(), paginator));
             } else if (e.getEmoji().equalsEmoji(unicodeSelect) && paginateEvent instanceof PaginateEvent) {
-                ((PaginateEvent<InteractionOriginalResponseUpdater, InteractionCreateEvent, T>) paginateEvent)
+                ((PaginateEvent<InteractionOriginalResponseUpdater, Interaction, T>) paginateEvent)
                         .onSelect(event, message, paginator.current(), paginator.getArrow(), paginator);
             } else if (e.getEmoji().equalsEmoji(unicodeCancel)) {
                 paginateEvent.onCancel(event, message);
             }
         } else {
             if (e.getEmoji().equalsEmoji(nextEmoji) && paginator.size() > 1) {
-                paginator.next().ifPresent(t -> ((PaginateSimpleEvent<InteractionOriginalResponseUpdater, InteractionCreateEvent, T>) paginateEvent)
+                paginator.next().ifPresent(t -> ((PaginateSimpleEvent<InteractionOriginalResponseUpdater, Interaction, T>) paginateEvent)
                         .onPaginate(event, message, t, paginator.getArrow(), paginator));
             } else if (e.getEmoji().equalsEmoji(reverseEmoji) && paginator.size() > 1) {
-                paginator.reverse().ifPresent(t -> ((PaginateSimpleEvent<InteractionOriginalResponseUpdater, InteractionCreateEvent, T>) paginateEvent)
+                paginator.reverse().ifPresent(t -> ((PaginateSimpleEvent<InteractionOriginalResponseUpdater, Interaction, T>) paginateEvent)
                         .onPaginate(event, message, t, paginator.getArrow(), paginator));
             } else if (e.getEmoji().equalsEmoji(selectEmoji) && paginateEvent instanceof PaginateEvent) {
-                ((PaginateEvent<InteractionOriginalResponseUpdater, InteractionCreateEvent, T>) paginateEvent)
+                ((PaginateEvent<InteractionOriginalResponseUpdater, Interaction, T>) paginateEvent)
                         .onSelect(event, message, paginator.current(), paginator.getArrow(), paginator);
             } else if (e.getEmoji().equalsEmoji(cancelEmoji)) {
                 paginateEvent.onCancel(event, message);
@@ -407,12 +408,12 @@ public class Paginate<T> {
     }
 
     private void handlePaginateButtonEventInteraction(String uniqueId, ButtonClickEvent e,
-                                                      Message message, InteractionCreateEvent event,
-                                                      PaginateButtonSimpleEvent<InteractionOriginalResponseUpdater, InteractionCreateEvent, T>
+                                                      Message message, Interaction event,
+                                                      PaginateButtonSimpleEvent<InteractionOriginalResponseUpdater, Interaction, T>
                                                               paginateEvent) {
         String customId = e.getButtonInteraction().getCustomId();
 
-        if (e.getButtonInteraction().getUser().getId() != event.getInteraction().getUser().getId())
+        if (e.getButtonInteraction().getUser().getId() != event.getUser().getId())
             return;
 
         if (customId.equals(uniqueId + "-REVERSE"))
@@ -424,7 +425,7 @@ public class Paginate<T> {
                     event, message, t, paginator.getArrow(), paginator));
 
         if (customId.equals(uniqueId + "-SUCCESS") && paginateEvent instanceof PaginateButtonEvent)
-            ((PaginateButtonEvent<InteractionOriginalResponseUpdater, InteractionCreateEvent, T>)paginateEvent)
+            ((PaginateButtonEvent<InteractionOriginalResponseUpdater, Interaction, T>)paginateEvent)
                     .onSelect(e.getButtonInteraction().createImmediateResponder(), event, message, paginator.current(),
                             paginator.getArrow(), paginator);
 

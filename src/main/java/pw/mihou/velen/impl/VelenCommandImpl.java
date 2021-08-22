@@ -400,7 +400,7 @@ public class VelenCommandImpl implements VelenCommand {
                     " handler for the slash command found!");
 
         if(hybridHandler == null) {
-            velenSlashEvent.onEvent(event.getSlashCommandInteraction(), event.getSlashCommandInteraction().getUser(),
+            velenSlashEvent.onEvent(event, event.getSlashCommandInteraction(), event.getSlashCommandInteraction().getUser(),
                     new VelenArguments(event.getSlashCommandInteraction().getOptions()), event.getSlashCommandInteraction().getOptions(),
                     event.getSlashCommandInteraction().createImmediateResponder());
         } else {
