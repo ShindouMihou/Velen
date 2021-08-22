@@ -257,9 +257,7 @@ public class VelenImpl implements Velen {
         }
 
         // kArgs will erase the mention if
-        String kArgs = isUsingMention ? event.getMessageContent()
-                .replaceFirst(args[0], "") :
-                event.getMessageContent();
+        String kArgs = event.getMessageContent();
 
         String cmd = isUsingMention ? args[1] : args[0].substring(prefix.length());
         if(commands.containsKey(cmd)) {

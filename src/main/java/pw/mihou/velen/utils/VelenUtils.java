@@ -180,9 +180,11 @@ public class VelenUtils {
      * @return The split String as Array.
      */
     public static String[] splitContent(String content) {
+        String[] args = content.split("\\s+");
+
         // if string without " and \ just return the normal split
         if (!(content.contains("\"") || content.contains("\\")))
-            return content.split("\\s+");
+            return Arrays.copyOfRange(args, 1, args.length);
 
         List<String> split = new ArrayList<>();
 
