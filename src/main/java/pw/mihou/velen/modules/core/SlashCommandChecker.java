@@ -55,6 +55,7 @@ public class SlashCommandChecker {
         // To ensure that we only get global commands.
         List<VelenCommand> commands = velen.getCommands()
                 .stream()
+                .filter(velenCommand -> velenCommand.supportsSlashCommand())
                 .filter(velenCommand -> (((VelenCommandImpl) velenCommand).asSlashCommand().getLeft() == null
                         || ((VelenCommandImpl) velenCommand).asSlashCommand().getLeft() == 0L))
                 .collect(Collectors.toList());
