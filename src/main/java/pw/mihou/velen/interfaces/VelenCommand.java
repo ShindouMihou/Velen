@@ -206,11 +206,18 @@ public interface VelenCommand {
     String getName();
 
     /**
-     * Gets the usage of the command.
+     * Gets the first usage of the command.
      *
-     * @return The usage of the command.
+     * @return The first usage of the command.
      */
     String getUsage();
+
+    /**
+     * Gets all the usages of the command.
+     *
+     * @return The usages of the command.
+     */
+    List<String> getUsages();
 
     /**
      * Gets the command description.

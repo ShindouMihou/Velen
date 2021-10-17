@@ -2,6 +2,7 @@ package pw.mihou.velen.interfaces.hybrid.responder.internal;
 
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
+import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.interaction.callback.InteractionOriginalResponseUpdater;
 import pw.mihou.velen.interfaces.hybrid.responder.VelenGeneralResponder;
 import pw.mihou.velen.interfaces.hybrid.responder.VelenResponderBase;
@@ -26,5 +27,13 @@ public interface VelenGeneralRespond<T> extends VelenResponderBase<T> {
      * responder.
      */
     Optional<InteractionOriginalResponseUpdater> getInteractionOriginalResponseUpdater();
+
+    /**
+     * Retrieves the message builder that is being utilized by this
+     * responder instance, you can use this to modify to your liking.
+     *
+     * @return The message builder being used.
+     */
+    Optional<MessageBuilder> getMessageBuilder();
 
 }

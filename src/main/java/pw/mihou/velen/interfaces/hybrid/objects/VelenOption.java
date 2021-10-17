@@ -7,7 +7,9 @@ import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.interaction.SlashCommandInteractionOption;
 import org.javacord.api.util.DiscordRegexPattern;
+import pw.mihou.velen.interfaces.VelenCommand;
 import pw.mihou.velen.interfaces.hybrid.objects.subcommands.VelenSubcommand;
+import pw.mihou.velen.internals.routing.VelenRoutedArgument;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -21,14 +23,40 @@ public class VelenOption {
     private final DiscordApi api;
     private final VelenHybridArguments arguments;
     private final int index;
+    private final String name;
+    private final VelenCommand vl;
 
-    private VelenOption(int index, String arg, SlashCommandInteractionOption option, DiscordApi api,
-                        VelenHybridArguments arguments) {
+    private VelenOption(int index, VelenRoutedArgument arg, SlashCommandInteractionOption option, DiscordApi api,
+                        VelenHybridArguments arguments, VelenCommand vl) {
         this.index = index;
-        this.arg = arg;
+        if (arg != null)
+            this.arg = arg.getValue();
+        else
+            this.arg = null;
+
         this.option = option;
         this.api = api;
         this.arguments = arguments;
+        this.vl = vl;
+
+        if (option != null) {
+            this.name = option.getName();
+        } else {
+            if (arg != null && arg.getName() != null)
+                this.name = arg.getName();
+            else
+                this.name = null;
+        }
+    }
+
+    /**
+     * Retrieves the name of this argument, this can return as null if the
+     * command does not have any sort of format setup.
+     *
+     * @return The name of this argument | null.
+     */
+    public String getName() {
+        return name;
     }
 
     /**
@@ -36,8 +64,8 @@ public class VelenOption {
      *
      * @param arg The argument vaule.
      */
-    public VelenOption(int index, String arg, DiscordApi api, VelenHybridArguments arguments) {
-        this(index, arg, null, api, arguments);
+    public VelenOption(int index, VelenRoutedArgument arg, DiscordApi api, VelenHybridArguments arguments, VelenCommand vl) {
+        this(index, arg, null, api, arguments, vl);
     }
 
     /**
@@ -45,8 +73,8 @@ public class VelenOption {
      *
      * @param option The option value.
      */
-    public VelenOption(int index, SlashCommandInteractionOption option, VelenHybridArguments arguments) {
-        this(index, null, option, null, arguments);
+    public VelenOption(int index, SlashCommandInteractionOption option, VelenHybridArguments arguments, VelenCommand vl) {
+        this(index, null, option, null, arguments, vl);
     }
 
     /**
@@ -230,8 +258,8 @@ public class VelenOption {
                 getIndex(),
                 api,
                 option != null ? option.isSubcommandOrGroup() ? option.getOptions() : null : null,
-                arguments.asMessageOptions().orElse(null),
-                arguments);
+                arguments.asRoutedArguments().orElse(null),
+                arguments, vl);
     }
 
     /**

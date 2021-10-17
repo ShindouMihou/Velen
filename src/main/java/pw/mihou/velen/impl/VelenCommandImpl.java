@@ -26,6 +26,7 @@ import pw.mihou.velen.interfaces.messages.surface.text.VelenPermissionOrdinaryMe
 import pw.mihou.velen.interfaces.messages.surface.text.VelenRatelimitOrdinaryMessage;
 import pw.mihou.velen.interfaces.messages.surface.text.VelenRoleOrdinaryMessage;
 import pw.mihou.velen.interfaces.messages.types.VelenConditionalMessage;
+import pw.mihou.velen.interfaces.routed.VelenRoutedOptions;
 import pw.mihou.velen.utils.Pair;
 import pw.mihou.velen.utils.VelenThreadPool;
 
@@ -38,7 +39,7 @@ import java.util.stream.Collectors;
 public class VelenCommandImpl implements VelenCommand {
 
     private final String name;
-    private final String usage;
+    private final List<String> usage;
     private final String description;
     private final String category;
     private final Duration cooldown;
@@ -56,11 +57,12 @@ public class VelenCommandImpl implements VelenCommand {
     private final List<Function<SlashCommandCreateEvent, Boolean>> conditionsSlash;
     private final VelenConditionalMessage conditionalMessage;
     private final VelenSlashEvent velenSlashEvent;
-    private VelenHybridHandler hybridHandler;
+    private final VelenHybridHandler hybridHandler;
+    private final List<String> commandFormats;
     private final long serverId;
     private String stringValue;
 
-    public VelenCommandImpl(String name, String usage, String description, String category, Duration cooldown, List<Long> requiredRoles,
+    public VelenCommandImpl(String name, List<String> usage, String description, String category, Duration cooldown, List<Long> requiredRoles,
                             List<Long> requiredUsers, List<PermissionType> permissions, boolean serverOnly,
                             boolean privateOnly,
                             List<String> shortcuts,
@@ -70,6 +72,7 @@ public class VelenCommandImpl implements VelenCommand {
                             List<SlashCommandOption> options,
                             List<Function<MessageCreateEvent, Boolean>> conditions,
                             List<Function<SlashCommandCreateEvent, Boolean>> conditionsSlash,
+                            List<String> commandFormats,
                             VelenConditionalMessage conditionalMessage,
                             long serverId,
                             Velen velen) {
@@ -82,6 +85,7 @@ public class VelenCommandImpl implements VelenCommand {
         this.requiredUsers = requiredUsers;
         this.permissions = permissions;
         this.serverOnly = serverOnly;
+        this.commandFormats = commandFormats;
         // add the name as it can be used for invocation too
         // but don't edit the shortcuts list as it may be immutable which would lead to bugs
         String[] shortcutsArray = shortcuts.toArray(new String[0]);
@@ -352,12 +356,12 @@ public class VelenCommandImpl implements VelenCommand {
             if(hybridHandler == null) {
                 if (velenEvent instanceof VelenServerEvent) {
                     event.getServer().ifPresent(server -> ((VelenServerEvent) velenEvent).onEvent(event, event.getMessage(),
-                            server, user, args));
+                            server, user, args, new VelenRoutedOptions(this, event)));
                 } else {
-                    velenEvent.onEvent(event, event.getMessage(), user, args);
+                    velenEvent.onEvent(event, event.getMessage(), user, args, new VelenRoutedOptions(this, event));
                 }
             } else {
-                VelenGeneralEvent e = new VelenGeneralEventImpl(name, null, event, args);
+                VelenGeneralEvent e = new VelenGeneralEventImpl(name, null, event, args, this);
                 hybridHandler.onEvent(e, e.createResponder(), e.getUser(), e.getArguments());
             }
         });
@@ -389,6 +393,15 @@ public class VelenCommandImpl implements VelenCommand {
         return options == null ? Collections.emptyList() : options;
     }
 
+    /**
+     * Retrieves all the possible formats of this command.
+     *
+     * @return The possible formats.
+     */
+    public List<String> getFormats() {
+        return commandFormats;
+    }
+
     @Override
     public boolean isSlashCommandOnly() {
         return velenEvent == null && hybridHandler == null && velenSlashEvent != null;
@@ -404,7 +417,7 @@ public class VelenCommandImpl implements VelenCommand {
                     new VelenArguments(event.getSlashCommandInteraction().getOptions()), event.getSlashCommandInteraction().getOptions(),
                     event.getSlashCommandInteraction().createImmediateResponder());
         } else {
-            VelenGeneralEvent e = new VelenGeneralEventImpl(name, event, null, null);
+            VelenGeneralEvent e = new VelenGeneralEventImpl(name, event, null, null, this);
             hybridHandler.onEvent(e, e.createResponder(), e.getUser(), e.getArguments());
         }
     }
@@ -424,8 +437,14 @@ public class VelenCommandImpl implements VelenCommand {
         return cooldown;
     }
 
-    public String getUsage() {
+    @Override
+    public List<String> getUsages() {
         return usage;
+    }
+
+    @Override
+    public String getUsage() {
+        return usage.get(0);
     }
 
     @Override

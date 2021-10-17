@@ -40,6 +40,16 @@ public class VelenGeneralResponder implements VelenGeneralRespond<VelenGeneralRe
     }
 
     @Override
+    public Optional<MessageBuilder> getMessageBuilder() {
+        return Optional.ofNullable(builder);
+    }
+
+    @Override
+    public Optional<InteractionOriginalResponseUpdater> getInteractionOriginalResponseUpdater() {
+        return Optional.ofNullable(updater);
+    }
+
+    @Override
     public VelenGeneralResponder addComponents(HighLevelComponent... components) {
         if(builder == null)
             updater.addComponents(components);
@@ -475,10 +485,5 @@ public class VelenGeneralResponder implements VelenGeneralRespond<VelenGeneralRe
                 return builder.send(channel);
             else
                 return builder.send(event.getChannel());
-    }
-
-    @Override
-    public Optional<InteractionOriginalResponseUpdater> getInteractionOriginalResponseUpdater() {
-        return Optional.ofNullable(updater);
     }
 }

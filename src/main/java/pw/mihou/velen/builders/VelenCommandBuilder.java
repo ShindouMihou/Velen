@@ -25,11 +25,12 @@ public class VelenCommandBuilder {
     private final List<Function<MessageCreateEvent, Boolean>> conditions = new ArrayList<>();
     private final List<Function<SlashCommandCreateEvent, Boolean>> conditionsSlash = new ArrayList<>();
     private final List<SlashCommandOption> options = new ArrayList<>();
+    private final List<String> formats = new ArrayList<>();
     private VelenConditionalMessage conditionalMessage;
     private long serverId = 0L;
     private String category;
     private String name;
-    private String usage;
+    private final List<String> usages = new ArrayList<>();
     private String description;
     private VelenSlashEvent velenSlashEvent;
     private VelenHybridHandler velenHybridHandler;
@@ -52,12 +53,48 @@ public class VelenCommandBuilder {
 
     /**
      * Sets the usage of the command.
+     * Deprecated for {@link VelenCommandBuilder#addUsage(String)}, still can be used
+     * to add usages.
      *
      * @param usage The usage of the command.
      * @return VelenCommandBuilder for chain calling methods.
      */
+    @Deprecated
     public VelenCommandBuilder setUsage(String usage) {
-        this.usage = usage;
+        return addUsage(usage);
+    }
+
+    /**
+     * Adds a usage of the command.
+     *
+     * @param usage The usage of the command.
+     * @return VelenCommandBuilder for chain calling methods.
+     */
+    public VelenCommandBuilder addUsage(String usage) {
+        this.usages.add(usage);
+        return this;
+    }
+
+    /**
+     * Adds multiple usages of the command.
+     *
+     * @param usages The usages of the command.
+     * @return VelenCommandBuilder for chain calling methods.
+     */
+    public VelenCommandBuilder addUsages(String... usages) {
+        this.usages.addAll(Arrays.asList(usages));
+        return this;
+    }
+
+    /**
+     * Adds multiple or single formats of a command, this can be used to grab options
+     * of a command with its name.
+     *
+     * @param formats The formats to add.
+     * @return VelenCommandBuilder for chain calling methods.
+     */
+    public VelenCommandBuilder addFormats(String... formats) {
+        this.formats.addAll(Arrays.asList(formats));
         return this;
     }
 
@@ -414,15 +451,12 @@ public class VelenCommandBuilder {
         if (description == null)
             description = "No description";
 
-        if (usage == null)
-            usage = "";
-
         if (category == null)
             category = "";
 
-        return new VelenCommandImpl(name, usage, description, category, cooldown, requiredRoles, requiredUsers,
+        return new VelenCommandImpl(name, usages, description, category, cooldown, requiredRoles, requiredUsers,
                 permissions, serverOnly, privateOnly, shortcuts, velenEvent, velenSlashEvent, velenHybridHandler, options,
-                conditions, conditionsSlash, conditionalMessage, serverId, velen);
+                conditions, conditionsSlash, formats, conditionalMessage, serverId, velen);
 
     }
 

@@ -11,6 +11,7 @@ import org.javacord.api.event.message.CertainMessageEvent;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.event.message.MessageEvent;
 import org.javacord.api.interaction.callback.InteractionOriginalResponseUpdater;
+import pw.mihou.velen.interfaces.VelenCommand;
 import pw.mihou.velen.interfaces.hybrid.objects.VelenHybridArguments;
 import pw.mihou.velen.interfaces.hybrid.responder.VelenGeneralResponder;
 
@@ -19,6 +20,14 @@ import java.util.List;
 import java.util.Optional;
 
 public interface VelenGeneralEvent {
+
+    /**
+     * Retrieves the Velen command instance that is in charge
+     * of this event.
+     *
+     * @return The Velen Command instance.
+     */
+    VelenCommand getCommand();
 
     /**
      * Retrieves the name of the command that was triggered.

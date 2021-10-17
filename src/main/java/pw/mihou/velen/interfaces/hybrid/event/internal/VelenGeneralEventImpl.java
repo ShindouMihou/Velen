@@ -3,8 +3,12 @@ package pw.mihou.velen.interfaces.hybrid.event.internal;
 import org.javacord.api.event.interaction.SlashCommandCreateEvent;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.interaction.callback.InteractionOriginalResponseUpdater;
+import pw.mihou.velen.impl.VelenCommandImpl;
+import pw.mihou.velen.interfaces.VelenCommand;
 import pw.mihou.velen.interfaces.hybrid.event.VelenGeneralEvent;
 import pw.mihou.velen.interfaces.hybrid.objects.VelenHybridArguments;
+import pw.mihou.velen.internals.routing.VelenRoutedArgument;
+import pw.mihou.velen.internals.routing.VelenUnderscoreParser;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -16,9 +20,11 @@ public class VelenGeneralEventImpl implements VelenGeneralEvent {
     private final MessageCreateEvent event;
     private final String command;
     private final VelenHybridArguments arguments;
+    private final VelenCommand vl;
 
-    public VelenGeneralEventImpl(String command, SlashCommandCreateEvent slashEvent, MessageCreateEvent event, String[] args) {
+    public VelenGeneralEventImpl(String command, SlashCommandCreateEvent slashEvent, MessageCreateEvent event, String[] args, VelenCommand vl) {
         this.command = command;
+        this.vl = vl;
         VelenHybridArguments a = null;
 
         this.slashEvent = slashEvent;
@@ -29,16 +35,29 @@ public class VelenGeneralEventImpl implements VelenGeneralEvent {
 
         this.event = event;
 
-        if(args != null && event != null)
-            if(args.length == 0)
-                a = new VelenHybridArguments(new String[0], event.getApi());
+        if(args != null && event != null) {
+            String[] commandIndexes = event.getMessageContent().split("\\s+");
+            VelenRoutedArgument[] vArgs = VelenUnderscoreParser.route(event.getMessageContent(), ((VelenCommandImpl)vl).getFormats())
+                    .entrySet()
+                    .stream()
+                    .map(entry -> new VelenRoutedArgument(entry.getKey(), entry.getValue(), commandIndexes[entry.getKey()]))
+                    .toArray(VelenRoutedArgument[]::new);
+
+            if (args.length == 0)
+                a = new VelenHybridArguments(new VelenRoutedArgument[0], event.getApi(), vl);
             else
-                a = new VelenHybridArguments(args, event.getApi());
+                a = new VelenHybridArguments(vArgs, event.getApi(), vl);
+        }
 
         if(slashEvent != null)
-            a = new VelenHybridArguments(slashEvent.getSlashCommandInteraction().getOptions());
+            a = new VelenHybridArguments(slashEvent.getSlashCommandInteraction().getOptions(), vl);
 
         this.arguments = Objects.requireNonNull(a);
+    }
+
+
+    public VelenCommand getCommand() {
+        return vl;
     }
 
     @Override
