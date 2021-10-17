@@ -8,6 +8,7 @@ import org.javacord.api.entity.message.component.HighLevelComponent;
 import org.javacord.api.entity.message.component.LowLevelComponent;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.message.mention.AllowedMentions;
+import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -374,7 +375,7 @@ public interface VelenResponderBase<T> {
      *
      * @param messageFlags The message flag of the message.
      */
-    T setFlags(EnumSet<MessageFlag> messageFlags);
+    T setFlags(EnumSet<InteractionCallbackDataFlag> messageFlags);
 
     /**
      * Sets the message flags of the message, this only works if the event was
@@ -382,5 +383,5 @@ public interface VelenResponderBase<T> {
      *
      * @param messageFlags The message flag of the message.
      */
-    T setFlags(MessageFlag... messageFlags);
+    T setFlags(InteractionCallbackDataFlag... messageFlags);
 }

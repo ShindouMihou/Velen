@@ -13,6 +13,7 @@ import org.javacord.api.entity.message.component.LowLevelComponent;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.message.mention.AllowedMentions;
 import org.javacord.api.event.message.MessageCreateEvent;
+import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
 import org.javacord.api.interaction.callback.InteractionOriginalResponseUpdater;
 import pw.mihou.velen.interfaces.hybrid.responder.internal.VelenGeneralRespond;
 
@@ -448,7 +449,7 @@ public class VelenGeneralResponder implements VelenGeneralRespond<VelenGeneralRe
     }
 
     @Override
-    public VelenGeneralResponder setFlags(EnumSet<MessageFlag> messageFlags) {
+    public VelenGeneralResponder setFlags(EnumSet<InteractionCallbackDataFlag> messageFlags) {
         if(updater != null)
             updater.setFlags(messageFlags);
 
@@ -456,7 +457,7 @@ public class VelenGeneralResponder implements VelenGeneralRespond<VelenGeneralRe
     }
 
     @Override
-    public VelenGeneralResponder setFlags(MessageFlag... messageFlags) {
+    public VelenGeneralResponder setFlags(InteractionCallbackDataFlag... messageFlags) {
         if(updater != null)
             updater.setFlags(messageFlags);
 

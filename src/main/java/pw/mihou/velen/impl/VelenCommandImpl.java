@@ -2,7 +2,6 @@ package pw.mihou.velen.impl;
 
 import org.javacord.api.entity.DiscordEntity;
 import org.javacord.api.entity.message.MessageBuilder;
-import org.javacord.api.entity.message.MessageFlag;
 import org.javacord.api.entity.message.mention.AllowedMentionsBuilder;
 import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.permission.Role;
@@ -11,6 +10,7 @@ import org.javacord.api.entity.user.User;
 import org.javacord.api.event.interaction.SlashCommandCreateEvent;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.interaction.*;
+import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
 import org.javacord.api.interaction.callback.InteractionImmediateResponseBuilder;
 import org.javacord.api.util.logging.ExceptionLogger;
 import pw.mihou.velen.interfaces.*;
@@ -129,7 +129,7 @@ public class VelenCommandImpl implements VelenCommand {
                 if (conditionalMessage != null) {
                     InteractionImmediateResponseBuilder builder =
                             event.createImmediateResponder()
-                                    .setFlags(MessageFlag.EPHEMERAL);
+                                    .setFlags(InteractionCallbackDataFlag.EPHEMERAL);
                     if (conditionalMessage instanceof VelenOrdinaryMessage)
                         builder.setContent(((VelenConditionalOrdinaryMessage) conditionalMessage).load(user, event.getChannel().get(), name));
                     else
@@ -151,7 +151,7 @@ public class VelenCommandImpl implements VelenCommand {
                                     .setMentionUsers(false)
                                     .setMentionEveryoneAndHere(false)
                                     .build())
-                            .setFlags(MessageFlag.EPHEMERAL);
+                            .setFlags(InteractionCallbackDataFlag.EPHEMERAL);
 
                     if (velen.getNoRoleMessage() instanceof VelenOrdinaryMessage)
                         builder.setContent(((VelenRoleOrdinaryMessage) velen.getNoRoleMessage())
@@ -171,7 +171,7 @@ public class VelenCommandImpl implements VelenCommand {
                 Collection<PermissionType> userPerms = server.getPermissions(user).getAllowedPermission();
                 if (!userPerms.containsAll(permissions)) {
                     InteractionImmediateResponseBuilder builder = event.createImmediateResponder()
-                            .setFlags(MessageFlag.EPHEMERAL);
+                            .setFlags(InteractionCallbackDataFlag.EPHEMERAL);
 
                     if (velen.getNoPermissionMessage() instanceof VelenOrdinaryMessage)
                         builder.setContent(((VelenPermissionOrdinaryMessage) velen.getNoPermissionMessage())
@@ -327,7 +327,7 @@ public class VelenCommandImpl implements VelenCommand {
             velen.getRatelimiter().ratelimit(user.getId(), server, toString(), cooldown.toMillis(), remaining -> {
                 if (remaining > 0) {
                     InteractionImmediateResponseBuilder builder = event.createImmediateResponder()
-                            .setFlags(MessageFlag.EPHEMERAL);
+                            .setFlags(InteractionCallbackDataFlag.EPHEMERAL);
 
                     if (velen.getRatelimitedMessage() instanceof VelenOrdinaryMessage) {
                         builder.setContent(((VelenRatelimitOrdinaryMessage) velen.getRatelimitedMessage())
