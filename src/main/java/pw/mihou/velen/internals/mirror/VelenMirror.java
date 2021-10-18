@@ -221,7 +221,6 @@ public class VelenMirror {
                     }
 
                     optionBuilders.values().forEach(builder.get()::addOption);
-                    System.out.println("Added command: " + commandName.get());
                     builder.get().setVelen(velen).attach();
 
                     // Let me introduce to you...
