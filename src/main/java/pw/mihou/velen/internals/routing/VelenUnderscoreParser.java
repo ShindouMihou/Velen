@@ -110,6 +110,23 @@ public class VelenUnderscoreParser {
                             }
 
                             if (passes) {
+                                if (i1 == indexes.length - 1) {
+                                    // We want to integrate the extra parts onto the command.
+                                    // if the last index of the format has the symbol [+]
+                                    if (commandIndexes.length > indexes.length) {
+                                        if (indexes[indexes.length - 1].contains(":hasMany()")) {
+                                            name = name.replace(":hasMany()", "");
+                                            for (int i = i1; i < commandIndexes.length; i++) {
+                                                componentMap.put(i, name);
+                                            }
+                                        }
+                                    } else {
+                                        // We still have to remove it here again...
+                                        if (indexes[indexes.length - 1].contains(":hasMany()")) {
+                                            name = name.replace(":hasMany()", "");
+                                        }
+                                    }
+                                }
                                 componentMap.put(i1, name);
                             } else {
                                 componentMap.put(i1, null);
@@ -125,6 +142,7 @@ public class VelenUnderscoreParser {
                                 componentMap.put(i1, "_commandName");
                             }
                         }
+
 
                         if (i1 == indexes.length - 1) {
                             if (isThisMrRight)

@@ -150,6 +150,12 @@ public class VelenMirror {
                         formats.get("option." + currentOption.get()).append(":{").append(value).append("}");
                     }
 
+                    if (innerName.equalsIgnoreCase("has_many")) {
+                        if (Boolean.parseBoolean(value)) {
+                            formats.get("option." + currentOption.get()).append(":hasMany()");
+                        }
+                    }
+
                     if (innerName.equalsIgnoreCase("choice")) {
                         if (commandType.get().equalsIgnoreCase("message")) {
                             formats.get("option." + currentOption.get()).append("::(")

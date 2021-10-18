@@ -8,6 +8,7 @@ import pw.mihou.velen.internals.routing.VelenUnderscoreParser;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class VelenRoutedOptions {
 
@@ -36,10 +37,19 @@ public class VelenRoutedOptions {
      * @return The value of the option in the specific position.
      */
     public Optional<String> withName(String name) {
-        return Arrays.stream(arguments)
-                .filter(arg -> arg.getName() != null && arg.getName().equalsIgnoreCase(name))
-                .map(VelenRoutedArgument::getValue)
-                .findFirst();
+        long duplicates = Arrays.stream(arguments).filter(arg -> arg.getName() != null && arg.getName().equalsIgnoreCase(name)).count();
+        if (duplicates < 2) {
+            return Arrays.stream(arguments)
+                    .filter(arg -> arg.getName() != null && arg.getName().equalsIgnoreCase(name))
+                    .map(VelenRoutedArgument::getValue)
+                    .findFirst();
+        } else {
+            // Allow us to return all the values.
+            return Optional.of(Arrays.stream(arguments)
+                    .filter(arg -> arg.getName() != null && arg.getName().equalsIgnoreCase(name))
+                    .map(VelenRoutedArgument::getValue)
+                    .collect(Collectors.joining(" ")));
+        }
     }
 
     /**

@@ -21,6 +21,7 @@
         desc: The text you want the bot to say.
         required: true
         type: string
+        has_many: true
     }
 
     handler: hybrid.say

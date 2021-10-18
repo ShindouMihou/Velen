@@ -25,16 +25,10 @@ public class Test {
             }
         });
 
-        velen.addHandler("hybrid.number", (event, responder, user, args) -> {
-            if (args.withName("number").isPresent()) {
-                responder.setContent("I say number " + args.withName("number").get().asInteger().get()).respond();
-            }
-        });
-
         velen.addHandler("hybrid.ping", (event, responder, user, args) -> responder.setContent("Pong!").respond());
         velen.addHandler("hybrid.say", (event, responder, user, args) -> {
-            if (args.withName("text").isPresent()) {
-                responder.setContent(args.withName("text").get().asString().get()).respond();
+            if (args.getManyWithName("text").isPresent()) {
+                responder.setContent(args.getManyWithName("text").get()).respond();
             }
         });
 
