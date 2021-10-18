@@ -14,21 +14,8 @@ public class RemoveSpecialSyntaxRouter implements VelenUnderscoreRoute {
     @Override
     public Pair<Boolean, String> accept(String s, String name, int index, String[] commandIndexes,
                                         String messageArgument, String command, String format) {
-        if (name.contains(":description(") && name.contains(")")) {
-            name = name.replace(collect(":description(", ')', name), "");
-        }
-
-        if (name.contains(":optional()")) {
-            name = name.replace(":optional\\(\\)", "");
-        }
-
         if (name.contains(":required()")) {
-            name = name.replace(":required\\(\\)", "");
-        }
-
-        if (name.contains("::withOptions(") && name.contains(")")) {
-            name = name.substring(name.indexOf("::withOptions(") + "::withOptions(".length(),
-                    findClosure(name.indexOf("::withOptions("), name, ')'));
+            name = name.replace(":required()", "");
         }
 
         return Pair.of(true, name);
