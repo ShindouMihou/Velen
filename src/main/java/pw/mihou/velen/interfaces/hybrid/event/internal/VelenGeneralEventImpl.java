@@ -9,9 +9,12 @@ import pw.mihou.velen.interfaces.hybrid.event.VelenGeneralEvent;
 import pw.mihou.velen.interfaces.hybrid.objects.VelenHybridArguments;
 import pw.mihou.velen.internals.routing.VelenRoutedArgument;
 import pw.mihou.velen.internals.routing.VelenUnderscoreParser;
+import pw.mihou.velen.utils.VelenUtils;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class VelenGeneralEventImpl implements VelenGeneralEvent {
 
@@ -36,7 +39,11 @@ public class VelenGeneralEventImpl implements VelenGeneralEvent {
         this.event = event;
 
         if(args != null && event != null) {
-            String[] commandIndexes = event.getMessageContent().split("\\s+");
+            String[] commandIndexes = Stream.concat(Arrays.stream(
+                    new String[]{event.getMessageContent().split(" ")[0]}),
+                            Arrays.stream(VelenUtils.splitContent(event.getMessageContent()))
+                            .filter(s -> !s.equals(event.getMessageContent().split(" ")[0])))
+                    .toArray(String[]::new);
             VelenRoutedArgument[] vArgs = VelenUnderscoreParser.route(event.getMessageContent(), ((VelenCommandImpl)vl).getFormats())
                     .entrySet()
                     .stream()

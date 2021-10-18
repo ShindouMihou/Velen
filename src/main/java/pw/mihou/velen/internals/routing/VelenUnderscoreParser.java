@@ -2,12 +2,15 @@ package pw.mihou.velen.internals.routing;
 
 import org.javacord.api.util.DiscordRegexPattern;
 import pw.mihou.velen.internals.routing.routers.OfTypeRouter;
+import pw.mihou.velen.internals.routing.routers.RemoveSpecialSyntaxRouter;
 import pw.mihou.velen.utils.Pair;
 import pw.mihou.velen.utils.VelenUtils;
 
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class VelenUnderscoreParser {
 
@@ -16,10 +19,13 @@ public class VelenUnderscoreParser {
     static {
         // All the :of(type) options.
         routers.add(new OfTypeRouter());
+        routers.add(new RemoveSpecialSyntaxRouter());
     }
 
     public static Map<Integer, String> route(String command, List<String> formats) {
-        String[] commandIndexes = VelenUtils.splitContent(command);
+        String[] commandIndexes = Stream.concat(Arrays.stream(new String[]{command.split(" ")[0]}), Arrays.stream(VelenUtils.splitContent(command))
+                        .filter(s -> !s.equals(command.split(" ")[0])))
+                .toArray(String[]::new);
         if (commandIndexes.length == 1)
             return Collections.singletonMap(0, command);
 
@@ -67,8 +73,7 @@ public class VelenUnderscoreParser {
                                     String pattern = name.substring(name.indexOf(token) + token.length(), findClosure(name.indexOf(token), name, ')'));
                                     String[] values = pattern.split(",");
 
-                                    String rawToken = name.substring(name.indexOf(token), findClosure(name.indexOf(token), name, ')') + 1);
-                                    name = name.substring(0, name.indexOf(rawToken));
+                                    name = name.replace(collect(token, ')', name), "");
 
                                     // Check if it matches with the required options.
                                     int finalI = i1;
@@ -82,11 +87,11 @@ public class VelenUnderscoreParser {
 
                             // If it has the regex pattern.
                             while (name.contains(":{") && name.contains("}")) {
-                                String regexPattern = name.substring(name.indexOf(":{"),findClosure(name.indexOf(":{"), name, '}') + 1);
-                                Pattern pattern = Pattern.compile(name.substring(name.indexOf(":{") + 2, findClosure(name.indexOf(":{"), name, '}')));
+                                Pattern pattern = Pattern.compile(name.substring(name.indexOf(":{") + 2,
+                                        findClosure(name.indexOf(":{"), name, '}')));
 
                                 // If the regex check is present then we can make name end with this.
-                                name = name.substring(0, name.indexOf(regexPattern));
+                                name = name.replace(collect(":{", '}', name), "");
                                 if (!pattern.matcher(commandIndexes[i1]).matches()) {
                                     // Since the pattern doesn't match then we'll ignore this format.
                                     passes = false;
@@ -146,6 +151,7 @@ public class VelenUnderscoreParser {
                 }
             }
         }
+
         return finalMap;
     }
 
@@ -163,6 +169,10 @@ public class VelenUnderscoreParser {
 
     public static Pair<Integer, Integer> find(String opening, char closure, String source) {
         return Pair.of(source.indexOf(opening), findClosure(source.indexOf(opening), source, closure));
+    }
+
+    public static String collect(String opening, char closure, String source) {
+        return source.substring(source.indexOf(opening), findClosure(source.indexOf(opening), source, closure) + 1);
     }
 
     public static int findClosure(int startingIndex, String source, char closure) {

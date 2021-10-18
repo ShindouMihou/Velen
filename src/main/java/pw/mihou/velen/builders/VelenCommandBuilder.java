@@ -436,8 +436,8 @@ public class VelenCommandBuilder {
             throw new IllegalArgumentException("Velen cannot be null when creating a command!");
 
         if (velenHybridHandler == null && velenEvent == null && velenSlashEvent == null)
-            throw new IllegalArgumentException("Velen Hybrid handler, Velen Message Handler or Velen Slash Handler cannot be null when creating a command since it will be executed" +
-                    " when the command is triggered!");
+            throw new IllegalArgumentException("Failed to create command ["+name+"] with reasons:Velen Hybrid handler, Velen Message Handler or Velen Slash Handler cannot be null " +
+                    "when creating a command since it will be executed when the command is triggered!");
 
         // Velen Hybrid Handler is always a priority over the others.
         if(velenHybridHandler != null && (velenEvent != null || velenSlashEvent != null)) {

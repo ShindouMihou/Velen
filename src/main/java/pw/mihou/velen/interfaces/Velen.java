@@ -25,7 +25,7 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * settings, not recommended if you want to use per-server prefixes
      * and a different default cooldown, for those, use {@link VelenBuilder} or {@link Velen#builder()}.
      *
-     * @return A default Valen.
+     * @return A default Velen.
      */
     static Velen ofDefaults() {
         return new VelenBuilder().build();
@@ -49,6 +49,35 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * @return An updated Velen.
      */
     Velen addCommand(VelenCommand command);
+
+    /**
+     * Loads all commands from a specific directory.
+     *
+     * @param directory The directory to search for.
+     * @return The Velen instance with newer data.
+     */
+    Velen loadFrom(String directory);
+
+    /**
+     * Adds a new handler for message commands.
+     * @param name The name of the handler, it must be unique otherwise it would collide.
+     * @param handler The handler to add.
+     */
+    Velen addHandler(String name, VelenEvent handler);
+
+    /**
+     * Adds a new handler for slash commands.
+     * @param name The name of the handler, it must be unique otherwise it would collide.
+     * @param handler The handler to add.
+     */
+    Velen addHandler(String name, VelenSlashEvent handler);
+
+    /**
+     * Adds a new handler for hybrid commands.
+     * @param name The name of the handler, it must be unique otherwise it would collide.
+     * @param handler The handler to add.
+     */
+    Velen addHandler(String name, VelenHybridHandler handler);
 
     /**
      * Removes a command from Velen.
