@@ -87,8 +87,7 @@ public class VelenUnderscoreParser {
 
                             // If it has the regex pattern.
                             while (name.contains(":{") && name.contains("}")) {
-                                Pattern pattern = Pattern.compile(name.substring(name.indexOf(":{") + 2,
-                                        findClosure(name.indexOf(":{"), name, '}')));
+                                Pattern pattern = Pattern.compile(name.substring(name.indexOf(":{") + 2, findClosure(name.indexOf(":{"), name, '}')));
 
                                 // If the regex check is present then we can make name end with this.
                                 name = name.replace(collect(":{", '}', name), "");

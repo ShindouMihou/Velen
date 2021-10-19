@@ -190,16 +190,16 @@ public class VelenMirror {
                     // Make sure to remove them so it doesn't get caught up in the finishing blow.
                     currentSubcommand.set("none");
                 } else if (s.equals("}") && state.get() == 3) {
+                    if (!choices.get(currentOption.get()).isEmpty()) {
+                        formats.get("option." + currentOption.get()).append("::(")
+                                .append(String.join(",", choices.get(currentOption.get())))
+                                .append(")");
+                        choices.remove(currentOption.get());
+                    }
+
                     if (!currentSubcommand.get().equalsIgnoreCase("none")) {
                         optionBuilders.get("subcommand."+currentSubcommand.get())
                                 .addOption(optionBuilders.get("option."+currentOption.get()).build());
-
-                        if (!commandType.get().equalsIgnoreCase("message") && !choices.get(currentOption.get()).isEmpty()) {
-                            formats.get("option."+currentOption.get()).append("::(")
-                                    .append(String.join(",", choices.get(currentOption.get())))
-                                    .append(")");
-                            choices.remove(currentOption.get());
-                        }
 
                         // And this option is done.
                         formats.get("subcommand."+currentSubcommand.get()).append(" ")
