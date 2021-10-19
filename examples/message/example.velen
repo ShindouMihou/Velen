@@ -1,0 +1,88 @@
+&[message]: category
+
+# Please check the parent folder for explanation.
+&[ping]: message {
+    desc: Do you want to ping-pong with me?
+    usage: ping [pong|ping]
+    usage: ping [ping|pong]
+    shortcut: pong
+
+    &[response]: option {
+        desc: What kind of move will you make?
+        choice: [PING, PONG]
+        type: string
+    }
+
+    cooldown: 5000
+    handler: message.ping
+}
+
+# With Many Testing
+&[say]: message {
+    desc: Say something for me!
+    usage: say [text]
+
+    &[text]: option {
+        desc: The text you want the bot to say.
+        type: string
+        has_many: true
+    }
+
+    handler: message.say
+}
+
+# Choice Testing
+&[scream]: message {
+    desc: I want to scream a number.
+    usage: scream [AH|YA]
+
+    &[scream]: option {
+        type: string
+        choice: [AH, YA]
+        desc: The scream type.
+    }
+
+    handler: message.scream
+}
+
+# Regex testing
+&[regex]: message {
+    desc: This is to test a regex.
+    usage: regex [url]
+
+    &[url]: option {
+        type: string
+        desc: This should respodn with http or https if the message has it.
+        regex: ^(http|https)
+    }
+
+    handler: message.regex
+}
+
+# Numeric type testing.
+&[number]: message {
+    desc: Make me say a number!
+    usage: number [number]
+
+    &[number]: option {
+        type: numeric
+        desc: The number you want me to say.
+    }
+
+    handler: message.number
+}
+
+# User type option testing.
+&[hi]: message {
+    desc: Say hello to someone.
+    usage: hi [user]
+    Usage: hi
+
+    &[user]: option {
+        type: user
+        required: false
+        desc: The user you want to mention.
+    }
+
+    handler: message.hi
+}

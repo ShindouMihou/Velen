@@ -3,7 +3,10 @@ These are new examples of Hybrid Commands in Velen using the new file constructo
 attempts to utilize all possible methods for hybrid commands.
 
 Please note that we are using the following handlers for this:
+
 ```java
+import pw.mihou.velen.interfaces.hybrid.objects.VelenOption;
+
 public class Test {
 
     public static void main(String[] a) {
@@ -19,18 +22,14 @@ public class Test {
             responder.respond();
         });
 
-        velen.addHandler("hybrid.number", (event, responder, user, args) -> {
-            if (args.withName("number").isPresent()) {
-                responder.setContent("I say number " + args.withName("number").get().asInteger().get()).respond();
-            }
-        });
+        velen.addHandler("hybrid.number", (event, responder, user, args) -> args.withName("number").flatMap(VelenOption::asInteger)
+                .ifPresent(integer -> responder.setContent("I say number " + integer).respond()));
 
-        velen.addHandler("hybrid.ping", (event, responder, user, args) -> responder.setContent("Pong!").respond());
-        velen.addHandler("hybrid.say", (event, responder, user, args) -> {
-            if (args.getManyWithName("text").isPresent()) {
-                responder.setContent(args.getManyWithName("text").get()).respond();
-            }
-        });
+        velen.addHandler("hybrid.ping", (event, responder, user, args) -> args.withName("response").flatMap(VelenOption::asString)
+                .ifPresent(s -> responder.setContent(s).respond()));
+
+        velen.addHandler("hybrid.say", (event, responder, user, args) -> args.getManyWithName("text")
+                .ifPresent(s -> responder.setContent(s).respond()));
 
         velen.addHandler("hybrid.regex", (event, responder, user, args) -> {
             if (args.withName("url").isPresent()) {
@@ -41,15 +40,11 @@ public class Test {
             }
         });
 
-        velen.addHandler("hybrid.scream", (event, responder, user, args) -> {
-            if (args.withName("scream").isPresent()) {
-                String scream = args.withName("scream").get().asString().get();
-                responder.setContent(scream).respond();
-            }
-        });
+        velen.addHandler("hybrid.scream", (event, responder, user, args) -> args.withName("scream")
+                .ifPresent(s -> responder.setContent(s).respond()));
 
 
-        velen.loadFrom("examples");
+        velen.loadFrom("examples/hybrid");
         DiscordApi api = new DiscordApiBuilder().setToken(System.getenv("token"))
                 .addListener(velen)
                 .setAllIntents()
