@@ -15,12 +15,17 @@ will be always up-to-date when using Velen!
 - Javacord v3.4.0
 
 ## 📚 Wiki & Guide
+As of Velen 3.0, the wiki explains not much compared to the examples for building commands and also fetching commands, we highly recommend taking a look at our examples instead to see a good look over how Velen looks:
+- [MUST READ FIRST](https://github.com/ShindouMihou/Velen/tree/master/examples)
+- [Hybrid Commands](https://github.com/ShindouMihou/Velen/tree/master/examples/hybrid)
+- [Message Commands](https://github.com/ShindouMihou/Velen/tree/master/examples/message)
+- [Slash Commands](https://github.com/ShindouMihou/Velen/tree/master/examples/slash)
+
 We highly recommend reading our wiki where everything is explained more in detailed
 - [Getting Started](https://github.com/ShindouMihou/Velen/wiki/Getting-Started)
 - [Building Velen Component](https://github.com/ShindouMihou/Velen/wiki/Velen-Main-Component)
-- [Building Message Commands](https://github.com/ShindouMihou/Velen/wiki/Building-Commands!)
-- [Advanced Argument Extraction](https://github.com/ShindouMihou/Velen/wiki/Advanced-Argument-Extraction)
-- [Building Slash and Hybrid Commands](https://github.com/ShindouMihou/Velen/wiki/Building-Slash-&-Hybrid-Commands!)
+- [Building Message, Hybrid and Slash Commands](https://github.com/ShindouMihou/Velen/wiki/Building-Commands!)
+- [Mastering Velen Options](https://github.com/ShindouMihou/Velen/wiki/Mastering-Velen-Options)
 - [Customizing Prefix Manager](https://github.com/ShindouMihou/Velen/wiki/Prefix-Manager)
 - [Customizing Messages](https://github.com/ShindouMihou/Velen/wiki/Velen-Message-Component)
 - [Customizing Cooldowns](https://github.com/ShindouMihou/Velen/wiki/Rate-limiter)
@@ -30,7 +35,7 @@ We highly recommend reading our wiki where everything is explained more in detai
 - [Velen Utilities](https://github.com/ShindouMihou/Velen/wiki/Velen-Utils)
 
 ## ✔️ Ping-Pong Example
-As we are still re-organizing the wiki to match the incredibly new style of Velen (the wikis are outdated), please refer to the examples (for now) located on.
+All examples are located at the examples folders below.
 - [MUST READ FIRST](https://github.com/ShindouMihou/Velen/tree/master/examples)
 - [Hybrid Commands](https://github.com/ShindouMihou/Velen/tree/master/examples/hybrid)
 - [Message Commands](https://github.com/ShindouMihou/Velen/tree/master/examples/message)
