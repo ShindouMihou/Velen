@@ -12,6 +12,53 @@ To fully understand the outline of Mirror, let us take a glance at a simple ping
 similarly on both Message and Slash folders but adapted to their own use-case. Our example here will showcase how they can
 be written in Hybrid Command.
 
+# 🎂 Ping-Pong with Velen Mirror
+Now that we know of all the currently possible options of Velen Mirror, let us start to minimize
+the file to view the actual parts of the command, shall we?
+
+**To see a full explanation of everything, please scroll even more below.**
+### 😲 ping.min.velen
+```velen
+&[ping]: hybrid {
+    desc: Do you want to ping-pong with me?
+    usage: ping [pong|ping]
+    usage: ping [ping|pong]
+    shortcut: pong
+    
+    &[response]: option {
+        desc: What kind of move will you make?
+        choice: [PING, PONG]
+        choice: [PONG, PING]
+        required: true
+        type: string
+    }
+    
+    cooldown: 5000
+    handler: hybrid.ping
+}
+```
+
+Doesn't that look quite clean and readable, compare that to the original Java builder method:
+```java
+VelenCommand.ofHybrid("ping", "Do you want to ping-pong with me?",
+        velen, new PingHandler(),
+        SlashCommandOption.createWithChoices(SlashCommandOptionType.STRING, "response", "What kind of move will you make?", true, 
+        Arrays.asList(
+                SlashCommandOptionChoice.create("ping", "pong"),
+                SlashCommandOptionChoice.create("pong", "ping")
+        )))
+        .addFormats("ping :[response::(ping,pong)::required()]")
+        .addShortcut("pong")
+        .addUsages("ping [pong|ping]", "ping [ping|pong]")
+        .attach();
+```
+
+And now, imagine the same command but with two or four options, doesn't it look a bit too meh?
+That is what was Velen Mirror was created for, to mirror a cleaner and readable look of command constructing.
+
+# 🔬 Mirror Explanation
+Now, you may be thinking... can I have an explanation and more details about the currently available ways
+of creating commands and options? Don't worry, feel free to look at here.
 **Note: I will be showing all the possible options and their explanation in the code block below**
 
 ### ⏱ Ping.velen
@@ -120,46 +167,7 @@ be written in Hybrid Command.
 }
 ```
 
-Now that we know of all the currently possible options of Velen Mirror, let us start to minimize
-the file to view the actual parts of the command, shall we?
-### 😲 ping.min.velen
-```velen
-&[ping]: hybrid {
-    desc: Do you want to ping-pong with me?
-    usage: ping [pong|ping]
-    usage: ping [ping|pong]
-    shortcut: pong
-    
-    &[response]: option {
-        desc: What kind of move will you make?
-        choice: [PING, PONG]
-        choice: [PONG, PING]
-        required: true
-        type: string
-    }
-    
-    cooldown: 5000
-    handler: hybrid.ping
-}
-```
-
-Doesn't that look quite clean and readable, compare that to the original Java builder method:
-```java
-VelenCommand.ofHybrid("ping", "Do you want to ping-pong with me?",
-        velen, new PingHandler(),
-        SlashCommandOption.createWithChoices(SlashCommandOptionType.STRING, "response", "What kind of move will you make?", true, 
-        Arrays.asList(
-                SlashCommandOptionChoice.create("ping", "pong"),
-                SlashCommandOptionChoice.create("pong", "ping")
-        )))
-        .addFormats("ping :[response::(ping,pong)::required()]")
-        .addShortcut("pong")
-        .addUsages("ping [pong|ping]", "ping [ping|pong]")
-        .attach();
-```
-
-And now, imagine the same command but with two or four options, doesn't it look a bit too meh?
-That is what was Velen Mirror was created for, to mirror a cleaner and readable look of command constructing.
+# 🚉 Handlers
 
 You may be thinking now, where is the logic behind how this ping command will work?
 ```java
