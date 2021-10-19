@@ -2,8 +2,9 @@
 <img src="https://i.ibb.co/Ny1V3sg/Velen-Banner.png" width="800px" width="250px">
 
 # ✨ Velen ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/ShindouMihou/Velen?label=version&style=flat-square) [![Discord](https://img.shields.io/discord/807084089013174272?color=blue&label=Discord&style=flat-square)](https://discord.gg/9FefYq4p83) ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/ShindouMihou/Velen?color=red&style=flat-square) ![GitHub last commit](https://img.shields.io/github/last-commit/ShindouMihou/Velen?color=orange&style=flat-square)
-Aiming to become the Laravel of Javacord; Velen is a framework for Discord bots using Javacord with complete features from hybrid (message and slash commands), slash commands, prefix managers, blacklists, fuzzy command search, cooldowns and many more. The aim of Velen is to reduce the time it takes for developers to setup a Discord bot without compromising on performance.
+Aiming to become the Laravel of Javacord; Velen is a framework for Discord bots using Javacord with complete features from hybrid (message and slash commands), slash commands, prefix managers, blacklists, fuzzy command search, cooldowns and many more. 
 
+The aim of Velen is to reduce the time it takes for developers to setup a Discord bot without compromising on performance.
 For a more organized look-through at Velen, please check our [GitHub Wiki](https://github.com/ShindouMihou/Velen/wiki) instead
 where everything is more organized and easier to read.
 
@@ -30,10 +31,10 @@ We highly recommend reading our wiki where everything is explained more in detai
 
 ## ✔️ Ping-Pong Example
 As we are still re-organizing the wiki to match the incredibly new style of Velen (the wikis are outdated), please refer to the examples (for now) located on.
-- [MUST READ FIRST](https://github.com/ShindouMihou/Velen/tree/development/examples)
-- [Hybrid Commands](https://github.com/ShindouMihou/Velen/tree/development/examples/hybrid)
-- [Message Commands](https://github.com/ShindouMihou/Velen/tree/development/examples/message)
-- [Slash Commands](https://github.com/ShindouMihou/Velen/tree/development/examples/slash)
+- [MUST READ FIRST](https://github.com/ShindouMihou/Velen/tree/master/examples)
+- [Hybrid Commands](https://github.com/ShindouMihou/Velen/tree/master/examples/hybrid)
+- [Message Commands](https://github.com/ShindouMihou/Velen/tree/master/examples/message)
+- [Slash Commands](https://github.com/ShindouMihou/Velen/tree/master/examples/slash)
 
 ## ❤️ Installation
 We are currently disabling Maven Central until Javacord's 3.4.0 is released officially, for now, [please use Jitpack in the meantime](https://jitpack.io/#pw.mihou/Velen)
