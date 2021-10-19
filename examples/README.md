@@ -18,7 +18,7 @@ the file to view the actual parts of the command, shall we?
 
 **To see a full explanation of everything, please scroll even more below.**
 ### 😲 ping.min.velen
-```velen
+```dotenv
 &[ping]: hybrid {
     desc: Do you want to ping-pong with me?
     usage: ping [pong|ping]
@@ -62,7 +62,7 @@ of creating commands and options? Don't worry, feel free to look at here.
 **Note: I will be showing all the possible options and their explanation in the code block below**
 
 ### ⏱ Ping.velen
-```velen
+```dotenv
 # This is how we specify what category the command
 # will be located on.
 # &[fun]: category
