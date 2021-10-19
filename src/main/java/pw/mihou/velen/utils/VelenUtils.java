@@ -3,6 +3,7 @@ package pw.mihou.velen.utils;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.Channel;
 import org.javacord.api.entity.permission.Role;
+import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.util.DiscordRegexPattern;
 import pw.mihou.velen.interfaces.Velen;
@@ -129,6 +130,31 @@ public class VelenUtils {
     }
 
     /**
+     * Checks if Role 1 is higher than Role 2 hierarchically.
+     *
+     * @param role1 The role to check.
+     * @param role2 The role to compare with.
+     * @return is Role 1 higher than Role 2?
+     */
+    public static boolean isRoleHigher(Role role1, Role role2) {
+        return role1.getPosition() > role2.getPosition();
+    }
+
+    /**
+     * Checks if the user has a higher role than the other user.
+     *
+     * @param user The user to check.
+     * @param userToCompareAgainst The user to compare with.
+     * @param server The server where the comparison should happen.
+     * @return is User's Role higher than User?
+     */
+    public static boolean isUserRoleHigherThanUser(User user, User userToCompareAgainst, Server server) {
+        return user.getRoles(server).stream()
+                .anyMatch(r -> userToCompareAgainst.getRoles(server).stream()
+                        .anyMatch(role -> isRoleHigher(r, role)));
+    }
+
+    /**
      * Checks if a string starts with the mention of a user/bot with a id.
      *
      * @param content The string to check.
@@ -154,8 +180,11 @@ public class VelenUtils {
      * @return The split String as Array.
      */
     public static String[] splitContent(String content) {
+        String[] args = content.split("\\s+");
+
         // if string without " and \ just return the normal split
-        if (!(content.contains("\"") || content.contains("\\"))) return content.split("\\s+");
+        if (!(content.contains("\"") || content.contains("\\")))
+            return Arrays.copyOfRange(args, 1, args.length);
 
         List<String> split = new ArrayList<>();
 

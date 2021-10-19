@@ -3,6 +3,7 @@ package pw.mihou.velen.interfaces;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.MessageCreateEvent;
+import pw.mihou.velen.interfaces.routed.VelenRoutedOptions;
 
 public interface VelenEvent {
 
@@ -13,7 +14,8 @@ public interface VelenEvent {
      * @param message The message received from the event.
      * @param args    The arguments received from the event's message.
      * @param user    The user who executed the command.
+     * @param options The routed named options, requires formats to be set.
      */
-    void onEvent(MessageCreateEvent event, Message message, User user, String[] args);
+    void onEvent(MessageCreateEvent event, Message message, User user, String[] args, VelenRoutedOptions options);
 
 }

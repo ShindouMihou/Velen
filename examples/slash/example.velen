@@ -1,0 +1,86 @@
+&[slash]: category
+
+# Please check the parent folder for explanation.
+&[ping]: slash {
+    desc: Do you want to ping-pong with me?
+    usage: ping [pong|ping]
+    usage: ping [ping|pong]
+    shortcut: pong
+
+    &[response]: option {
+        desc: What kind of move will you make?
+        choice: [PING, PONG]
+        choice: [PONG, PING]
+        required: true
+        type: string
+    }
+
+    cooldown: 5000
+    handler: slash.ping
+}
+
+# Option testing with required.
+&[say]: slash {
+    desc: Say something for me!
+
+    usage: say [text]
+
+    &[text]: option {
+        desc: The text you want the bot to say.
+        required: true
+        type: string
+        has_many: true
+    }
+
+    handler: slash.say
+}
+
+# Choice testing.
+&[scream]: slash {
+    desc: I want to scream a number!
+    usage: scream [AH|YA]
+
+    &[scream]: option {
+        type: string
+
+        # This is because Velen requires slash commands to be of [Choice Name, Choice Value]
+        # because of Discord Slash Command Specifications.
+        choice: [AH, AH]
+        choice: [YA, YA]
+        required: true
+        desc: The scream type.
+    }
+    handler: slash.scream
+}
+
+# Regex testing is not applicable for this test
+# as Velen still does not enforce slash command regex.
+
+# Numeric type testing.
+&[number]: slash {
+    desc: Make me say a number!
+    usage: number [number]
+
+    &[number]: option {
+        type: numeric
+        required: true
+        desc: The number you want me to say.
+    }
+
+    handler: slash.number
+}
+
+# User type option testing.
+&[hi]: slash {
+    desc: Say hello to someone.
+    usage: hi [user]
+    usage: hi
+
+    &[user]: option {
+        type: user
+        required: false
+        desc: The user you want to mention.
+    }
+
+    handler: slash.hi
+}

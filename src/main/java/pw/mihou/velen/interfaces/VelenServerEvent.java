@@ -4,6 +4,7 @@ import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.MessageCreateEvent;
+import pw.mihou.velen.interfaces.routed.VelenRoutedOptions;
 
 public interface VelenServerEvent extends VelenEvent {
 
@@ -15,7 +16,8 @@ public interface VelenServerEvent extends VelenEvent {
      * @param server  The server where the event was triggered.
      * @param args    The arguments received from the event's message.
      * @param user    The user who executed the command.
+     * @param options The routed named options.
      */
-    void onEvent(MessageCreateEvent event, Message message, Server server, User user, String[] args);
+    void onEvent(MessageCreateEvent event, Message message, Server server, User user, String[] args, VelenRoutedOptions options);
 
 }

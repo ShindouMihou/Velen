@@ -2,7 +2,6 @@ package pw.mihou.velen.impl;
 
 import org.javacord.api.entity.DiscordEntity;
 import org.javacord.api.entity.message.MessageBuilder;
-import org.javacord.api.entity.message.MessageFlag;
 import org.javacord.api.entity.message.mention.AllowedMentionsBuilder;
 import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.permission.Role;
@@ -11,9 +10,12 @@ import org.javacord.api.entity.user.User;
 import org.javacord.api.event.interaction.SlashCommandCreateEvent;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.interaction.*;
+import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
 import org.javacord.api.interaction.callback.InteractionImmediateResponseBuilder;
 import org.javacord.api.util.logging.ExceptionLogger;
 import pw.mihou.velen.interfaces.*;
+import pw.mihou.velen.interfaces.hybrid.event.VelenGeneralEvent;
+import pw.mihou.velen.interfaces.hybrid.event.internal.VelenGeneralEventImpl;
 import pw.mihou.velen.interfaces.messages.VelenOrdinaryMessage;
 import pw.mihou.velen.interfaces.messages.surface.embed.VelenConditionalEmbedMessage;
 import pw.mihou.velen.interfaces.messages.surface.embed.VelenPermissionEmbedMessage;
@@ -24,14 +26,12 @@ import pw.mihou.velen.interfaces.messages.surface.text.VelenPermissionOrdinaryMe
 import pw.mihou.velen.interfaces.messages.surface.text.VelenRatelimitOrdinaryMessage;
 import pw.mihou.velen.interfaces.messages.surface.text.VelenRoleOrdinaryMessage;
 import pw.mihou.velen.interfaces.messages.types.VelenConditionalMessage;
+import pw.mihou.velen.interfaces.routed.VelenRoutedOptions;
 import pw.mihou.velen.utils.Pair;
 import pw.mihou.velen.utils.VelenThreadPool;
 
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 public class VelenCommandImpl implements VelenCommand {
 
     private final String name;
-    private final String usage;
+    private final List<String> usage;
     private final String description;
     private final String category;
     private final Duration cooldown;
@@ -57,15 +57,22 @@ public class VelenCommandImpl implements VelenCommand {
     private final List<Function<SlashCommandCreateEvent, Boolean>> conditionsSlash;
     private final VelenConditionalMessage conditionalMessage;
     private final VelenSlashEvent velenSlashEvent;
+    private final VelenHybridHandler hybridHandler;
+    private final List<String> commandFormats;
     private final long serverId;
     private String stringValue;
 
-    public VelenCommandImpl(String name, String usage, String description, String category, Duration cooldown, List<Long> requiredRoles,
+    public VelenCommandImpl(String name, List<String> usage, String description, String category, Duration cooldown, List<Long> requiredRoles,
                             List<Long> requiredUsers, List<PermissionType> permissions, boolean serverOnly,
                             boolean privateOnly,
-                            List<String> shortcuts, VelenEvent event, VelenSlashEvent slashEvent, List<SlashCommandOption> options,
+                            List<String> shortcuts,
+                            VelenEvent event,
+                            VelenSlashEvent slashEvent,
+                            VelenHybridHandler hybridHandler,
+                            List<SlashCommandOption> options,
                             List<Function<MessageCreateEvent, Boolean>> conditions,
                             List<Function<SlashCommandCreateEvent, Boolean>> conditionsSlash,
+                            List<String> commandFormats,
                             VelenConditionalMessage conditionalMessage,
                             long serverId,
                             Velen velen) {
@@ -78,6 +85,7 @@ public class VelenCommandImpl implements VelenCommand {
         this.requiredUsers = requiredUsers;
         this.permissions = permissions;
         this.serverOnly = serverOnly;
+        this.commandFormats = commandFormats;
         // add the name as it can be used for invocation too
         // but don't edit the shortcuts list as it may be immutable which would lead to bugs
         String[] shortcutsArray = shortcuts.toArray(new String[0]);
@@ -87,6 +95,7 @@ public class VelenCommandImpl implements VelenCommand {
         this.shortcuts = shortcutsArrayFinal;
         this.velenEvent = event;
         this.velenSlashEvent = slashEvent;
+        this.hybridHandler = hybridHandler;
         this.serverId = serverId;
         this.conditions = conditions;
         this.conditionsSlash = conditionsSlash;
@@ -120,7 +129,7 @@ public class VelenCommandImpl implements VelenCommand {
                 if (conditionalMessage != null) {
                     InteractionImmediateResponseBuilder builder =
                             event.createImmediateResponder()
-                                    .setFlags(MessageFlag.EPHEMERAL);
+                                    .setFlags(InteractionCallbackDataFlag.EPHEMERAL);
                     if (conditionalMessage instanceof VelenOrdinaryMessage)
                         builder.setContent(((VelenConditionalOrdinaryMessage) conditionalMessage).load(user, event.getChannel().get(), name));
                     else
@@ -142,7 +151,7 @@ public class VelenCommandImpl implements VelenCommand {
                                     .setMentionUsers(false)
                                     .setMentionEveryoneAndHere(false)
                                     .build())
-                            .setFlags(MessageFlag.EPHEMERAL);
+                            .setFlags(InteractionCallbackDataFlag.EPHEMERAL);
 
                     if (velen.getNoRoleMessage() instanceof VelenOrdinaryMessage)
                         builder.setContent(((VelenRoleOrdinaryMessage) velen.getNoRoleMessage())
@@ -162,7 +171,7 @@ public class VelenCommandImpl implements VelenCommand {
                 Collection<PermissionType> userPerms = server.getPermissions(user).getAllowedPermission();
                 if (!userPerms.containsAll(permissions)) {
                     InteractionImmediateResponseBuilder builder = event.createImmediateResponder()
-                            .setFlags(MessageFlag.EPHEMERAL);
+                            .setFlags(InteractionCallbackDataFlag.EPHEMERAL);
 
                     if (velen.getNoPermissionMessage() instanceof VelenOrdinaryMessage)
                         builder.setContent(((VelenPermissionOrdinaryMessage) velen.getNoPermissionMessage())
@@ -182,7 +191,7 @@ public class VelenCommandImpl implements VelenCommand {
                 return;
         }
 
-        innerHandle(user, serverId, event);
+        innerHandle(user, serverId, event, e);
     }
 
     public void execute(MessageCreateEvent event, String[] args) {
@@ -310,7 +319,7 @@ public class VelenCommandImpl implements VelenCommand {
         }
     }
 
-    private void innerHandle(User user, long server, SlashCommandInteraction event) {
+    private void innerHandle(User user, long server, SlashCommandInteraction event, SlashCommandCreateEvent e) {
         if (!event.getChannel().isPresent())
             return;
 
@@ -318,7 +327,7 @@ public class VelenCommandImpl implements VelenCommand {
             velen.getRatelimiter().ratelimit(user.getId(), server, toString(), cooldown.toMillis(), remaining -> {
                 if (remaining > 0) {
                     InteractionImmediateResponseBuilder builder = event.createImmediateResponder()
-                            .setFlags(MessageFlag.EPHEMERAL);
+                            .setFlags(InteractionCallbackDataFlag.EPHEMERAL);
 
                     if (velen.getRatelimitedMessage() instanceof VelenOrdinaryMessage) {
                         builder.setContent(((VelenRatelimitOrdinaryMessage) velen.getRatelimitedMessage())
@@ -336,19 +345,24 @@ public class VelenCommandImpl implements VelenCommand {
                 } else {
                     velen.getRatelimiter().release(user.getId(), server, toString());
                 }
-            }, ratelimitEntity -> runEvent(event));
+            }, ratelimitEntity -> runEvent(e));
         } else {
-            runEvent(event);
+            runEvent(e);
         }
     }
 
     private void runEvent(MessageCreateEvent event, String[] args) {
         event.getMessageAuthor().asUser().ifPresent(user -> {
-            if (velenEvent instanceof VelenServerEvent) {
-                event.getServer().ifPresent(server -> ((VelenServerEvent) velenEvent).onEvent(event, event.getMessage(),
-                        server, user, args));
+            if(hybridHandler == null) {
+                if (velenEvent instanceof VelenServerEvent) {
+                    event.getServer().ifPresent(server -> ((VelenServerEvent) velenEvent).onEvent(event, event.getMessage(),
+                            server, user, args, new VelenRoutedOptions(this, event)));
+                } else {
+                    velenEvent.onEvent(event, event.getMessage(), user, args, new VelenRoutedOptions(this, event));
+                }
             } else {
-                velenEvent.onEvent(event, event.getMessage(), user, args);
+                VelenGeneralEvent e = new VelenGeneralEventImpl(name, null, event, args, this);
+                hybridHandler.onEvent(e, e.createResponder(), e.getUser(), e.getArguments());
             }
         });
     }
@@ -375,18 +389,37 @@ public class VelenCommandImpl implements VelenCommand {
     }
 
     @Override
-    public boolean isSlashCommandOnly() {
-        return velenEvent == null;
+    public List<SlashCommandOption> getOptions() {
+        return options == null ? Collections.emptyList() : options;
     }
 
-    private void runEvent(SlashCommandInteraction event) {
-        if (velenSlashEvent == null)
+    /**
+     * Retrieves all the possible formats of this command.
+     *
+     * @return The possible formats.
+     */
+    public List<String> getFormats() {
+        return commandFormats;
+    }
+
+    @Override
+    public boolean isSlashCommandOnly() {
+        return velenEvent == null && hybridHandler == null && velenSlashEvent != null;
+    }
+
+    private void runEvent(SlashCommandCreateEvent event) {
+        if (hybridHandler == null && velenSlashEvent == null)
             throw new RuntimeException("A slash command event was received for " + getName() + " but there is no event" +
                     " handler for the slash command found!");
 
-        velenSlashEvent.onEvent(event, event.getUser(),
-                new VelenArguments(event.getOptions()), event.getOptions(),
-                event.createImmediateResponder());
+        if(hybridHandler == null) {
+            velenSlashEvent.onEvent(event, event.getSlashCommandInteraction(), event.getSlashCommandInteraction().getUser(),
+                    new VelenArguments(event.getSlashCommandInteraction().getOptions()), event.getSlashCommandInteraction().getOptions(),
+                    event.getSlashCommandInteraction().createImmediateResponder());
+        } else {
+            VelenGeneralEvent e = new VelenGeneralEventImpl(name, event, null, null, this);
+            hybridHandler.onEvent(e, e.createResponder(), e.getUser(), e.getArguments());
+        }
     }
 
     @Override
@@ -404,8 +437,14 @@ public class VelenCommandImpl implements VelenCommand {
         return cooldown;
     }
 
-    public String getUsage() {
+    @Override
+    public List<String> getUsages() {
         return usage;
+    }
+
+    @Override
+    public String getUsage() {
+        return usage.get(0);
     }
 
     @Override
@@ -430,7 +469,12 @@ public class VelenCommandImpl implements VelenCommand {
 
     @Override
     public boolean supportsSlashCommand() {
-        return velenSlashEvent != null;
+        return velenSlashEvent != null || hybridHandler != null;
+    }
+
+    @Override
+    public boolean isHybrid() {
+        return hybridHandler != null || (velenSlashEvent != null && velenEvent != null);
     }
 
     @Override
@@ -463,7 +507,8 @@ public class VelenCommandImpl implements VelenCommand {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getName(), getUsage(), getDescription(), getCooldown(), getRequiredRoles(), getRequiredUsers(), getPermissions(), isServerOnly(), getShortcuts(), velenEvent, velen);
+        return Objects.hash(getName(), getUsage(), getDescription(), getCooldown(), getRequiredRoles(), getRequiredUsers(), getPermissions(),
+                isServerOnly(), Arrays.hashCode(getShortcuts()), velenEvent, velen);
     }
 
     @Override

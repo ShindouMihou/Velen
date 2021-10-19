@@ -8,18 +8,21 @@ import org.javacord.api.interaction.SlashCommand;
 import org.javacord.api.interaction.SlashCommandBuilder;
 import org.javacord.api.interaction.SlashCommandUpdater;
 import org.javacord.api.util.logging.ExceptionLogger;
-import pw.mihou.velen.interfaces.Velen;
-import pw.mihou.velen.interfaces.VelenCommand;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import pw.mihou.velen.interfaces.*;
 import pw.mihou.velen.interfaces.messages.types.VelenPermissionMessage;
 import pw.mihou.velen.interfaces.messages.types.VelenRatelimitMessage;
 import pw.mihou.velen.interfaces.messages.types.VelenRoleMessage;
 import pw.mihou.velen.internals.VelenBlacklist;
+import pw.mihou.velen.internals.mirror.VelenMirror;
 import pw.mihou.velen.prefix.VelenPrefixManager;
 import pw.mihou.velen.ratelimiter.VelenRatelimiter;
 import pw.mihou.velen.utils.Pair;
 import pw.mihou.velen.utils.VelenThreadPool;
 import pw.mihou.velen.utils.VelenUtils;
 
+import java.io.File;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -35,6 +38,9 @@ public class VelenImpl implements Velen {
     private final VelenRoleMessage noRoleMessage;
     private final VelenBlacklist blacklist;
     private final boolean allowMentionPrefix;
+    private static final Logger commandInterceptorLogger = LoggerFactory.getLogger("Velen - Command Interceptor");
+    private final HandlerStorage handlerStorage = new HandlerStorage();
+    private final VelenMirror mirror = new VelenMirror(this);
 
     public VelenImpl(VelenRatelimiter ratelimiter, VelenPrefixManager prefixManager, VelenRatelimitMessage ratelimitedMessage,
                      VelenPermissionMessage noPermissionMessage, VelenRoleMessage noRoleMessage,
@@ -49,9 +55,59 @@ public class VelenImpl implements Velen {
         this.allowMentionPrefix = allowMentionPrefix;
     }
 
+
+    /**
+     * A private method that should only be internally accessed that
+     * allows access to the handler storage of Velen.
+     *
+     * @return The storage for handlers.
+     */
+    public HandlerStorage getHandlerStorage() {
+        return handlerStorage;
+    }
+
     @Override
     public Velen addCommand(VelenCommand command) {
         commands.put(command.getName().toLowerCase(), command);
+        return this;
+    }
+
+    @Override
+    public Velen loadFrom(String directory) {
+        File[] files = new File(directory).listFiles((dir, name) -> dir.isDirectory() || name.endsWith(".velen"));
+
+        for (File file : Objects.requireNonNull(files)) {
+            iterateAndLoad(file);
+        }
+
+        return this;
+    }
+
+    private void iterateAndLoad(File file) {
+        if (file.isDirectory()) {
+            for (File f : Objects.requireNonNull(file.listFiles((dir, name) -> dir.isDirectory() || name.endsWith(".velen")))) {
+                iterateAndLoad(f);
+            }
+        } else if (file.getName().endsWith(".velen")){
+            mirror.comprehend(file);
+        }
+    }
+
+    @Override
+    public Velen addHandler(String name, VelenEvent handler) {
+        handlerStorage.addHandler(name, handler);
+        return this;
+    }
+
+    @Override
+    public Velen addHandler(String name, VelenSlashEvent handler) {
+        handlerStorage.addHandler(name, handler);
+        return this;
+    }
+
+    @Override
+    public Velen addHandler(String name, VelenHybridHandler handler) {
+        handlerStorage.addHandler(name, handler);
         return this;
     }
 
@@ -235,6 +291,9 @@ public class VelenImpl implements Velen {
     }
 
     private void dispatch(MessageCreateEvent event, String[] args, String prefix) {
+        if(!event.getMessageAuthor().isRegularUser())
+            return;
+
         if (supportsBlacklist() && blacklist.isBlacklisted(event.getMessageAuthor().getId()))
             return;
 
@@ -250,14 +309,18 @@ public class VelenImpl implements Velen {
                 return;
         }
 
-        // kArgs will already default to String[0] if there is no arguments.
-        String kArgs = String.join(" ", (args.length > (isUsingMention ? 2 : 1)
-                ? Arrays.copyOfRange(args, isUsingMention ? 2 : 1, args.length) : new String[0]));
+        // kArgs will erase the mention if
+        String kArgs = event.getMessageContent();
 
         String cmd = isUsingMention ? args[1] : args[0].substring(prefix.length());
         if(commands.containsKey(cmd)) {
             VelenCommand command = commands.get(cmd);
             if(!command.isSlashCommandOnly()) {
+                commandInterceptorLogger.debug("Intercepted trigger for command ({}) with packet (message={}, args={}, user={}).",
+                        command.getName(), event.getMessageContent(),
+                        Arrays.toString(VelenUtils.splitContent(kArgs)),
+                        event.getMessageAuthor().getId());
+
                 VelenThreadPool.executorService.submit(() -> ((VelenCommandImpl) command).execute(event,
                         VelenUtils.splitContent(kArgs)));
             }
@@ -265,8 +328,15 @@ public class VelenImpl implements Velen {
             commands.values().stream()
                     .filter(velenCommand -> !velenCommand.isSlashCommandOnly())
                     .filter(velenCommand -> Arrays.stream(velenCommand.getShortcuts()).anyMatch(cmd::equalsIgnoreCase))
-                    .forEachOrdered(command -> VelenThreadPool.executorService.submit(() -> ((VelenCommandImpl) command).execute(event,
-                            VelenUtils.splitContent(kArgs))));
+                    .forEachOrdered(command -> {
+                        commandInterceptorLogger.debug("Intercepted trigger for command ({}) with packet (message={}, args={}, user={}).",
+                                command.getName(), event.getMessageContent(),
+                                Arrays.toString(VelenUtils.splitContent(kArgs)),
+                                event.getMessageAuthor().getId());
+
+                        VelenThreadPool.executorService.submit(() -> ((VelenCommandImpl) command).execute(event,
+                                VelenUtils.splitContent(kArgs)));
+                    });
         }
     }
 
@@ -277,8 +347,84 @@ public class VelenImpl implements Velen {
 
         if(commands.containsKey(event.getSlashCommandInteraction().getCommandName())
                 && commands.get(event.getSlashCommandInteraction().getCommandName().toLowerCase()).supportsSlashCommand()) {
+            // Log it!
+            commandInterceptorLogger.debug("Intercepted trigger for command ({}) with packet (type=interaction, user={}).",
+                    commands.get(event.getSlashCommandInteraction().getCommandName().toLowerCase()).getName(),
+                    event.getInteraction().getUser().getId());
+
             VelenThreadPool.executorService.submit(() -> ((VelenCommandImpl) commands.get(event.getSlashCommandInteraction()
                     .getCommandName().toLowerCase())).execute(event));
+        }
+    }
+
+    public class HandlerStorage {
+        private final Map<String, VelenEvent> messageHandlers = new HashMap<>();
+        private final Map<String, VelenHybridHandler> hybridHandlers = new HashMap<>();
+        private final Map<String, VelenSlashEvent> slashHandlers = new HashMap<>();
+
+        /**
+         * Finds a handler for a message command.
+         *
+         * @param name The name to search for.
+         * @return The handler for message events.
+         */
+        public Optional<VelenEvent> findMessageHandler(String name) {
+            return Optional.ofNullable(messageHandlers.get(name));
+        }
+
+        /**
+         * Finds a handler for a both command.
+         *
+         * @param name The name to search for.
+         * @return The handler for both events.
+         */
+        public Optional<VelenHybridHandler> findHybridHandlers(String name) {
+            return Optional.ofNullable(hybridHandlers.get(name));
+        }
+
+        /**
+         * Finds a handler for a slash command.
+         *
+         * @param name The name to search for.
+         * @return The handler for slash events.
+         */
+        public Optional<VelenSlashEvent> findSlashHandlers(String name) {
+            return Optional.ofNullable(slashHandlers.get(name));
+        }
+
+        /**
+         * Checks if a handler with the name exists in any of the three.
+         *
+         * @param name The name to search for.
+         * @return Does it exists.
+         */
+        public boolean contains(String name) {
+            return messageHandlers.containsKey(name) || slashHandlers.containsKey(name) || hybridHandlers.containsKey(name);
+        }
+
+        /**
+         * Adds a new handler, it must be of either {@link VelenSlashEvent}, {@link VelenEvent} or {@link VelenHybridHandler}.
+         * @param name The name of the handler, it must be unique otherwise it would collide.
+         * @param object The object to place.
+         */
+        public <T> void addHandler(String name, T object) {
+            if (object instanceof VelenSlashEvent) {
+                slashHandlers.put(name, (VelenSlashEvent) object);
+                return;
+            }
+
+            if (object instanceof VelenHybridHandler) {
+                hybridHandlers.put(name, (VelenHybridHandler) object);
+                return;
+            }
+
+            if (object instanceof VelenEvent) {
+                messageHandlers.put(name, (VelenEvent) object);
+                return;
+            }
+
+            throw new IllegalArgumentException("Adding of handler with name ["+name+"] failed with error: " +
+                    "The handler does not extend any of the handler types (VelenSlashEvent, VelenHybridHandler and VelenEvent).");
         }
     }
 }
