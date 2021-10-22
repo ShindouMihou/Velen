@@ -2,6 +2,8 @@ package pw.mihou.velen.utils;
 
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.Channel;
+import org.javacord.api.entity.message.mention.AllowedMentions;
+import org.javacord.api.entity.message.mention.AllowedMentionsBuilder;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
@@ -166,6 +168,20 @@ public class VelenUtils {
                 content.startsWith(String.format("<@%s>", mentionId))
                         || content.startsWith(String.format("<@!%s>", mentionId))
         );
+    }
+
+    /**
+     * Creates a {@link AllowedMentions} that disallows mentions of
+     * all types of entities from users to roles.
+     *
+     * @return The no-mention {@link AllowedMentions} instance.
+     */
+    public static AllowedMentions createNoMentions() {
+        return new AllowedMentionsBuilder()
+                .setMentionRoles(false)
+                .setMentionUsers(false)
+                .setMentionEveryoneAndHere(false)
+                .build();
     }
 
     /**

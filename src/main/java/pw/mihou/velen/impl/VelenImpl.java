@@ -165,10 +165,9 @@ public class VelenImpl implements Velen {
     public Map<String, List<VelenCommand>> getCategories() {
         Map<String, List<VelenCommand>> catMap = new HashMap<>();
         commands.values()
+                .stream()
+                .filter(command -> !command.getCategory().isEmpty())
                 .forEach(velenCommand -> {
-                    if(velenCommand.getCategory().isEmpty())
-                        return;
-
                     if(!catMap.containsKey(velenCommand.getCategory()))
                         catMap.put(velenCommand.getCategory(), new ArrayList<>());
 
@@ -196,7 +195,7 @@ public class VelenImpl implements Velen {
     public CompletableFuture<Void> registerAllSlashCommands(DiscordApi api) {
         return CompletableFuture.allOf(commands.values().stream().filter(VelenCommand::supportsSlashCommand)
                 .map(velenCommand -> {
-                    Pair<Long, SlashCommandBuilder> pair = ((VelenCommandImpl) velenCommand).asSlashCommand();
+                    Pair<Long, SlashCommandBuilder> pair = velenCommand.asSlashCommand();
 
                     if (pair.getLeft() != null && pair.getLeft() != 0L) {
                         Optional<Server> server = api.getServerById(pair.getLeft());
@@ -221,7 +220,7 @@ public class VelenImpl implements Velen {
         if(!c.supportsSlashCommand())
             throw new IllegalArgumentException("The command " + command + " does not support slash commands!");
 
-        Pair<Long, SlashCommandBuilder> pair = ((VelenCommandImpl) c).asSlashCommand();
+        Pair<Long, SlashCommandBuilder> pair = c.asSlashCommand();
         if (pair.getLeft() != null && pair.getLeft() != 0L) {
             Optional<Server> server = api.getServerById(pair.getLeft());
             if (server.isPresent()) {
@@ -249,7 +248,7 @@ public class VelenImpl implements Velen {
 
     @Override
     public CompletableFuture<SlashCommand> updateSlashCommand(long id, VelenCommand command, DiscordApi api) {
-        Pair<Long, SlashCommandUpdater> pair = ((VelenCommandImpl) command).asSlashCommandUpdater(id);
+        Pair<Long, SlashCommandUpdater> pair = command.asSlashCommandUpdater(id);
         if (pair.getLeft() != null && pair.getLeft() != 0L) {
             Optional<Server> server = api.getServerById(pair.getLeft());
             if (server.isPresent()) {
@@ -321,7 +320,7 @@ public class VelenImpl implements Velen {
                         Arrays.toString(VelenUtils.splitContent(kArgs)),
                         event.getMessageAuthor().getId());
 
-                VelenThreadPool.executorService.submit(() -> ((VelenCommandImpl) command).execute(event,
+                VelenThreadPool.executorService.submit(() -> ((VelenCommandImpl) command).onReceive(event,
                         VelenUtils.splitContent(kArgs)));
             }
         } else {
@@ -334,7 +333,7 @@ public class VelenImpl implements Velen {
                                 Arrays.toString(VelenUtils.splitContent(kArgs)),
                                 event.getMessageAuthor().getId());
 
-                        VelenThreadPool.executorService.submit(() -> ((VelenCommandImpl) command).execute(event,
+                        VelenThreadPool.executorService.submit(() -> ((VelenCommandImpl) command).onReceive(event,
                                 VelenUtils.splitContent(kArgs)));
                     });
         }
@@ -353,7 +352,7 @@ public class VelenImpl implements Velen {
                     event.getInteraction().getUser().getId());
 
             VelenThreadPool.executorService.submit(() -> ((VelenCommandImpl) commands.get(event.getSlashCommandInteraction()
-                    .getCommandName().toLowerCase())).execute(event));
+                    .getCommandName().toLowerCase())).onReceive(event));
         }
     }
 

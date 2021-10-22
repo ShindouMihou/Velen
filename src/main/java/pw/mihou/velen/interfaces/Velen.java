@@ -180,6 +180,8 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * This should only be done once unless you are changing the values
      * inside the commands (like the name of the command, etc).
      *
+     * <br><br><b>We recommend using {@link pw.mihou.velen.modules.core.SlashCommandChecker} to
+     * automate registration and updating of slash commands.</b>
      * @param api The Discord API to register the commands to.
      * @return A CompletableFuture to mark its completion.
      */
@@ -193,6 +195,8 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * This will throw an {@link IllegalArgumentException} if the command is not
      * found.
      *
+     * <br><br><b>We recommend using {@link pw.mihou.velen.modules.core.SlashCommandChecker} to
+     * automate registration and updating of slash commands.</b>
      * @param command The command to search for.
      * @param api The DiscordApi to use for registering the command.
      * @return The slash command returned.
@@ -211,6 +215,8 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * This also proxies to {@link Velen#updateSlashCommand(long, VelenCommand, DiscordApi)} after retrieving
      * the VelenCommand if it exists, otherwise throws an {@link IllegalArgumentException}.
      *
+     * <br><br><b>We recommend using {@link pw.mihou.velen.modules.core.SlashCommandChecker} to
+     * automate registration and updating of slash commands.</b>
      * @param id The ID of the slash command that you want to update.
      * @param command The command to search.
      * @param api The DiscordApi to use for updating.
@@ -226,6 +232,8 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * You can use {@link Velen#getAllSlashCommandIds(DiscordApi)} to retrieve the ID of the slash
      * command that you want to update.
      *
+     * <br><br><b>We recommend using {@link pw.mihou.velen.modules.core.SlashCommandChecker} to
+     * automate registration and updating of slash commands.</b>
      * @param id The ID of the slash command that you want to update.
      * @param command The command to search.
      * @param api The DiscordApi to use for updating.

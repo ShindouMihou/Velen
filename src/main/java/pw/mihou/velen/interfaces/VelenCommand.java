@@ -1,9 +1,9 @@
 package pw.mihou.velen.interfaces;
 
 import org.javacord.api.entity.permission.PermissionType;
-import org.javacord.api.interaction.SlashCommandOption;
-import org.javacord.api.interaction.SlashCommandOptionBuilder;
+import org.javacord.api.interaction.*;
 import pw.mihou.velen.builders.VelenCommandBuilder;
+import pw.mihou.velen.utils.Pair;
 
 import java.time.Duration;
 import java.util.List;
@@ -272,6 +272,22 @@ public interface VelenCommand {
     boolean isSlashCommandOnly();
 
     /**
+     * Is this command for DMs-use only?
+     *
+     * @return Is this command for DMs-only?
+     */
+    boolean isPrivateOnly();
+
+    /**
+     * Retrieves the ID of the server that this command is allowed to
+     * execute, this can be null which means it is allowed globally.
+     *
+     * @return the ID of the server that this command is allowed to
+     * execute, nullable.
+     */
+    long getServerId();
+
+    /**
      * Gets all the slash command options for this command, this will return
      * an empty list if there are none or if the command is not of slash command.
      *
@@ -308,5 +324,41 @@ public interface VelenCommand {
      * @return The category of the command.
      */
     String getCategory();
+
+    /**
+     * Transforms this into a slash command builder that can be used to create
+     * the slash command yourself, it returns this via a {@link Pair} containing the server id
+     * and the builder.
+     * 
+     * @return The server id of the server this is intended (nullable) and the slash command builder.
+     */
+    default Pair<Long, SlashCommandBuilder> asSlashCommand() {
+        SlashCommandBuilder builder = SlashCommand.with(getName().toLowerCase(), getDescription());
+
+        if (getOptions() != null)
+            return Pair.of(getServerId(), builder.setOptions(getOptions()));
+
+        return Pair.of(getServerId(), builder);
+    }
+
+    /**
+     * Transforms this into a slash command updater that can be used to update
+     * the slash command yourself, it returns this via a {@link Pair} containing the server id
+     * and the updater.
+     *
+     * @param commandId The ID of the command to update.
+     * @return The server id of the server this is intended (nullable) and the slash command updater.
+     */
+    default Pair<Long, SlashCommandUpdater> asSlashCommandUpdater(long commandId) {
+        SlashCommandUpdater updater = new SlashCommandUpdater(commandId)
+                .setName(getName())
+                .setDescription(getDescription());
+
+        if(getOptions() != null && !getOptions().isEmpty()) {
+            updater.setSlashCommandOptions(getOptions());
+        }
+
+        return Pair.of(getServerId(), updater);
+    }
 
 }

@@ -378,8 +378,6 @@ public class VelenCommandBuilder {
 
     /**
      * Should this command be private-channel only?
-     * <h3> This is only for making the command work only for servers, please use
-     * {@link VelenCommandBuilder#setServerOnly(boolean, long)} for slash commands!</h3>
      *
      * @param privateChannelOnly Is this command a private channel only command?
      * @return VelenCommandBuilder for chain calling methods.
@@ -404,9 +402,10 @@ public class VelenCommandBuilder {
     }
 
     /**
-     * Sets the Velen to use (this will make the command use the Velen's ratelimiter, etc).
+     * The {@link Velen} instance that is used to fetch important modules
+     * of the framework, for instance, the rate-limiter.
      *
-     * @param velen The velen to use.
+     * @param velen The {@link Velen} to use.
      * @return VelenCommandBuilder for chain calling methods.
      */
     public VelenCommandBuilder setVelen(Velen velen) {
@@ -415,17 +414,18 @@ public class VelenCommandBuilder {
     }
 
     /**
-     * Attaches the command directly onto Velen.
+     * Registers the command onto the {@link Velen} instance which would then allow it
+     * to function and start listening to commands.
      */
     public void attach() {
         if (velen == null)
-            throw new IllegalArgumentException("You cannot attach a VelenCommand with a null Velen!");
+            throw new IllegalArgumentException("A command requires a non-null instance of Velen @ https://github.com/ShindouMihou/Velen");
 
         velen.addCommand(build());
     }
 
     /**
-     * Creates a VelenCommand which you can then attach to Velen
+     * Creates a Velen Command which you can then attach to Velen
      * or retrieve the values from.
      *
      * @return A velen command.
@@ -454,9 +454,22 @@ public class VelenCommandBuilder {
         if (category == null)
             category = "";
 
-        return new VelenCommandImpl(name, usages, description, category, cooldown, requiredRoles, requiredUsers,
-                permissions, serverOnly, privateOnly, shortcuts, velenEvent, velenSlashEvent, velenHybridHandler, options,
-                conditions, conditionsSlash, formats, conditionalMessage, serverId, velen);
+        VelenCommandImpl.GeneralCollective general = new VelenCommandImpl
+                .GeneralCollective(name, description, shortcuts, category, cooldown, usages);
+
+        VelenCommandImpl.RequireCollective requires = new VelenCommandImpl
+                .RequireCollective(requiredRoles, requiredUsers, permissions);
+
+        VelenCommandImpl.ConditionalCollective conditional = new VelenCommandImpl
+                .ConditionalCollective(conditions, conditionsSlash, conditionalMessage);
+
+        VelenCommandImpl.Settings settings = new VelenCommandImpl
+                .Settings(serverOnly, privateOnly, serverId, formats, options);
+
+        VelenCommandImpl.Handlers handlers = new VelenCommandImpl
+                .Handlers(velenEvent, velenSlashEvent, velenHybridHandler);
+
+        return new VelenCommandImpl(general, requires, conditional, settings, handlers, velen);
 
     }
 
