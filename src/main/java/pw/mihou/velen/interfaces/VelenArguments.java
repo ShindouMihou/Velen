@@ -106,8 +106,8 @@ public class VelenArguments {
      */
     public Optional<Integer> getIntegerOptionWithName(String name) {
         return options.stream().filter(slashCommandOption -> slashCommandOption.getName()
-                .equals(name) && slashCommandOption.getIntValue().isPresent())
-                .map(slashCommandInteractionOption -> slashCommandInteractionOption.getIntValue().get())
+                .equals(name) && slashCommandOption.getLongValue().map(Long::intValue).isPresent())
+                .map(slashCommandInteractionOption -> slashCommandInteractionOption.getLongValue().map(Long::intValue).get())
                 .findAny();
     }
 
@@ -119,8 +119,8 @@ public class VelenArguments {
      */
     public Optional<Integer> getIntegerOptionWithNameIgnoreCasing(String name) {
         return options.stream().filter(slashCommandOption -> slashCommandOption.getName()
-                .equalsIgnoreCase(name) && slashCommandOption.getIntValue().isPresent())
-                .map(slashCommandInteractionOption -> slashCommandInteractionOption.getIntValue().get())
+                .equalsIgnoreCase(name) && slashCommandOption.getLongValue().map(Long::intValue).isPresent())
+                .map(slashCommandInteractionOption -> slashCommandInteractionOption.getLongValue().map(Long::intValue).get())
                 .findAny();
     }
 

@@ -108,7 +108,7 @@ public class VelenOption {
      */
     public Optional<Integer> asInteger() {
         if(arg == null)
-            return option.getIntValue();
+            return option.getLongValue().map(Long::intValue);
 
         return Optional.of(Integer.parseInt(arg));
     }
@@ -120,7 +120,7 @@ public class VelenOption {
      */
     public Optional<Long> asLong() {
         if(arg == null)
-            return option.getStringValue().map(Long::parseLong);
+            return option.getLongValue();
 
         return Optional.of(arg).map(Long::parseLong);
     }
