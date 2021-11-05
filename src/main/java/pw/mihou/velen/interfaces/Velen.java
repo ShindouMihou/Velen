@@ -5,9 +5,14 @@ import org.javacord.api.interaction.SlashCommand;
 import org.javacord.api.listener.interaction.SlashCommandCreateListener;
 import org.javacord.api.listener.message.MessageCreateListener;
 import pw.mihou.velen.VelenBuilder;
+import pw.mihou.velen.builders.VelenCategoryBuilder;
 import pw.mihou.velen.interfaces.messages.types.VelenPermissionMessage;
 import pw.mihou.velen.interfaces.messages.types.VelenRatelimitMessage;
 import pw.mihou.velen.interfaces.messages.types.VelenRoleMessage;
+import pw.mihou.velen.interfaces.middleware.VelenMiddleware;
+import pw.mihou.velen.interfaces.middleware.types.VelenHybridMiddleware;
+import pw.mihou.velen.interfaces.middleware.types.VelenMessageMiddleware;
+import pw.mihou.velen.interfaces.middleware.types.VelenSlashMiddleware;
 import pw.mihou.velen.internals.VelenBlacklist;
 import pw.mihou.velen.prefix.VelenPrefixManager;
 import pw.mihou.velen.ratelimiter.VelenRatelimiter;
@@ -57,6 +62,61 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * @return The Velen instance with newer data.
      */
     Velen loadFrom(String directory);
+
+    /**
+     * Retrieves the middleware with the specified name.
+     *
+     * @param name The name of the middleware to fetch.
+     * @return The middleware if present.
+     */
+    Optional<VelenMiddleware> getMiddleware(String name);
+
+    /**
+     * Stores the middleware inside this instance, it is not generally recommended to
+     * use this method but instead use the other three similar methods which are specific
+     * to a type of command.
+     *
+     * @param name The name of the middleware.
+     * @param middleware The middleware to store.
+     * @return The Velen instance for chain-calling methods.
+     */
+    Velen storeMiddleware(String name, VelenMiddleware middleware);
+
+    /**
+     * Adds a hybrid command middleware to the instance which can then be used
+     * to retrieve later.
+     *
+     * @param name The name of the middleware.
+     * @param middleware The middleware itself.
+     * @return The Velen instance for chain-calling methods.
+     */
+    default Velen addMiddleware(String name, VelenHybridMiddleware middleware) {
+        return storeMiddleware(name, middleware);
+    }
+
+    /**
+     * Adds a message command middleware to the instance which can then be used
+     * to retrieve later.
+     *
+     * @param name The name of the middleware.
+     * @param middleware The middleware itself.
+     * @return The Velen instance for chain-calling methods.
+     */
+    default Velen addMiddleware(String name, VelenMessageMiddleware middleware) {
+        return storeMiddleware(name, middleware);
+    }
+
+    /**
+     * Adds a slash command middleware to the instance which can then be used
+     * to retrieve later.
+     *
+     * @param name The name of the middleware.
+     * @param middleware The middleware itself.
+     * @return The Velen instance for chain-calling methods.
+     */
+    default Velen addMiddleware(String name, VelenSlashMiddleware middleware) {
+        return storeMiddleware(name, middleware);
+    }
 
     /**
      * Adds a new handler for message commands.
@@ -141,6 +201,39 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
     List<VelenCommand> getCategory(String category);
 
     /**
+     * Retrieves the category instance with the specified name.
+     *
+     * @param category The category to search for.
+     * @return The {@link VelenCategory} instance.
+     */
+    VelenCategory findCategory(String category);
+
+    /**
+     * Retrieves the categories that are stored inside this Velen instance.
+     *
+     * @return All the stored {@link VelenCategory} instances.
+     */
+    Map<String, VelenCategory> findCategories();
+
+    /**
+     * Stores a specific category into the {@link Velen} instance.
+     *
+     * @param builder The builder used to create the category.
+     * @return The {@link Velen} instance for chain-calling methods.
+     */
+    default Velen addCategory(VelenCategoryBuilder builder) {
+        return addCategory(builder.create(this));
+    }
+
+    /**
+     * Stores a specific category into the {@link Velen} instance.
+     *
+     * @param category The category to store.
+     * @return The {@link Velen} instance for chain-calling methods.
+     */
+    Velen addCategory(VelenCategory category);
+
+    /**
      * Gets all the commands registered with the specified category on the Velen.
      *
      * @param category The category to search for (case-insensitive).
@@ -180,7 +273,7 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * This should only be done once unless you are changing the values
      * inside the commands (like the name of the command, etc).
      *
-     * <br><br><b>We recommend using {@link pw.mihou.velen.modules.core.SlashCommandChecker} to
+     * <br><br><b>We recommend using {@link pw.mihou.velen.internals.observer.VelenObserver} to
      * automate registration and updating of slash commands.</b>
      * @param api The Discord API to register the commands to.
      * @return A CompletableFuture to mark its completion.
@@ -195,7 +288,7 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * This will throw an {@link IllegalArgumentException} if the command is not
      * found.
      *
-     * <br><br><b>We recommend using {@link pw.mihou.velen.modules.core.SlashCommandChecker} to
+     * <br><br><b>We recommend using {@link pw.mihou.velen.internals.observer.VelenObserver} to
      * automate registration and updating of slash commands.</b>
      * @param command The command to search for.
      * @param api The DiscordApi to use for registering the command.
@@ -215,7 +308,7 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * This also proxies to {@link Velen#updateSlashCommand(long, VelenCommand, DiscordApi)} after retrieving
      * the VelenCommand if it exists, otherwise throws an {@link IllegalArgumentException}.
      *
-     * <br><br><b>We recommend using {@link pw.mihou.velen.modules.core.SlashCommandChecker} to
+     * <br><br><b>We recommend using {@link pw.mihou.velen.internals.observer.VelenObserver} to
      * automate registration and updating of slash commands.</b>
      * @param id The ID of the slash command that you want to update.
      * @param command The command to search.
@@ -232,7 +325,7 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * You can use {@link Velen#getAllSlashCommandIds(DiscordApi)} to retrieve the ID of the slash
      * command that you want to update.
      *
-     * <br><br><b>We recommend using {@link pw.mihou.velen.modules.core.SlashCommandChecker} to
+     * <br><br><b>We recommend using {@link pw.mihou.velen.internals.observer.VelenObserver} to
      * automate registration and updating of slash commands.</b>
      * @param id The ID of the slash command that you want to update.
      * @param command The command to search.

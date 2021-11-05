@@ -14,6 +14,7 @@ import pw.mihou.velen.interfaces.*;
 import pw.mihou.velen.interfaces.messages.types.VelenPermissionMessage;
 import pw.mihou.velen.interfaces.messages.types.VelenRatelimitMessage;
 import pw.mihou.velen.interfaces.messages.types.VelenRoleMessage;
+import pw.mihou.velen.interfaces.middleware.VelenMiddleware;
 import pw.mihou.velen.internals.VelenBlacklist;
 import pw.mihou.velen.internals.mirror.VelenMirror;
 import pw.mihou.velen.prefix.VelenPrefixManager;
@@ -33,10 +34,12 @@ public class VelenImpl implements Velen {
     private final VelenRatelimiter ratelimiter;
     // We want to use O(1) for full commands and the normal way for shortcuts.
     private final HashMap<String, VelenCommand> commands;
+    private final HashMap<String, VelenCategory> categories;
     private final VelenPrefixManager prefixManager;
     private final VelenPermissionMessage noPermissionMessage;
     private final VelenRoleMessage noRoleMessage;
     private final VelenBlacklist blacklist;
+    private final Map<String, VelenMiddleware> middlewares;
     private final boolean allowMentionPrefix;
     private static final Logger commandInterceptorLogger = LoggerFactory.getLogger("Velen - Command Interceptor");
     private final HandlerStorage handlerStorage = new HandlerStorage();
@@ -48,6 +51,8 @@ public class VelenImpl implements Velen {
         this.ratelimiter = ratelimiter;
         this.ratelimitedMessage = ratelimitedMessage;
         this.commands = new HashMap<>();
+        this.middlewares = new HashMap<>();
+        this.categories = new HashMap<>();
         this.prefixManager = prefixManager;
         this.noPermissionMessage = noPermissionMessage;
         this.noRoleMessage = noRoleMessage;
@@ -80,6 +85,17 @@ public class VelenImpl implements Velen {
             iterateAndLoad(file);
         }
 
+        return this;
+    }
+
+    @Override
+    public Optional<VelenMiddleware> getMiddleware(String name) {
+        return Optional.ofNullable(middlewares.get(name.toLowerCase()));
+    }
+
+    @Override
+    public Velen storeMiddleware(String name, VelenMiddleware middleware) {
+        middlewares.put(name.toLowerCase(), middleware);
         return this;
     }
 
@@ -152,6 +168,22 @@ public class VelenImpl implements Velen {
         return commands.values().stream()
                 .filter(velenCommand -> velenCommand.getCategory().equals(category))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public VelenCategory findCategory(String category) {
+        return categories.get(category.toLowerCase());
+    }
+
+    @Override
+    public Map<String, VelenCategory> findCategories() {
+        return categories;
+    }
+
+    @Override
+    public Velen addCategory(VelenCategory category) {
+        categories.put(category.getName().toLowerCase(), category);
+        return this;
     }
 
     @Override

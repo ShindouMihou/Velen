@@ -5,13 +5,20 @@ import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.interaction.SlashCommandCreateEvent;
 import org.javacord.api.event.message.MessageCreateEvent;
+import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
 import pw.mihou.velen.impl.VelenCommandImpl;
 import pw.mihou.velen.interfaces.VelenArguments;
 import pw.mihou.velen.interfaces.hybrid.event.VelenGeneralEvent;
 import pw.mihou.velen.interfaces.hybrid.event.internal.VelenGeneralEventImpl;
+import pw.mihou.velen.interfaces.middleware.VelenGate;
+import pw.mihou.velen.interfaces.middleware.types.VelenHybridMiddleware;
+import pw.mihou.velen.interfaces.middleware.types.VelenMessageMiddleware;
+import pw.mihou.velen.interfaces.middleware.types.VelenSlashMiddleware;
 import pw.mihou.velen.interfaces.routed.VelenRoutedOptions;
 import pw.mihou.velen.ratelimiter.entities.RatelimitEntity;
+import pw.mihou.velen.utils.Pair;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -127,6 +134,61 @@ public class BaseCommandImplementation {
     }
 
     /**
+     * Applies all the middleware restraints for a hybrid command.
+     *
+     * @param middlewares The middlewares to use.
+     * @param event The event to use.
+     * @return Is this accepted by the gate?
+     */
+    public Pair<Boolean, String> applyHybridMiddlewares(List<VelenHybridMiddleware> middlewares, VelenGeneralEvent event) {
+        for (VelenHybridMiddleware middleware : middlewares) {
+            Pair<Boolean, String> gate = middleware.onEvent(event, event.getArguments(), event.getCommand(), new VelenGate());
+
+            if (!gate.getLeft())
+                return gate;
+        }
+
+        return Pair.of(true, null);
+    }
+
+    /**
+     * Applies all the middleware restraints for a hybrid command.
+     *
+     * @param middlewares The middlewares to use.
+     * @param event The event to use.
+     * @return Is this accepted by the gate?
+     */
+    public Pair<Boolean, String> applySlashMiddlewares(List<VelenSlashMiddleware> middlewares, SlashCommandCreateEvent event) {
+        for (VelenSlashMiddleware middleware : middlewares) {
+            Pair<Boolean, String> gate = middleware.onEvent(event, instance, new VelenGate());
+
+            if (!gate.getLeft())
+                return gate;
+        }
+
+        return Pair.of(true, null);
+    }
+
+    /**
+     * Applies all the middleware restraints for a hybrid command.
+     *
+     * @param middlewares The middlewares to use.
+     * @param event The event to use.
+     * @return Is this accepted by the gate?
+     */
+    public Pair<Boolean, String> applyMessageMiddlewares(List<VelenMessageMiddleware> middlewares, MessageCreateEvent event) {
+        for (VelenMessageMiddleware middleware : middlewares) {
+            Pair<Boolean, String> gate = middleware.onEvent(event, instance, new VelenRoutedOptions(instance, event), new VelenGate());
+
+            if (!gate.getLeft())
+                return gate;
+        }
+
+        return Pair.of(true, null);
+    }
+
+
+    /**
      * Applies all the restraint requirements for the command.
      *
      * @param event The event instance to use.
@@ -148,6 +210,22 @@ public class BaseCommandImplementation {
                     instance.getName() + ".");
 
         if (instance.getHybridHandler() == null) {
+            Pair<Boolean, String> middlewareResponse = applySlashMiddlewares(
+                    instance.getVelen().findCategory(instance.getCategory()).getSlashMiddlewares(),
+                    event
+            );
+
+            if (!middlewareResponse.getLeft()) {
+                if (middlewareResponse.getRight() != null) {
+                    event.getSlashCommandInteraction()
+                            .createImmediateResponder()
+                            .setContent(middlewareResponse.getRight())
+                            .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
+                            .respond();
+                }
+                return;
+            }
+
             instance.getInteractionHandler()
                     .onEvent(event,
                             event.getSlashCommandInteraction(),
@@ -157,6 +235,22 @@ public class BaseCommandImplementation {
                             event.getSlashCommandInteraction().createImmediateResponder());
         } else {
             VelenGeneralEvent e = new VelenGeneralEventImpl(instance.getName(), event, null, null, instance);
+
+            Pair<Boolean, String> middlewareResponse = applyHybridMiddlewares(
+                    instance.getVelen().findCategory(instance.getCategory()).getHybridMiddlewares(),
+                    e
+            );
+
+            if (!middlewareResponse.getLeft()) {
+                if (middlewareResponse.getRight() != null) {
+                    e.createResponder()
+                            .setContent(middlewareResponse.getRight())
+                            .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
+                            .respond();
+                }
+                return;
+            }
+
             instance.getHybridHandler().onEvent(e, e.createResponder(), e.getUser(), e.getArguments());
         }
     }
@@ -174,9 +268,38 @@ public class BaseCommandImplementation {
                         instance.getName() + ".");
 
             if (instance.getHybridHandler() == null) {
+
+                Pair<Boolean, String> middlewareResponse = applyMessageMiddlewares(
+                        instance.getVelen().findCategory(instance.getCategory()).getMessageMiddlewares(),
+                        event
+                );
+
+                if (!middlewareResponse.getLeft()) {
+                    if (middlewareResponse.getRight() != null) {
+                        event.getMessage().reply(middlewareResponse.getRight());
+                    }
+                    return;
+                }
+
                 instance.getMessageHandler().onEvent(event, event.getMessage(), u, args, new VelenRoutedOptions(instance, event));
             } else {
                 VelenGeneralEvent e = new VelenGeneralEventImpl(instance.getName(), null, event, args, instance);
+
+                Pair<Boolean, String> middlewareResponse = applyHybridMiddlewares(
+                        instance.getVelen().findCategory(instance.getCategory()).getHybridMiddlewares(),
+                        e
+                );
+
+                if (!middlewareResponse.getLeft()) {
+                    if (middlewareResponse.getRight() != null) {
+                        e.createResponder()
+                                .setContent(middlewareResponse.getRight())
+                                .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
+                                .respond();
+                    }
+                    return;
+                }
+
                 instance.getHybridHandler().onEvent(e, e.createResponder(), e.getUser(), e.getArguments());
             }
         });
