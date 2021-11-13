@@ -54,7 +54,7 @@ public class VelenObserver {
                 existentialFilter(commands, slashCommands).forEach(command -> {
                     long start = System.currentTimeMillis();
                     command.asSlashCommand().getRight().createGlobal(api).thenAccept(slashCommand ->
-                            logger.debug("Application command was created. [name={}, description={}, id={}]. It took {} milliseconds.", slashCommand.getName(), slashCommand.getDescription(),
+                            logger.info("Application command was created. [name={}, description={}, id={}]. It took {} milliseconds.", slashCommand.getName(), slashCommand.getDescription(),
                                     slashCommand.getId(), System.currentTimeMillis() - start))
                         .exceptionally(ExceptionLogger.get());
                 });
@@ -65,7 +65,7 @@ public class VelenObserver {
                     long start = System.currentTimeMillis();
 
                     velenCommand.asSlashCommandUpdater(aLong).getRight().updateGlobal(api)
-                                    .thenAccept(slashCommand -> logger.debug("Application command was updated. [name={}, description={}, id={}]. It took {} milliseconds.",
+                                    .thenAccept(slashCommand -> logger.info("Application command was updated. [name={}, description={}, id={}]. It took {} milliseconds.",
                                             slashCommand.getName(), slashCommand.getDescription(), slashCommand.getId(), System.currentTimeMillis() - start))
                         .exceptionally(ExceptionLogger.get());
                 });
