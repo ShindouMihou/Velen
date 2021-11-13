@@ -66,7 +66,7 @@ public class VelenObserver {
 
                     velenCommand.asSlashCommandUpdater(aLong).getRight().updateGlobal(api)
                                     .thenAccept(slashCommand -> logger.info("Application command was updated. [name={}, description={}, id={}]. It took {} milliseconds.",
-                                            slashCommand.getName(), slashCommand.getDescription(), slashCommand.getId(), System.currentTimeMillis() - start))
+                                        slashCommand.getName(), slashCommand.getDescription(), slashCommand.getId(), System.currentTimeMillis() - start))
                         .exceptionally(ExceptionLogger.get());
                 });
             }
@@ -177,7 +177,6 @@ public class VelenObserver {
 
             SlashCommandOption option = velenOptional.get();
 
-
             // Time to start checking the choices for any differences.
             option.getChoices().forEach(choice -> {
                 Optional<SlashCommandOptionChoice> oChoice = slashCommandOption
@@ -214,7 +213,7 @@ public class VelenObserver {
 
             // We'll have to generate a new HashMap to prevent duplication.
             differences.putAll(depthFilter(command, slashCommand, new HashMap<>(),
-                    slashCommandOptions, velenCommandOptions));
+                    option.getOptions(), slashCommandOption.getOptions()));
         });
 
         return differences;
