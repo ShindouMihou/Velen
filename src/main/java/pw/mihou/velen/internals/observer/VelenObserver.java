@@ -146,8 +146,24 @@ public class VelenObserver {
 
     private Map<Long, VelenCommand> depthFilter(VelenCommand command, SlashCommand slashCommand, Map<Long, VelenCommand> differences,
                                            List<SlashCommandOption> slashCommandOptions, List<SlashCommandOption> velenCommandOptions) {
+
+        // This checks if the slash command option is present on Discord API
+        // but removed on Velen.
         slashCommandOptions.forEach(slashCommandOption -> {
             Optional<SlashCommandOption> velenOptional = velenCommandOptions.stream()
+                    .filter(o -> o.getName().equalsIgnoreCase(slashCommandOption.getName()))
+                    .filter(o -> o.getDescription().equalsIgnoreCase(slashCommandOption.getDescription()))
+                    .filter(o -> o.isRequired() == slashCommandOption.isRequired())
+                    .filter(o -> o.getType().getValue() == slashCommandOption.getType().getValue())
+                    .findFirst();
+
+            if (!velenOptional.isPresent()) {
+                differences.put(slashCommand.getId(), command);
+            }
+        });
+
+        velenCommandOptions.forEach(slashCommandOption -> {
+            Optional<SlashCommandOption> velenOptional = slashCommandOptions.stream()
                     .filter(o -> o.getName().equalsIgnoreCase(slashCommandOption.getName()))
                     .filter(o -> o.getDescription().equalsIgnoreCase(slashCommandOption.getDescription()))
                     .filter(o -> o.isRequired() == slashCommandOption.isRequired())
