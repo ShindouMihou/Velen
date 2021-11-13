@@ -6,7 +6,7 @@ import pw.mihou.velen.interfaces.middleware.VelenGate;
 import pw.mihou.velen.interfaces.middleware.VelenMiddleware;
 import pw.mihou.velen.utils.Pair;
 
-public abstract class VelenSlashMiddleware implements VelenMiddleware {
+public interface VelenSlashMiddleware extends VelenMiddleware {
 
     /**
      * This is ran before the command is executed, it is up to you here whether
@@ -17,6 +17,6 @@ public abstract class VelenSlashMiddleware implements VelenMiddleware {
      * @param command The command instance.
      * @return The response whether to allow or reject the user.
      */
-    public abstract Pair<Boolean, String> onEvent(SlashCommandCreateEvent event, VelenCommand command, VelenGate gate);
+    Pair<Boolean, String> onEvent(SlashCommandCreateEvent event, VelenCommand command, VelenGate gate);
     
 }

@@ -90,7 +90,7 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * @param middleware The middleware itself.
      * @return The Velen instance for chain-calling methods.
      */
-    default Velen addMiddleware(String name, VelenHybridMiddleware middleware) {
+    default Velen addHybridMiddleware(String name, VelenHybridMiddleware middleware) {
         return storeMiddleware(name, middleware);
     }
 
@@ -102,7 +102,7 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * @param middleware The middleware itself.
      * @return The Velen instance for chain-calling methods.
      */
-    default Velen addMiddleware(String name, VelenMessageMiddleware middleware) {
+    default Velen addMessageMiddleware(String name, VelenMessageMiddleware middleware) {
         return storeMiddleware(name, middleware);
     }
 
@@ -114,7 +114,7 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * @param middleware The middleware itself.
      * @return The Velen instance for chain-calling methods.
      */
-    default Velen addMiddleware(String name, VelenSlashMiddleware middleware) {
+    default Velen addSlashMiddleware(String name, VelenSlashMiddleware middleware) {
         return storeMiddleware(name, middleware);
     }
 

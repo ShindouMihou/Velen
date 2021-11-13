@@ -8,6 +8,7 @@ import org.javacord.api.interaction.SlashCommandOptionBuilder;
 import pw.mihou.velen.impl.VelenCommandImpl;
 import pw.mihou.velen.interfaces.*;
 import pw.mihou.velen.interfaces.messages.types.VelenConditionalMessage;
+import pw.mihou.velen.interfaces.middleware.VelenMiddleware;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ public class VelenCommandBuilder {
     private Duration cooldown;
     private boolean serverOnly = false;
     private boolean privateOnly = false;
+    private final List<String> middlewares = new ArrayList<>();
     private VelenEvent velenEvent;
     private Velen velen;
 
@@ -377,6 +379,17 @@ public class VelenCommandBuilder {
     }
 
     /**
+     * Adds a middleware to this command.
+     *
+     * @param middlewares The middlewares to add.
+     * @return VelenCommandBuilder for chain calling methods.
+     */
+    public VelenCommandBuilder addMiddlewares(String... middlewares) {
+        this.middlewares.addAll(Arrays.asList(middlewares));
+        return this;
+    }
+
+    /**
      * Should this command be private-channel only?
      *
      * @param privateChannelOnly Is this command a private channel only command?
@@ -469,7 +482,11 @@ public class VelenCommandBuilder {
         VelenCommandImpl.Handlers handlers = new VelenCommandImpl
                 .Handlers(velenEvent, velenSlashEvent, velenHybridHandler);
 
-        return new VelenCommandImpl(general, requires, conditional, settings, handlers, velen);
+        VelenCommandImpl.Warehouse warehouse = new VelenCommandImpl.Warehouse(middlewares
+                .stream().map(s -> velen.getMiddleware(s).orElseThrow(() -> new IllegalStateException("The middleware " + s + " couldn't be found.")))
+                .collect(Collectors.toList()));
+
+        return new VelenCommandImpl(general, requires, conditional, settings, handlers, warehouse, velen);
 
     }
 

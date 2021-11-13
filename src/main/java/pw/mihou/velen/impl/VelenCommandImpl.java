@@ -8,6 +8,7 @@ import pw.mihou.velen.impl.commands.children.BaseInteractionCommand;
 import pw.mihou.velen.impl.commands.children.BaseMessageCommand;
 import pw.mihou.velen.interfaces.*;
 import pw.mihou.velen.interfaces.messages.types.VelenConditionalMessage;
+import pw.mihou.velen.interfaces.middleware.VelenMiddleware;
 
 import java.time.Duration;
 import java.util.*;
@@ -22,18 +23,20 @@ public class VelenCommandImpl implements VelenCommand {
     private final ConditionalCollective conditional;
     private final Settings settings;
     private final Handlers handlers;
+    private final Warehouse warehouse;
 
     private final BaseMessageCommand baseMessageCommand = new BaseMessageCommand(this);
     private final BaseInteractionCommand baseInteractionCommand = new BaseInteractionCommand(this);
 
     public VelenCommandImpl(GeneralCollective general, RequireCollective requires, ConditionalCollective conditional,
-                            Settings settings, Handlers handlers, Velen velen) {
+                            Settings settings, Handlers handlers, Warehouse warehouse, Velen velen) {
         this.general = general;
         this.requires = requires;
         this.conditional = conditional;
         this.settings = settings;
         this.handlers = handlers;
         this.velen = velen;
+        this.warehouse = warehouse;
     }
 
     /**
@@ -151,6 +154,11 @@ public class VelenCommandImpl implements VelenCommand {
     }
 
     @Override
+    public List<VelenMiddleware> getMiddlewares() {
+        return warehouse.getMiddlewares();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -249,6 +257,31 @@ public class VelenCommandImpl implements VelenCommand {
      */
     public Velen getVelen() {
         return velen;
+    }
+
+
+    public static class Warehouse {
+        private final List<VelenMiddleware> middlewares;
+
+        /**
+         * Creates a brand new warehouse that can store
+         * middlewares and afterwares.
+         *
+         * @param middlewares The middlewares to store.
+         */
+        public Warehouse(List<VelenMiddleware> middlewares) {
+            this.middlewares = middlewares;
+        }
+
+        /**
+         * Retrieves all the middlewares of this command.
+         *
+         * @return All the middlewares being used in this command.
+         */
+        public List<VelenMiddleware> getMiddlewares() {
+            return middlewares;
+        }
+
     }
 
     public static class RequireCollective {

@@ -7,7 +7,8 @@ import pw.mihou.velen.interfaces.middleware.VelenGate;
 import pw.mihou.velen.interfaces.middleware.VelenMiddleware;
 import pw.mihou.velen.utils.Pair;
 
-public abstract class VelenHybridMiddleware implements VelenMiddleware {
+@FunctionalInterface
+public interface VelenHybridMiddleware extends VelenMiddleware {
 
     /**
      * This is ran before the command is executed, it is up to you here whether
@@ -19,6 +20,6 @@ public abstract class VelenHybridMiddleware implements VelenMiddleware {
      * @param command The command instance.
      * @return The response whether to allow or reject the user.
      */
-    public abstract Pair<Boolean, String> onEvent(VelenGeneralEvent event, VelenHybridArguments arguments, VelenCommand command, VelenGate gate);
+    Pair<Boolean, String> onEvent(VelenGeneralEvent event, VelenHybridArguments arguments, VelenCommand command, VelenGate gate);
     
 }

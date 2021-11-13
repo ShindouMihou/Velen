@@ -257,6 +257,9 @@ public class VelenMirror {
                         case "desc":
                             builder.get().setDescription(value);
                             break;
+                        case "middleware":
+                            builder.get().addMiddlewares(value);
+                            break;
                         case "shortcut":
                             builder.get().addShortcut(value);
                             break;
