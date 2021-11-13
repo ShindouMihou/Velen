@@ -152,7 +152,7 @@ public class VelenObserver {
         slashCommandOptions.forEach(slashCommandOption -> {
             Optional<SlashCommandOption> velenOptional = velenCommandOptions.stream()
                     .filter(o -> o.getName().equalsIgnoreCase(slashCommandOption.getName()))
-                    .filter(o -> o.getDescription().equalsIgnoreCase(slashCommandOption.getDescription()))
+                    .filter(o -> o.getDescription().equals(slashCommandOption.getDescription()))
                     .filter(o -> o.isRequired() == slashCommandOption.isRequired())
                     .filter(o -> o.getType().getValue() == slashCommandOption.getType().getValue())
                     .findFirst();
@@ -165,7 +165,7 @@ public class VelenObserver {
         velenCommandOptions.forEach(slashCommandOption -> {
             Optional<SlashCommandOption> velenOptional = slashCommandOptions.stream()
                     .filter(o -> o.getName().equalsIgnoreCase(slashCommandOption.getName()))
-                    .filter(o -> o.getDescription().equalsIgnoreCase(slashCommandOption.getDescription()))
+                    .filter(o -> o.getDescription().equals(slashCommandOption.getDescription()))
                     .filter(o -> o.isRequired() == slashCommandOption.isRequired())
                     .filter(o -> o.getType().getValue() == slashCommandOption.getType().getValue())
                     .findFirst();
