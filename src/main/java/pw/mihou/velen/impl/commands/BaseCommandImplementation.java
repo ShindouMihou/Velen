@@ -210,20 +210,22 @@ public class BaseCommandImplementation {
                     instance.getName() + ".");
 
         if (instance.getHybridHandler() == null) {
-            Pair<Boolean, String> middlewareResponse = applySlashMiddlewares(
-                    instance.getVelen().findCategory(instance.getCategory()).getSlashMiddlewares(),
-                    event
-            );
+            if (instance.getVelen().findCategory(instance.getCategory()) != null) {
+                Pair<Boolean, String> middlewareResponse = applySlashMiddlewares(
+                        instance.getVelen().findCategory(instance.getCategory()).getSlashMiddlewares(),
+                        event
+                );
 
-            if (!middlewareResponse.getLeft()) {
-                if (middlewareResponse.getRight() != null) {
-                    event.getSlashCommandInteraction()
-                            .createImmediateResponder()
-                            .setContent(middlewareResponse.getRight())
-                            .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
-                            .respond();
+                if (!middlewareResponse.getLeft()) {
+                    if (middlewareResponse.getRight() != null) {
+                        event.getSlashCommandInteraction()
+                                .createImmediateResponder()
+                                .setContent(middlewareResponse.getRight())
+                                .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
+                                .respond();
+                    }
+                    return;
                 }
-                return;
             }
 
             instance.getInteractionHandler()
@@ -236,19 +238,21 @@ public class BaseCommandImplementation {
         } else {
             VelenGeneralEvent e = new VelenGeneralEventImpl(instance.getName(), event, null, null, instance);
 
-            Pair<Boolean, String> middlewareResponse = applyHybridMiddlewares(
-                    instance.getVelen().findCategory(instance.getCategory()).getHybridMiddlewares(),
-                    e
-            );
+            if (instance.getVelen().findCategory(instance.getCategory()) != null) {
+                Pair<Boolean, String> middlewareResponse = applyHybridMiddlewares(
+                        instance.getVelen().findCategory(instance.getCategory()).getHybridMiddlewares(),
+                        e
+                );
 
-            if (!middlewareResponse.getLeft()) {
-                if (middlewareResponse.getRight() != null) {
-                    e.createResponder()
-                            .setContent(middlewareResponse.getRight())
-                            .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
-                            .respond();
+                if (!middlewareResponse.getLeft()) {
+                    if (middlewareResponse.getRight() != null) {
+                        e.createResponder()
+                                .setContent(middlewareResponse.getRight())
+                                .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
+                                .respond();
+                    }
+                    return;
                 }
-                return;
             }
 
             instance.getHybridHandler().onEvent(e, e.createResponder(), e.getUser(), e.getArguments());
@@ -269,35 +273,39 @@ public class BaseCommandImplementation {
 
             if (instance.getHybridHandler() == null) {
 
-                Pair<Boolean, String> middlewareResponse = applyMessageMiddlewares(
-                        instance.getVelen().findCategory(instance.getCategory()).getMessageMiddlewares(),
-                        event
-                );
+                if (instance.getVelen().findCategory(instance.getCategory()) != null) {
+                    Pair<Boolean, String> middlewareResponse = applyMessageMiddlewares(
+                            instance.getVelen().findCategory(instance.getCategory()).getMessageMiddlewares(),
+                            event
+                    );
 
-                if (!middlewareResponse.getLeft()) {
-                    if (middlewareResponse.getRight() != null) {
-                        event.getMessage().reply(middlewareResponse.getRight());
+                    if (!middlewareResponse.getLeft()) {
+                        if (middlewareResponse.getRight() != null) {
+                            event.getMessage().reply(middlewareResponse.getRight());
+                        }
+                        return;
                     }
-                    return;
                 }
 
                 instance.getMessageHandler().onEvent(event, event.getMessage(), u, args, new VelenRoutedOptions(instance, event));
             } else {
                 VelenGeneralEvent e = new VelenGeneralEventImpl(instance.getName(), null, event, args, instance);
 
-                Pair<Boolean, String> middlewareResponse = applyHybridMiddlewares(
-                        instance.getVelen().findCategory(instance.getCategory()).getHybridMiddlewares(),
-                        e
-                );
+                if (instance.getVelen().findCategory(instance.getCategory()) != null) {
+                    Pair<Boolean, String> middlewareResponse = applyHybridMiddlewares(
+                            instance.getVelen().findCategory(instance.getCategory()).getHybridMiddlewares(),
+                            e
+                    );
 
-                if (!middlewareResponse.getLeft()) {
-                    if (middlewareResponse.getRight() != null) {
-                        e.createResponder()
-                                .setContent(middlewareResponse.getRight())
-                                .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
-                                .respond();
+                    if (!middlewareResponse.getLeft()) {
+                        if (middlewareResponse.getRight() != null) {
+                            e.createResponder()
+                                    .setContent(middlewareResponse.getRight())
+                                    .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
+                                    .respond();
+                        }
+                        return;
                     }
-                    return;
                 }
 
                 instance.getHybridHandler().onEvent(e, e.createResponder(), e.getUser(), e.getArguments());
