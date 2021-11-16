@@ -45,7 +45,7 @@ public class BaseInteractionCommand extends BaseCommandImplementation {
     public void onReceive(SlashCommandCreateEvent event) {
         User user = event.getSlashCommandInteraction().getUser();
 
-        if (applyDefaultPermission(user, event.getSlashCommandInteraction().getServer().orElse(null))) {
+        if (!applyDefaultPermission(user, event.getSlashCommandInteraction().getServer().orElse(null))) {
             return;
         }
 

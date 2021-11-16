@@ -264,7 +264,7 @@ public class BaseCommandImplementation {
      * @return Is this user allowed to go through the command?
      */
     public boolean applyDefaultPermission(User user, Server server) {
-        if (!instance.isDefaultPermissionEnabled())
+        if (instance.isDefaultPermissionEnabled())
             return true;
 
         if (server == null)
