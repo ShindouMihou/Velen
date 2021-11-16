@@ -46,10 +46,6 @@ public class BaseMessageCommand extends BaseCommandImplementation {
 
         User user = event.getMessageAuthor().asUser().get();
 
-        if (!applyDefaultPermission(user, event.getServer().orElse(null))) {
-            return;
-        }
-
         if (!applyRestraints(event)) {
             return;
         }
