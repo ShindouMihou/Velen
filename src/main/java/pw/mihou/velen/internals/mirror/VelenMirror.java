@@ -254,6 +254,14 @@ public class VelenMirror {
                         case "has_format":
                             builder.get().addFormats(value);
                             break;
+                        case "default_permission": {
+                            if (!(value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false"))) {
+                                throw new IllegalStateException("The value for default permission in " + commandName.get() + " is invalid, it must be of boolean type.");
+                            }
+
+                            builder.get().setDefaultPermission(Boolean.parseBoolean(value));
+                            break;
+                        }
                         case "desc":
                             builder.get().setDescription(value);
                             break;
