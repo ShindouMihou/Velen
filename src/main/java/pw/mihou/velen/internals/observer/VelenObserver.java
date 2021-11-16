@@ -138,6 +138,11 @@ public class VelenObserver {
                 return;
             }
 
+            if (slashCommand.getDefaultPermission() != command.isDefaultPermissionEnabled()) {
+                reference.get().put(slashCommand.getId(), command);
+                return;
+            }
+
             reference.set(depthFilter(command, slashCommand, reference.get(), slashCommand.getOptions(), command.getOptions()));
         });
 

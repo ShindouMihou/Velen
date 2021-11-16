@@ -33,6 +33,7 @@ public class VelenCommandBuilder {
     private String name;
     private final List<String> usages = new ArrayList<>();
     private String description;
+    private boolean defaultPermission = false;
     private VelenSlashEvent velenSlashEvent;
     private VelenHybridHandler velenHybridHandler;
     private Duration cooldown;
@@ -50,6 +51,18 @@ public class VelenCommandBuilder {
      */
     public VelenCommandBuilder setName(String commandName) {
         this.name = commandName;
+        return this;
+    }
+
+    /**
+     * Sets whether to make this command functional to only server owners
+     * or server administrators. This will function with both message and slash commands.
+     *
+     * @param defaultPermission The default permission to use.
+     * @return VelenCommadnBuilder for chain calling methods.
+     */
+    public VelenCommandBuilder setDefaultPermission(boolean defaultPermission) {
+        this.defaultPermission = defaultPermission;
         return this;
     }
 
@@ -468,7 +481,7 @@ public class VelenCommandBuilder {
             category = "";
 
         VelenCommandImpl.GeneralCollective general = new VelenCommandImpl
-                .GeneralCollective(name, description, shortcuts, category, cooldown, usages);
+                .GeneralCollective(name, description, shortcuts, category, cooldown, usages, defaultPermission);
 
         VelenCommandImpl.RequireCollective requires = new VelenCommandImpl
                 .RequireCollective(requiredRoles, requiredUsers, permissions);

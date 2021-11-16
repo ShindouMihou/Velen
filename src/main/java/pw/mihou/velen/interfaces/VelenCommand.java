@@ -324,6 +324,14 @@ public interface VelenCommand {
     String[] getShortcuts();
 
     /**
+     * Is this command limited to only guild owners or
+     * server administrators?
+     *
+     * @return Is this command limited to server owners?
+     */
+    boolean isDefaultPermissionEnabled();
+
+    /**
      * Gets the category of the command.
      *
      * @return The category of the command.
@@ -388,7 +396,8 @@ public interface VelenCommand {
      * @return The server id of the server this is intended (nullable) and the slash command builder.
      */
     default Pair<Long, SlashCommandBuilder> asSlashCommand() {
-        SlashCommandBuilder builder = SlashCommand.with(getName().toLowerCase(), getDescription());
+        SlashCommandBuilder builder = SlashCommand.with(getName().toLowerCase(), getDescription())
+                .setDefaultPermission(isDefaultPermissionEnabled());
 
         if (getOptions() != null)
             return Pair.of(getServerId(), builder.setOptions(getOptions()));
@@ -407,7 +416,8 @@ public interface VelenCommand {
     default Pair<Long, SlashCommandUpdater> asSlashCommandUpdater(long commandId) {
         SlashCommandUpdater updater = new SlashCommandUpdater(commandId)
                 .setName(getName())
-                .setDescription(getDescription());
+                .setDescription(getDescription())
+                .setDefaultPermission(isDefaultPermissionEnabled());
 
         if(getOptions() != null && !getOptions().isEmpty()) {
             updater.setSlashCommandOptions(getOptions());

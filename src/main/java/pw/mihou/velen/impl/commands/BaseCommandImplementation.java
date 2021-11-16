@@ -256,6 +256,24 @@ public class BaseCommandImplementation {
     }
 
     /**
+     * Applies the default permission for the commands, it will default
+     * to true if default permission option is disabled.
+     *
+     * @param user The user to check.
+     * @param server The server to check.
+     * @return Is this user allowed to go through the command?
+     */
+    public boolean applyDefaultPermission(User user, Server server) {
+        if (!instance.isDefaultPermissionEnabled())
+            return true;
+
+        if (server == null)
+            return false;
+
+        return server.isOwner(user) || server.isAdmin(user);
+    }
+
+    /**
      * Dispatches an event for slash commands.
      *
      * @param event The event to dispatch.

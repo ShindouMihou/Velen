@@ -143,6 +143,10 @@ public class VelenCommandImpl implements VelenCommand {
         return handlers.hybridHandler != null || (handlers.velenSlashEvent != null && handlers.velenEvent != null);
     }
 
+    public boolean isDefaultPermissionEnabled() {
+        return general.defaultPermission;
+    }
+
     @Override
     public String[] getShortcuts() {
         return general.shortcuts;
@@ -313,6 +317,7 @@ public class VelenCommandImpl implements VelenCommand {
         public final Duration cooldown;
         public final String[] shortcuts;
         public final List<String> usage;
+        public final boolean defaultPermission;
 
         /**
          * Creates a general collective that contains the general information
@@ -324,15 +329,17 @@ public class VelenCommandImpl implements VelenCommand {
          * @param category The category of the command.
          * @param cooldown The cooldown of the command.
          * @param usage The usages of the command.
+         * @param defaultPermission Should this command only be useable for admins and guild owners?
          */
         public GeneralCollective(String name, String description, List<String> shortcuts,
-                                 String category, Duration cooldown, List<String> usage) {
+                                 String category, Duration cooldown, List<String> usage, boolean defaultPermission) {
             this.name = name;
             this.description = description;
             this.shortcuts = shortcuts.toArray(new String[0]);
             this.category = category;
             this.cooldown = cooldown;
             this.usage = usage;
+            this.defaultPermission = defaultPermission;
         }
     }
 
