@@ -53,8 +53,8 @@ public class VelenCommandBuilder {
     }
 
     /**
-     * Sets whether to make this command functional to only server owners
-     * or server administrators. This will function with both message and slash commands.
+     * Sets whether to make this command a default permission or not.
+     * This only functions with slash commands.
      *
      * @param defaultPermission The default permission to use.
      * @return VelenCommadnBuilder for chain calling methods.
