@@ -55,4 +55,14 @@ public class VelenCategoryImpl implements VelenCategory {
     public String getDescription() {
         return description;
     }
+
+    @Override
+    public String toString() {
+        return "VelenCategoryImpl{" +
+                "name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", middleware_count=" + middlewares.size() +
+                '}';
+    }
+
 }

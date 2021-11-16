@@ -1,0 +1,29 @@
+&[hybrid]: category {
+
+    desc: This is the category for hybrid commands.
+
+    # To be added middlewares.
+    # middlewares: [log_command, increment_counter]
+    middleware: log_command
+
+}
+
+&[hybrid]: category {
+
+    desc: This is the category for hybrid commands.
+
+    # To be added middlewares.
+    # middlewares: [log_command, increment_counter]
+    middleware: log_command
+
+}
+
+&[slash]: category {
+
+    desc: This is the category for slash commands.
+
+    # To be added middlewares.
+    # middlewares: [log_command, increment_counter]
+    middleware: log_command
+
+}

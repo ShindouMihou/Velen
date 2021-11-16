@@ -16,6 +16,7 @@ import pw.mihou.velen.interfaces.messages.types.VelenRatelimitMessage;
 import pw.mihou.velen.interfaces.messages.types.VelenRoleMessage;
 import pw.mihou.velen.interfaces.middleware.VelenMiddleware;
 import pw.mihou.velen.internals.VelenBlacklist;
+import pw.mihou.velen.internals.mirror.VelenCategorizer;
 import pw.mihou.velen.internals.mirror.VelenMirror;
 import pw.mihou.velen.prefix.VelenPrefixManager;
 import pw.mihou.velen.ratelimiter.VelenRatelimiter;
@@ -44,6 +45,7 @@ public class VelenImpl implements Velen {
     private static final Logger commandInterceptorLogger = LoggerFactory.getLogger("Velen - Command Interceptor");
     private final HandlerStorage handlerStorage = new HandlerStorage();
     private final VelenMirror mirror = new VelenMirror(this);
+    private final VelenCategorizer categorizer = new VelenCategorizer(this);
 
     public VelenImpl(VelenRatelimiter ratelimiter, VelenPrefixManager prefixManager, VelenRatelimitMessage ratelimitedMessage,
                      VelenPermissionMessage noPermissionMessage, VelenRoleMessage noRoleMessage,
@@ -101,11 +103,13 @@ public class VelenImpl implements Velen {
 
     private void iterateAndLoad(File file) {
         if (file.isDirectory()) {
-            for (File f : Objects.requireNonNull(file.listFiles((dir, name) -> dir.isDirectory() || name.endsWith(".velen")))) {
+            for (File f : Objects.requireNonNull(file.listFiles((dir, name) -> dir.isDirectory() || name.endsWith(".velen") || name.endsWith(".vecomp")))) {
                 iterateAndLoad(f);
             }
         } else if (file.getName().endsWith(".velen")){
             mirror.comprehend(file);
+        } else if (file.getName().endsWith(".vecomp")) {
+            categorizer.comprehend(file);
         }
     }
 
