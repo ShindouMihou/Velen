@@ -8,8 +8,6 @@ import org.javacord.api.interaction.SlashCommandOptionBuilder;
 import pw.mihou.velen.impl.VelenCommandImpl;
 import pw.mihou.velen.interfaces.*;
 import pw.mihou.velen.interfaces.messages.types.VelenConditionalMessage;
-import pw.mihou.velen.interfaces.middleware.VelenMiddleware;
-
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,7 +31,7 @@ public class VelenCommandBuilder {
     private String name;
     private final List<String> usages = new ArrayList<>();
     private String description;
-    private boolean defaultPermission = false;
+    private boolean defaultPermission = true;
     private VelenSlashEvent velenSlashEvent;
     private VelenHybridHandler velenHybridHandler;
     private Duration cooldown;
