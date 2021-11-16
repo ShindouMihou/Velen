@@ -143,6 +143,7 @@ public class VelenCommandImpl implements VelenCommand {
         return handlers.hybridHandler != null || (handlers.velenSlashEvent != null && handlers.velenEvent != null);
     }
 
+    @Override
     public boolean isDefaultPermissionEnabled() {
         return general.defaultPermission;
     }
