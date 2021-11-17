@@ -17,6 +17,7 @@ import pw.mihou.velen.internals.VelenBlacklist;
 import pw.mihou.velen.prefix.VelenPrefixManager;
 import pw.mihou.velen.ratelimiter.VelenRatelimiter;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -62,6 +63,22 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * @return The Velen instance with newer data.
      */
     Velen loadFrom(String directory);
+
+    /**
+     * Loads all commands from a specific directory.
+     *
+     * @param directory The directory to search for.
+     * @return The Velen instance with newer data.
+     */
+    Velen loadFrom(File directory);
+
+    /**
+     * Loads all commands specified.
+     *
+     * @param files The files to load.
+     * @return The Velen instance with newer data.
+     */
+    Velen load(File... files);
 
     /**
      * Retrieves the middleware with the specified name.

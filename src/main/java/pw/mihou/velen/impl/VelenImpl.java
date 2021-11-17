@@ -81,9 +81,26 @@ public class VelenImpl implements Velen {
 
     @Override
     public Velen loadFrom(String directory) {
-        File[] files = new File(directory).listFiles((dir, name) -> dir.isDirectory() || name.endsWith(".velen"));
+        loadFrom(new File(directory));
+        return this;
+    }
 
-        for (File file : Objects.requireNonNull(files)) {
+    @Override
+    public Velen loadFrom(File directory) {
+        if (directory.isDirectory()) {
+            load(Objects.requireNonNull(directory.listFiles((dir, name) -> dir.isDirectory() || name.endsWith(".velen"))));
+            return this;
+        }
+
+        load(directory);
+        return this;
+    }
+
+    @Override
+    public Velen load(File... files) {
+
+        for (File file : files) {
+            System.out.println(file.getName());
             iterateAndLoad(file);
         }
 
