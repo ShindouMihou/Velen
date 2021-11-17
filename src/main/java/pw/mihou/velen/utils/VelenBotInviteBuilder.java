@@ -18,8 +18,9 @@ public class VelenBotInviteBuilder {
     private final long clientId;
     public static final String BASE_LINK = "https://discord.com/oauth2/authorize?client_id=";
     private String redirect_uri = "";
-    private List<InviteScope> inviteScopes = new ArrayList<>();
+    private final List<InviteScope> inviteScopes = new ArrayList<>();
     private Permissions permissions = new PermissionsBuilder().build();
+    private boolean consent = true;
 
     /**
      * Creates a new Velen Invite Builder that is more of an extension to
@@ -40,6 +41,19 @@ public class VelenBotInviteBuilder {
      */
     public VelenBotInviteBuilder setPermissions(Permissions permissions) {
         this.permissions = permissions;
+        return this;
+    }
+
+    /**
+     * Should Velen append prompt consent to the invite links, by default, this is enabled
+     * since it has no other side effects while allowing server owners to be able to reauthorize
+     * scopes of the bot. For example, if the bot is missing {@link InviteScope#APPLICATIONS_COMMANDS}.
+     *
+     * @param promptConsent Read above.
+     * @return {@link VelenBotInviteBuilder} for chain-calling methods.
+     */
+    public VelenBotInviteBuilder setPromptConsent(boolean promptConsent) {
+        this.consent = promptConsent;
         return this;
     }
 
@@ -119,14 +133,20 @@ public class VelenBotInviteBuilder {
                 .append("&permissions=")
                 .append(permissions.getAllowedBitmask());
 
-        if (!(redirect_uri.isEmpty() || redirect_uri == null)) {
+        // We will only need redirect uri if an intent requires it.
+        // since Discord will just ignore it.
+        if (inviteScopes.stream().anyMatch(InviteScope::requiresRedirect) && !(redirect_uri.isEmpty() || redirect_uri == null)) {
             try {
-                builder.append("&redirect_uri=").append(URLEncoder.encode(redirect_uri, "UTF-8"));
+                builder.append("&redirect_uri=").append(URLEncoder.encode(redirect_uri, "UTF-8"))
+                        .append("&response_type=code");
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
                 throw new IllegalStateException("Attempt to perform URL Encoding for " + redirect_uri + " failed with: " + e.getMessage());
             }
         }
+
+        if (consent)
+            builder.append("&prompt=consent");
 
         return builder.toString();
     }
