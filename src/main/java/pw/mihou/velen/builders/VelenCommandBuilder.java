@@ -38,6 +38,7 @@ public class VelenCommandBuilder {
     private boolean serverOnly = false;
     private boolean privateOnly = false;
     private final List<String> middlewares = new ArrayList<>();
+    private final List<String> afterwares = new ArrayList<>();
     private VelenEvent velenEvent;
     private Velen velen;
 
@@ -45,7 +46,7 @@ public class VelenCommandBuilder {
      * Sets the name of the command.
      *
      * @param commandName The name of the command.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder setName(String commandName) {
         this.name = commandName;
@@ -70,7 +71,7 @@ public class VelenCommandBuilder {
      * to add usages.
      *
      * @param usage The usage of the command.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     @Deprecated
     public VelenCommandBuilder setUsage(String usage) {
@@ -81,7 +82,7 @@ public class VelenCommandBuilder {
      * Adds a usage of the command.
      *
      * @param usage The usage of the command.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder addUsage(String usage) {
         this.usages.add(usage);
@@ -92,7 +93,7 @@ public class VelenCommandBuilder {
      * Adds multiple usages of the command.
      *
      * @param usages The usages of the command.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder addUsages(String... usages) {
         this.usages.addAll(Arrays.asList(usages));
@@ -104,7 +105,7 @@ public class VelenCommandBuilder {
      * of a command with its name.
      *
      * @param formats The formats to add.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder addFormats(String... formats) {
         this.formats.addAll(Arrays.asList(formats));
@@ -115,7 +116,7 @@ public class VelenCommandBuilder {
      * Sets the description of the command.
      *
      * @param description The description of the command.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder setDescription(String description) {
         this.description = description;
@@ -126,7 +127,7 @@ public class VelenCommandBuilder {
      * Sets the category of the command.
      *
      * @param category The category of the command.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder setCategory(String category) {
         this.category = category;
@@ -138,7 +139,7 @@ public class VelenCommandBuilder {
      * otherwise do not set if you want it to use the default cooldown that is set with Velen.
      *
      * @param duration The cooldown of the command.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder setCooldown(Duration duration) {
         this.cooldown = duration;
@@ -149,7 +150,7 @@ public class VelenCommandBuilder {
      * Make this command only useable to a certain role.
      *
      * @param roleID The ID of the role that users must have to use the command.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder requireRole(long roleID) {
         requiredRoles.add(roleID);
@@ -160,7 +161,7 @@ public class VelenCommandBuilder {
      * Make this command only useable to certain roles.
      *
      * @param roles The roles that the users must have to use the command.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder requireRoles(long... roles) {
         Arrays.stream(roles).forEach(requiredRoles::add);
@@ -171,7 +172,7 @@ public class VelenCommandBuilder {
      * Make this command only useable to a user.
      *
      * @param user The user who can use this command.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder requireUser(long user) {
         requiredUsers.add(user);
@@ -182,7 +183,7 @@ public class VelenCommandBuilder {
      * Makes this command only useable to certain users.
      *
      * @param users The users who can use this command.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder requireUsers(long... users) {
         Arrays.stream(users).forEach(requiredUsers::add);
@@ -193,7 +194,7 @@ public class VelenCommandBuilder {
      * Makes this command require a certain permission.
      *
      * @param permissionType The permission to require.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder requirePermission(PermissionType permissionType) {
         permissions.add(permissionType);
@@ -204,7 +205,7 @@ public class VelenCommandBuilder {
      * Makes this command require the following permissions.
      *
      * @param perms The permissions to require.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder requirePermissions(PermissionType... perms) {
         permissions.addAll(Arrays.asList(perms));
@@ -217,7 +218,7 @@ public class VelenCommandBuilder {
      * then you can add it here.
      *
      * @param shortcut The shortcut to add.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder addShortcut(String shortcut) {
         shortcuts.add(shortcut);
@@ -230,7 +231,7 @@ public class VelenCommandBuilder {
      * then you can add them here.
      *
      * @param shortcuts The shortcuts to add.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder addShortcuts(String... shortcuts) {
         this.shortcuts.addAll(Arrays.asList(shortcuts));
@@ -242,7 +243,7 @@ public class VelenCommandBuilder {
      * <h3>This is only applicable for slash commands!</h3>
      *
      * @param option The option to add.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder addOption(SlashCommandOptionBuilder option) {
         options.add(option.build());
@@ -254,7 +255,7 @@ public class VelenCommandBuilder {
      * <h3>This is only applicable for slash commands!</h3>
      *
      * @param options The option to add.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder addOptions(SlashCommandOptionBuilder... options) {
         this.options.addAll(Arrays.stream(options).map(SlashCommandOptionBuilder::build).collect(Collectors.toList()));
@@ -273,7 +274,7 @@ public class VelenCommandBuilder {
      * instead all of them.
      *
      * @param condition The condition the event has to meet.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder addCondition(Function<MessageCreateEvent, Boolean> condition) {
         this.conditions.add(condition);
@@ -292,7 +293,7 @@ public class VelenCommandBuilder {
      * instead all of them.
      *
      * @param condition The condition the event has to meet.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder addConditionForSlash(Function<SlashCommandCreateEvent, Boolean> condition) {
         this.conditionsSlash.add(condition);
@@ -305,7 +306,7 @@ public class VelenCommandBuilder {
      * a message to the user.
      *
      * @param message The message to be sent.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder setConditionalMessage(VelenConditionalMessage message) {
         this.conditionalMessage = message;
@@ -317,7 +318,7 @@ public class VelenCommandBuilder {
      * <h3>This is only applicable for slash commands!</h3>
      *
      * @param option The option to add.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder addOption(SlashCommandOption option) {
         options.add(option);
@@ -329,7 +330,7 @@ public class VelenCommandBuilder {
      * <h3>This is only applicable for slash commands!</h3>
      *
      * @param options The option to add.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder addOptions(SlashCommandOption... options) {
         this.options.addAll(Arrays.asList(options));
@@ -341,7 +342,7 @@ public class VelenCommandBuilder {
      * You must set this one as this one will be executed when the command is invoked by a user.
      *
      * @param event The Velen Event to use when the command is invoked.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder doEventOnInvocation(VelenEvent event) {
         this.velenEvent = event;
@@ -354,7 +355,7 @@ public class VelenCommandBuilder {
      * You must set this one as this one will be executed when the command is invoked by a user.
      *
      * @param event The Velen Slash Event to use when the command is invoked.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder setSlashEvent(VelenSlashEvent event) {
         this.velenSlashEvent = event;
@@ -366,7 +367,7 @@ public class VelenCommandBuilder {
      * will remove any previously set slash event or {@link VelenEvent} as a {@link VelenHybridHandler} is priority.
      *
      * @param handler The handler for the event.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder setHybridHandler(VelenHybridHandler handler) {
         this.velenHybridHandler = handler;
@@ -382,7 +383,7 @@ public class VelenCommandBuilder {
      * {@link VelenCommandBuilder#setServerOnly(boolean, long)} for slash commands!</h3>
      *
      * @param serverOnly Is this command a server only command?
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder setServerOnly(boolean serverOnly) {
         this.serverOnly = serverOnly;
@@ -390,10 +391,11 @@ public class VelenCommandBuilder {
     }
 
     /**
-     * Adds a middleware to this command.
+     * Adds one or more middlewares to the list of middlewares to be used, ensure that
+     * all the middlewares here are available in the {@link pw.mihou.velen.interfaces.Velen} instance.
      *
-     * @param middlewares The middlewares to add.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @param middlewares The middlewares to attach.
+     * @return {@link VelenCommandBuilder} for chain-calling methods.
      */
     public VelenCommandBuilder addMiddlewares(String... middlewares) {
         this.middlewares.addAll(Arrays.asList(middlewares));
@@ -401,10 +403,22 @@ public class VelenCommandBuilder {
     }
 
     /**
+     * Adds one or more afterwares to the list of afterwares to be used, ensure that
+     * all the middlewares here are available in the {@link pw.mihou.velen.interfaces.Velen} instance.
+     *
+     * @param afterwares The afterwares to attach.
+     * @return {@link VelenCommandBuilder} for chain-calling methods.
+     */
+    public VelenCommandBuilder addAfterwares(String... afterwares) {
+        this.afterwares.addAll(Arrays.asList(afterwares));
+        return this;
+    }
+
+    /**
      * Should this command be private-channel only?
      *
      * @param privateChannelOnly Is this command a private channel only command?
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder setPrivateChannelOnly(boolean privateChannelOnly) {
         this.privateOnly = privateChannelOnly;
@@ -417,7 +431,7 @@ public class VelenCommandBuilder {
      * @param serverOnly Is this command a server only command?
      * @param serverId   The server ID to register the slash command on (this limits the slash
      *                   command to that server only).
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder setServerOnly(boolean serverOnly, long serverId) {
         this.serverOnly = serverOnly;
@@ -430,7 +444,7 @@ public class VelenCommandBuilder {
      * of the framework, for instance, the rate-limiter.
      *
      * @param velen The {@link Velen} to use.
-     * @return VelenCommandBuilder for chain calling methods.
+     * @return {@link VelenCommandBuilder} for chain-calling methods..
      */
     public VelenCommandBuilder setVelen(Velen velen) {
         this.velen = velen;
@@ -493,9 +507,14 @@ public class VelenCommandBuilder {
         VelenCommandImpl.Handlers handlers = new VelenCommandImpl
                 .Handlers(velenEvent, velenSlashEvent, velenHybridHandler);
 
-        VelenCommandImpl.Warehouse warehouse = new VelenCommandImpl.Warehouse(middlewares
-                .stream().map(s -> velen.getMiddleware(s).orElseThrow(() -> new IllegalStateException("The middleware " + s + " couldn't be found.")))
-                .collect(Collectors.toList()));
+        VelenCommandImpl.Warehouse warehouse = new VelenCommandImpl.Warehouse(
+                middlewares.stream().map(s -> velen.getMiddleware(s)
+                                .orElseThrow(() -> new IllegalStateException("The middleware " + s + " couldn't be found.")))
+                        .collect(Collectors.toList()),
+                afterwares.stream().map(s -> velen.getAfterware(s)
+                                .orElseThrow(() -> new IllegalStateException("The afterware " + s + " couldn't be found.")))
+                        .collect(Collectors.toList())
+        );
 
         return new VelenCommandImpl(general, requires, conditional, settings, handlers, warehouse, velen);
 

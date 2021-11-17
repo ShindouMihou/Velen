@@ -6,6 +6,10 @@ import org.javacord.api.listener.interaction.SlashCommandCreateListener;
 import org.javacord.api.listener.message.MessageCreateListener;
 import pw.mihou.velen.VelenBuilder;
 import pw.mihou.velen.builders.VelenCategoryBuilder;
+import pw.mihou.velen.interfaces.afterware.VelenAfterware;
+import pw.mihou.velen.interfaces.afterware.types.VelenHybridAfterware;
+import pw.mihou.velen.interfaces.afterware.types.VelenMessageAfterware;
+import pw.mihou.velen.interfaces.afterware.types.VelenSlashAfterware;
 import pw.mihou.velen.interfaces.messages.types.VelenPermissionMessage;
 import pw.mihou.velen.interfaces.messages.types.VelenRatelimitMessage;
 import pw.mihou.velen.interfaces.messages.types.VelenRoleMessage;
@@ -79,6 +83,61 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * @return The Velen instance with newer data.
      */
     Velen load(File... files);
+
+    /**
+     * Retrieves the afterware with the specified name.
+     *
+     * @param name The name of the afterware to fetch.
+     * @return The afterware if present.
+     */
+    Optional<VelenAfterware> getAfterware(String name);
+
+    /**
+     * Stores the afterware inside this instance, it is not generally recommended to
+     * use this method but instead use the other three similar methods which are specific
+     * to a type of command.
+     *
+     * @param name The name of the middleware.
+     * @param afterware The afterware to store.
+     * @return The Velen instance for chain-calling methods.
+     */
+    Velen storeAfterware(String name, VelenAfterware afterware);
+
+    /**
+     * Adds a hybrid command afterware to the instance which can then be used
+     * to retrieve later.
+     *
+     * @param name The name of the afterware.
+     * @param afterware The afterware itself.
+     * @return The Velen instance for chain-calling methods.
+     */
+    default Velen addHybridAfterware(String name, VelenHybridAfterware afterware) {
+        return storeAfterware(name, afterware);
+    }
+
+    /**
+     * Adds a message command afterware to the instance which can then be used
+     * to retrieve later.
+     *
+     * @param name The name of the afterware.
+     * @param afterware The afterware itself.
+     * @return The Velen instance for chain-calling methods.
+     */
+    default Velen addMessageAfterware(String name, VelenMessageAfterware afterware) {
+        return storeAfterware(name, afterware);
+    }
+
+    /**
+     * Adds a slash command afterware to the instance which can then be used
+     * to retrieve later.
+     *
+     * @param name The name of the afterware.
+     * @param afterware The afterware itself.
+     * @return The Velen instance for chain-calling methods.
+     */
+    default Velen addSlashAfterware(String name, VelenSlashAfterware afterware) {
+        return storeAfterware(name, afterware);
+    }
 
     /**
      * Retrieves the middleware with the specified name.

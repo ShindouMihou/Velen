@@ -13,6 +13,7 @@ public class VelenCategoryBuilder {
     private String name;
     private String description;
     private List<String> middlewares = new ArrayList<>();
+    private List<String> afterwares = new ArrayList<>();
 
     public VelenCategoryBuilder setName(String name) {
         this.name = name;
@@ -37,6 +38,18 @@ public class VelenCategoryBuilder {
     }
 
     /**
+     * Adds one or more afterwares to the list of afterwares to be used, ensure that
+     * all the middlewares here are available in the {@link pw.mihou.velen.interfaces.Velen} instance.
+     *
+     * @param afterwares The afterwares to attach.
+     * @return {@link VelenCategoryBuilder} for chain-calling methods.
+     */
+    public VelenCategoryBuilder addAfterware(String... afterwares) {
+        this.afterwares.addAll(Arrays.asList(afterwares));
+        return this;
+    }
+
+    /**
      * Creates a new category instance using the specified details written
      * in the following {@link VelenCategoryBuilder} instance.
      *
@@ -50,7 +63,7 @@ public class VelenCategoryBuilder {
         if (velen == null)
             throw new IllegalArgumentException("You cannot create a category without a Velen instance.");
 
-        return new VelenCategoryImpl(name, description, middlewares, velen);
+        return new VelenCategoryImpl(name, description, middlewares, afterwares, velen);
     }
 
 }

@@ -8,6 +8,9 @@ import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
 import pw.mihou.velen.impl.VelenCommandImpl;
 import pw.mihou.velen.interfaces.VelenArguments;
+import pw.mihou.velen.interfaces.afterware.types.VelenHybridAfterware;
+import pw.mihou.velen.interfaces.afterware.types.VelenMessageAfterware;
+import pw.mihou.velen.interfaces.afterware.types.VelenSlashAfterware;
 import pw.mihou.velen.interfaces.hybrid.event.VelenGeneralEvent;
 import pw.mihou.velen.interfaces.hybrid.event.internal.VelenGeneralEventImpl;
 import pw.mihou.velen.interfaces.middleware.VelenGate;
@@ -17,6 +20,7 @@ import pw.mihou.velen.interfaces.middleware.types.VelenSlashMiddleware;
 import pw.mihou.velen.interfaces.routed.VelenRoutedOptions;
 import pw.mihou.velen.ratelimiter.entities.RatelimitEntity;
 import pw.mihou.velen.utils.Pair;
+import pw.mihou.velen.utils.VelenThreadPool;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -183,9 +187,9 @@ public class BaseCommandImplementation {
      * @param event The event to use.
      * @return Is this accepted by the gate?
      */
-    public Pair<Boolean, String> applyMessageMiddlewares(List<VelenMessageMiddleware> middlewares, MessageCreateEvent event) {
+    public Pair<Boolean, String> applyMessageMiddlewares(List<VelenMessageMiddleware> middlewares, MessageCreateEvent event, VelenRoutedOptions options) {
         for (VelenMessageMiddleware middleware : middlewares) {
-            Pair<Boolean, String> gate = middleware.onEvent(event, instance, new VelenRoutedOptions(instance, event), new VelenGate());
+            Pair<Boolean, String> gate = middleware.onEvent(event, instance, options, new VelenGate());
 
             if (!gate.getLeft())
                 return gate;
@@ -256,6 +260,54 @@ public class BaseCommandImplementation {
     }
 
     /**
+     * Gets all the slash afterwares of this command.
+     *
+     * @return All the slash afterwares for this command.
+     */
+    public List<VelenSlashAfterware> getSlashAfterwares() {
+        List<VelenSlashAfterware> afterwares = new ArrayList<>();
+
+        if (instance.getVelen().findCategory(instance.getCategory()) != null) {
+            afterwares.addAll(instance.getVelen().findCategory(instance.getCategory()).getSlashAfterwares());
+        }
+
+        afterwares.addAll(instance.getSlashAfterwares());
+        return afterwares;
+    }
+
+    /**
+     * Gets all the message afterwares of this command.
+     *
+     * @return All the message afterwares for this command.
+     */
+    public List<VelenMessageAfterware> getMessageAfterwares() {
+        List<VelenMessageAfterware> afterwares = new ArrayList<>();
+
+        if (instance.getVelen().findCategory(instance.getCategory()) != null) {
+            afterwares.addAll(instance.getVelen().findCategory(instance.getCategory()).getMessageAfterwares());
+        }
+
+        afterwares.addAll(instance.getMessageAfterwares());
+        return afterwares;
+    }
+
+    /**
+     * Gets all the hybrid afterwares of this command.
+     *
+     * @return All the hybrid afterwares for this command.
+     */
+    public List<VelenHybridAfterware> getHybridAfterwares() {
+        List<VelenHybridAfterware> afterwares = new ArrayList<>();
+
+        if (instance.getVelen().findCategory(instance.getCategory()) != null) {
+            afterwares.addAll(instance.getVelen().findCategory(instance.getCategory()).getHybridAfterwares());
+        }
+
+        afterwares.addAll(instance.getHybridAfterwares());
+        return afterwares;
+    }
+
+    /**
      * Dispatches an event for slash commands.
      *
      * @param event The event to dispatch.
@@ -289,6 +341,9 @@ public class BaseCommandImplementation {
                             new VelenArguments(event.getSlashCommandInteraction().getOptions()),
                             event.getSlashCommandInteraction().getOptions(),
                             event.getSlashCommandInteraction().createImmediateResponder());
+            // Execute the afterwares.
+            getSlashAfterwares().forEach(afterware -> VelenThreadPool.executorService
+                    .submit(() -> afterware.afterEvent(event, instance)));
         } else {
             VelenGeneralEvent e = new VelenGeneralEventImpl(instance.getName(), event, null, null, instance);
 
@@ -308,6 +363,9 @@ public class BaseCommandImplementation {
             }
 
             instance.getHybridHandler().onEvent(e, e.createResponder(), e.getUser(), e.getArguments());
+            // Execute the afterwares.
+            getHybridAfterwares().forEach(afterware -> VelenThreadPool.executorService
+                    .submit(() -> afterware.afterEvent(e, e.getArguments(), instance)));
         }
     }
 
@@ -325,9 +383,11 @@ public class BaseCommandImplementation {
 
             if (instance.getHybridHandler() == null) {
 
+                VelenRoutedOptions options = new VelenRoutedOptions(instance, event);
                 Pair<Boolean, String> middlewareResponse = applyMessageMiddlewares(
                         getMessageMiddlewares(),
-                        event
+                        event,
+                        options
                 );
 
                 if (!middlewareResponse.getLeft()) {
@@ -337,7 +397,10 @@ public class BaseCommandImplementation {
                     return;
                 }
 
-                instance.getMessageHandler().onEvent(event, event.getMessage(), u, args, new VelenRoutedOptions(instance, event));
+                instance.getMessageHandler().onEvent(event, event.getMessage(), u, args, options);
+                // Execute the afterwares.
+                getMessageAfterwares().forEach(afterware -> VelenThreadPool.executorService
+                        .submit(() -> afterware.afterEvent(event, instance, options)));
             } else {
                 VelenGeneralEvent e = new VelenGeneralEventImpl(instance.getName(), null, event, args, instance);
 
@@ -357,6 +420,9 @@ public class BaseCommandImplementation {
                 }
 
                 instance.getHybridHandler().onEvent(e, e.createResponder(), e.getUser(), e.getArguments());
+                // Execute the afterwares.
+                getHybridAfterwares().forEach(afterware -> VelenThreadPool.executorService
+                        .submit(() -> afterware.afterEvent(e, e.getArguments(), instance)));
             }
         });
     }

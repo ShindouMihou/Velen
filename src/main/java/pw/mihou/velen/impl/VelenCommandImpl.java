@@ -7,6 +7,7 @@ import org.javacord.api.interaction.*;
 import pw.mihou.velen.impl.commands.children.BaseInteractionCommand;
 import pw.mihou.velen.impl.commands.children.BaseMessageCommand;
 import pw.mihou.velen.interfaces.*;
+import pw.mihou.velen.interfaces.afterware.VelenAfterware;
 import pw.mihou.velen.interfaces.messages.types.VelenConditionalMessage;
 import pw.mihou.velen.interfaces.middleware.VelenMiddleware;
 
@@ -164,6 +165,11 @@ public class VelenCommandImpl implements VelenCommand {
     }
 
     @Override
+    public List<VelenAfterware> getAfterwares() {
+        return warehouse.getAfterwares();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -267,15 +273,18 @@ public class VelenCommandImpl implements VelenCommand {
 
     public static class Warehouse {
         private final List<VelenMiddleware> middlewares;
+        private final List<VelenAfterware> afterwares;
 
         /**
          * Creates a brand new warehouse that can store
          * middlewares and afterwares.
          *
          * @param middlewares The middlewares to store.
+         * @param afterwares The afterwares to store.
          */
-        public Warehouse(List<VelenMiddleware> middlewares) {
+        public Warehouse(List<VelenMiddleware> middlewares, List<VelenAfterware> afterwares) {
             this.middlewares = middlewares;
+            this.afterwares = afterwares;
         }
 
         /**
@@ -285,6 +294,15 @@ public class VelenCommandImpl implements VelenCommand {
          */
         public List<VelenMiddleware> getMiddlewares() {
             return middlewares;
+        }
+
+        /**
+         * Retrieves all the afterwares of this command.
+         *
+         * @return All the afterwares being used in this command.
+         */
+        public List<VelenAfterware> getAfterwares() {
+            return afterwares;
         }
 
     }

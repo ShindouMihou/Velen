@@ -199,6 +199,15 @@ public class VelenMirror extends VelenBaseParser {
                             case "middleware":
                                 builder.get().addMiddlewares(value);
                                 break;
+                            case "middlewares":
+                                builder.get().addMiddlewares(array(value));
+                                break;
+                            case "afterware":
+                                builder.get().addAfterwares(value);
+                                break;
+                            case "afterwares":
+                                builder.get().addAfterwares(array(value));
+                                break;
                             case "shortcut":
                                 builder.get().addShortcut(value);
                                 break;

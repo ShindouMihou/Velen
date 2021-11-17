@@ -3,9 +3,9 @@ package pw.mihou.velen.impl;
 import pw.mihou.velen.interfaces.Velen;
 import pw.mihou.velen.interfaces.VelenCategory;
 import pw.mihou.velen.interfaces.VelenCommand;
+import pw.mihou.velen.interfaces.afterware.VelenAfterware;
 import pw.mihou.velen.interfaces.middleware.VelenMiddleware;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,6 +14,7 @@ public class VelenCategoryImpl implements VelenCategory {
     private final String name;
     private final String description;
     private final List<VelenMiddleware> middlewares;
+    private final List<VelenAfterware> afterwares;
     private final Velen velen;
 
     /**
@@ -25,12 +26,16 @@ public class VelenCategoryImpl implements VelenCategory {
      * @param velen The velen instance to attach to.
      * @param middlewares The list of middlewares to use.
      */
-    public VelenCategoryImpl(String name, String description, List<String> middlewares, Velen velen) {
+    public VelenCategoryImpl(String name, String description, List<String> middlewares, List<String> afterwares, Velen velen) {
         this.name = name;
         this.description = description;
         this.middlewares = middlewares.stream()
                 .map(s -> velen.getMiddleware(s)
                         .orElseThrow(() -> new IllegalStateException("The middleware " + s + " is not found in the Velen instance.")))
+                .collect(Collectors.toList());
+        this.afterwares = afterwares.stream()
+                .map(s -> velen.getAfterware(s)
+                        .orElseThrow(() -> new IllegalStateException("The afterware " + s + " is not found in the Velen instance.")))
                 .collect(Collectors.toList());
         this.velen = velen;
     }
@@ -39,6 +44,11 @@ public class VelenCategoryImpl implements VelenCategory {
     @Override
     public List<VelenMiddleware> getMiddlewares() {
         return middlewares;
+    }
+
+    @Override
+    public List<VelenAfterware> getAfterwares() {
+        return afterwares;
     }
 
     @Override

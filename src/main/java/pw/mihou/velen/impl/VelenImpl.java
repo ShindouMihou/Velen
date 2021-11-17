@@ -11,6 +11,7 @@ import org.javacord.api.util.logging.ExceptionLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pw.mihou.velen.interfaces.*;
+import pw.mihou.velen.interfaces.afterware.VelenAfterware;
 import pw.mihou.velen.interfaces.messages.types.VelenPermissionMessage;
 import pw.mihou.velen.interfaces.messages.types.VelenRatelimitMessage;
 import pw.mihou.velen.interfaces.messages.types.VelenRoleMessage;
@@ -39,8 +40,8 @@ public class VelenImpl implements Velen {
     private final VelenPrefixManager prefixManager;
     private final VelenPermissionMessage noPermissionMessage;
     private final VelenRoleMessage noRoleMessage;
+    private final Warehouse warehouse = new Warehouse();
     private final VelenBlacklist blacklist;
-    private final Map<String, VelenMiddleware> middlewares;
     private final boolean allowMentionPrefix;
     private static final Logger commandInterceptorLogger = LoggerFactory.getLogger("Velen - Command Interceptor");
     private final HandlerStorage handlerStorage = new HandlerStorage();
@@ -53,7 +54,6 @@ public class VelenImpl implements Velen {
         this.ratelimiter = ratelimiter;
         this.ratelimitedMessage = ratelimitedMessage;
         this.commands = new HashMap<>();
-        this.middlewares = new HashMap<>();
         this.categories = new HashMap<>();
         this.prefixManager = prefixManager;
         this.noPermissionMessage = noPermissionMessage;
@@ -100,7 +100,6 @@ public class VelenImpl implements Velen {
     public Velen load(File... files) {
 
         for (File file : files) {
-            System.out.println(file.getName());
             iterateAndLoad(file);
         }
 
@@ -108,13 +107,24 @@ public class VelenImpl implements Velen {
     }
 
     @Override
+    public Optional<VelenAfterware> getAfterware(String name) {
+        return Optional.ofNullable(warehouse.getAfterware(name));
+    }
+
+    @Override
+    public Velen storeAfterware(String name, VelenAfterware afterware) {
+        warehouse.addAfterware(name, afterware);
+        return this;
+    }
+
+    @Override
     public Optional<VelenMiddleware> getMiddleware(String name) {
-        return Optional.ofNullable(middlewares.get(name.toLowerCase()));
+        return Optional.ofNullable(warehouse.getMiddleware(name));
     }
 
     @Override
     public Velen storeMiddleware(String name, VelenMiddleware middleware) {
-        middlewares.put(name.toLowerCase(), middleware);
+        warehouse.addMiddleware(name, middleware);
         return this;
     }
 
@@ -409,7 +419,50 @@ public class VelenImpl implements Velen {
         }
     }
 
-    public class HandlerStorage {
+    public static class Warehouse {
+        public final Map<String, VelenMiddleware> middlewares = new HashMap<>();
+        public final Map<String, VelenAfterware> afterwares = new HashMap<>();
+
+
+        /**
+         * Adds a middleware to the resources of Velen.
+         * @param name The name of the middleware.
+         * @param middleware The middleware component.
+         */
+        public void addMiddleware(String name, VelenMiddleware middleware) {
+            middlewares.put(name, middleware);
+        }
+
+        /**
+         * Adds an afterware to the resources of Velen.
+         * @param name The name of the afterware.
+         * @param afterware The afterware component.
+         */
+        public void addAfterware(String name, VelenAfterware afterware) {
+            afterwares.put(name.toLowerCase(), afterware);
+        }
+
+        /**
+         * Gets the middleware that with the specified key.
+         * @param name The name of the middleware.
+         * @return The middleware with the specified key.
+         */
+        public VelenMiddleware getMiddleware(String name) {
+            return middlewares.get(name.toLowerCase());
+        }
+
+        /**
+         * Gets the afterware with the specified key.
+         * @param name The name of the afterware.
+         * @return The afterware with the specified key.
+         */
+        public VelenAfterware getAfterware(String name) {
+            return afterwares.get(name.toLowerCase());
+        }
+
+    }
+
+    public static class HandlerStorage {
         private final Map<String, VelenEvent> messageHandlers = new HashMap<>();
         private final Map<String, VelenHybridHandler> hybridHandlers = new HashMap<>();
         private final Map<String, VelenSlashEvent> slashHandlers = new HashMap<>();

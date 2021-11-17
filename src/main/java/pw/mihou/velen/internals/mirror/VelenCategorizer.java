@@ -61,6 +61,13 @@ public class VelenCategorizer extends VelenBaseParser {
                             break;
                         case "desc":
                             builder.get().setDescription(value);
+                            break;
+                        case "afterware":
+                            builder.get().addAfterware(value);
+                            break;
+                        case "afterwares":
+                            builder.get().addAfterware(array(value));
+                            break;
                     }
                 }
 
