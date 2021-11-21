@@ -6,7 +6,7 @@
 
     <groupId>pw.mihou</groupId>
     <artifactId>Velen</artifactId>
-    <version>3.0.5</version>
+    <version>3.0.6</version>
     <name>Velen</name>
     <description>Velen is a command framework for Javacord that aims to do everything simpler and easier.</description>
     <url>https://github.com/ShindouMihou/Velen/</url>
