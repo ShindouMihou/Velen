@@ -1,7 +1,9 @@
 package pw.mihou.velen.internals.observer;
 
 import org.javacord.api.DiscordApi;
+import org.javacord.api.entity.server.Server;
 import org.javacord.api.interaction.SlashCommand;
+import org.javacord.api.interaction.SlashCommandBuilder;
 import org.javacord.api.interaction.SlashCommandOption;
 import org.javacord.api.interaction.SlashCommandOptionChoice;
 import org.slf4j.Logger;
@@ -10,8 +12,11 @@ import org.javacord.api.util.logging.ExceptionLogger;
 import pw.mihou.velen.interfaces.Velen;
 import pw.mihou.velen.interfaces.VelenCommand;
 import pw.mihou.velen.internals.observer.modes.ObserverMode;
+import pw.mihou.velen.utils.Pair;
+import pw.mihou.velen.utils.VelenThreadPool;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -41,14 +46,80 @@ public class VelenObserver {
         this.mode = mode;
     }
 
-    public void observe(Velen velen) {
+
+    public CompletableFuture<Void> observeServer(Velen velen, DiscordApi... apis) {
+        List<DiscordApi> shards = Arrays.stream(apis)
+                .sorted(Comparator.comparingInt(DiscordApi::getCurrentShard))
+                .collect(Collectors.toList());
+
+        List<VelenCommand> commands = velen.getCommands()
+                .stream()
+                .filter(VelenCommand::supportsSlashCommand)
+                .filter(s -> s.asSlashCommand().getLeft() != 0L && s.asSlashCommand().getLeft() != null)
+                .collect(Collectors.toList());
+
+        // We need to store the received lists of all the servers
+        // temporarily to reduce requests.
+        Map<Long, List<SlashCommand>> serverSlashCommands = new HashMap<>();
+
+        // We are executing something non-asynchronous inside
+        // so we need to run this entire thing outside the current thread.
+        return CompletableFuture.runAsync(() -> commands.forEach(v -> {
+            Pair<Long, SlashCommandBuilder> pair = v.asSlashCommand();
+
+            Server server = shards.stream()
+                    .filter(discordApi -> discordApi.getServerById(pair.getLeft()).isPresent())
+                    .map(discordApi -> discordApi.getServerById(pair.getLeft())
+                            .orElseThrow(() -> new NullPointerException("There is something fishy here, please report to Javacord issues.")))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("The command " + v.getName()
+                            + "'s server " + pair.getLeft() + " cannot be found through all " + shards.get(0).getTotalShards() + " shards."));
+
+            if (!serverSlashCommands.containsKey(pair.getLeft())) {
+                serverSlashCommands.put(pair.getLeft(), api.getServerSlashCommands(server).join());
+            }
+
+            List<SlashCommand> slashCommands = serverSlashCommands.get(pair.getLeft());
+
+            if (mode.isCreate()) {
+                existentialFilter(commands, slashCommands).forEach(command -> {
+                    long start = System.currentTimeMillis();
+                    command.asSlashCommand().getRight().createForServer(server).thenAccept(slashCommand ->
+                                    logger.info("Application command was created for server {}. [name={}, description={}, id={}]. It took {} milliseconds.",
+                                            pair.getLeft(),
+                                            slashCommand.getName(), slashCommand.getDescription(),
+                                            slashCommand.getId(), System.currentTimeMillis() - start))
+                            .exceptionally(ExceptionLogger.get());
+                });
+            }
+
+            if (mode.isUpdate()) {
+                crustFilter(commands, slashCommands).forEach((aLong, velenCommand) -> {
+                    long start = System.currentTimeMillis();
+
+                    velenCommand.asSlashCommandUpdater(aLong).getRight().updateForServer(server)
+                            .thenAccept(slashCommand -> logger.info("Application command was updated for server {}. [name={}, description={}, id={}]. It took {} milliseconds.",
+                                    pair.getLeft(), slashCommand.getName(), slashCommand.getDescription(), slashCommand.getId(), System.currentTimeMillis() - start))
+                            .exceptionally(ExceptionLogger.get());
+                });
+            }
+
+            if (!mode.isUpdate() && !mode.isCreate()) {
+                existentialFilter(commands, slashCommands).forEach(command -> logger.warn("Application command is not registered on Discord API. [{}]", command.toString()));
+                crustFilter(commands, slashCommands).forEach((aLong, velenCommand) ->
+                        logger.warn("Application command requires updating. [id={}, {}]", aLong, velenCommand.toString()));
+            }
+        }), VelenThreadPool.executorService);
+    }
+
+    public CompletableFuture<Void> observe(Velen velen) {
         List<VelenCommand> commands = velen.getCommands()
                 .stream()
                 .filter(VelenCommand::supportsSlashCommand)
                 .filter(s -> s.asSlashCommand().getLeft() == 0L || s.asSlashCommand().getLeft() == null)
                 .collect(Collectors.toList());
 
-        api.getGlobalSlashCommands().thenAcceptAsync(slashCommands -> {
+        return api.getGlobalSlashCommands().thenAcceptAsync(slashCommands -> {
 
             if (mode.isCreate()) {
                 existentialFilter(commands, slashCommands).forEach(command -> {
@@ -79,6 +150,7 @@ public class VelenObserver {
 
         });
     }
+
 
     /**
      * This performs the filter to check if a slash command is registered
