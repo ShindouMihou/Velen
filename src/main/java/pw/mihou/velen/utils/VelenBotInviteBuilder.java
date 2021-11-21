@@ -120,7 +120,7 @@ public class VelenBotInviteBuilder {
      * @return The generated invite url.
      */
     public String create() {
-        if (inviteScopes.stream().anyMatch(InviteScope::requiresRedirect) && (redirect_uri.isEmpty() || redirect_uri == null))
+        if (inviteScopes.stream().anyMatch(InviteScope::requiresRedirect) && (redirect_uri == null || redirect_uri.isEmpty()))
             throw new IllegalStateException("You have added a scope that requires a redirect_uri, please specify a redirect uri using setRedirectUri.");
 
         if (inviteScopes.isEmpty())
@@ -128,14 +128,14 @@ public class VelenBotInviteBuilder {
 
         StringBuilder builder = new StringBuilder(BASE_LINK);
         builder.append(clientId)
-                .append("&scopes=")
+                .append("&scope=")
                 .append(inviteScopes.stream().map(InviteScope::getScope).collect(Collectors.joining("%20")))
                 .append("&permissions=")
                 .append(permissions.getAllowedBitmask());
 
         // We will only need redirect uri if an intent requires it.
         // since Discord will just ignore it.
-        if (inviteScopes.stream().anyMatch(InviteScope::requiresRedirect) && !(redirect_uri.isEmpty() || redirect_uri == null)) {
+        if (inviteScopes.stream().anyMatch(InviteScope::requiresRedirect) && !(redirect_uri == null || redirect_uri.isEmpty())) {
             try {
                 builder.append("&redirect_uri=").append(URLEncoder.encode(redirect_uri, "UTF-8"))
                         .append("&response_type=code");
