@@ -4,3 +4,6 @@
 # IntelliJ:
 .idea/
 Velen.iml
+
+# Developer testing
+/src/main/java/Test.java
