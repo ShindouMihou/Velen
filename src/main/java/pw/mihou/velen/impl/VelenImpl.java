@@ -321,13 +321,25 @@ public class VelenImpl implements Velen {
             VelenThreadPool.executorService.submit(() -> ((VelenCommandImpl) command).onReceive(event));
         } else {
 
-            // If there is no indexed command then we'll opt for
-            // O(N) lookup.
-            List<VelenCommand> commands = getCommands()
-                    .stream()
-                    .filter(VelenCommand::supportsSlashCommand)
-                    .filter(cmd -> cmd.getName().equalsIgnoreCase(event.getSlashCommandInteraction().getCommandName()))
-                    .collect(Collectors.toList());
+            List<VelenCommand> commands;
+            if (company.hasIndex(event.getSlashCommandInteraction().getCommandName().toLowerCase()) && event.getInteraction().getServer().isPresent()) {
+                // If a global command does have an index and it isn't this command, then that means
+                // we are dealing with a server-specific slash command.
+                commands = getCommands()
+                        .stream()
+                        .filter(VelenCommand::supportsSlashCommand)
+                        .filter(cmd -> cmd.getName().equalsIgnoreCase(event.getSlashCommandInteraction().getCommandName()))
+                        .filter(cmd -> cmd.isServerOnly() && cmd.getServerId() == event.getInteraction().getServer().orElseThrow(AssertionError::new).getId())
+                        .collect(Collectors.toList());
+            } else {
+                // If there is no index for any global commands with the same name.
+                // then that means there is just no indexes, then we can just continue on with O(N) lookup.
+                commands = getCommands()
+                        .stream()
+                        .filter(VelenCommand::supportsSlashCommand)
+                        .filter(cmd -> cmd.getName().equalsIgnoreCase(event.getSlashCommandInteraction().getCommandName()))
+                        .collect(Collectors.toList());
+            }
 
             VelenThreadPool.executorService.submit(() -> commands.forEach(command -> {
                 commandInterceptorLogger.debug("Intercepted trigger for command ({}) with packet (type=interaction, user={}).", command.getName(),
@@ -359,6 +371,16 @@ public class VelenImpl implements Velen {
         public Optional<VelenCommand> getCommand(String command) {
             return commands.stream().filter(velenCommand -> velenCommand.getName().equalsIgnoreCase(command))
                     .findFirst();
+        }
+
+        /**
+         * Checks if a command has an index.
+         *
+         * @param command The command to lookup.
+         * @return Does this command have an index?
+         */
+        public boolean hasIndex(String command) {
+            return indexMap.containsKey(command);
         }
 
         @Override
