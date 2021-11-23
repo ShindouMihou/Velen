@@ -5,13 +5,12 @@ import org.javacord.api.entity.server.Server;
 import org.javacord.api.event.interaction.SlashCommandCreateEvent;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.interaction.SlashCommand;
-import org.javacord.api.interaction.SlashCommandBuilder;
 import org.javacord.api.interaction.SlashCommandUpdater;
-import org.javacord.api.util.logging.ExceptionLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pw.mihou.velen.interfaces.*;
 import pw.mihou.velen.interfaces.afterware.VelenAfterware;
+import pw.mihou.velen.interfaces.extensions.VelenCompany;
 import pw.mihou.velen.interfaces.messages.types.VelenPermissionMessage;
 import pw.mihou.velen.interfaces.messages.types.VelenRatelimitMessage;
 import pw.mihou.velen.interfaces.messages.types.VelenRoleMessage;
@@ -34,8 +33,7 @@ public class VelenImpl implements Velen {
 
     private final VelenRatelimitMessage ratelimitedMessage;
     private final VelenRatelimiter ratelimiter;
-    // We want to use O(1) for full commands and the normal way for shortcuts.
-    private final HashMap<String, VelenCommand> commands;
+    private final Company company = new Company(this);
     private final HashMap<String, VelenCategory> categories;
     private final VelenPrefixManager prefixManager;
     private final VelenPermissionMessage noPermissionMessage;
@@ -53,7 +51,6 @@ public class VelenImpl implements Velen {
                      VelenBlacklist blacklist, boolean allowMentionPrefix) {
         this.ratelimiter = ratelimiter;
         this.ratelimitedMessage = ratelimitedMessage;
-        this.commands = new HashMap<>();
         this.categories = new HashMap<>();
         this.prefixManager = prefixManager;
         this.noPermissionMessage = noPermissionMessage;
@@ -75,8 +72,12 @@ public class VelenImpl implements Velen {
 
     @Override
     public Velen addCommand(VelenCommand command) {
-        commands.put(command.getName().toLowerCase(), command);
-        return this;
+        return company.addCommand(command);
+    }
+
+    @Override
+    public CompletableFuture<Void> index(DiscordApi api) {
+        return company.index(api);
     }
 
     @Override
@@ -159,12 +160,6 @@ public class VelenImpl implements Velen {
     }
 
     @Override
-    public Velen removeCommand(VelenCommand command) {
-        commands.remove(command.getName().toLowerCase());
-        return this;
-    }
-
-    @Override
     public synchronized Velen getInstance() {
         return this;
     }
@@ -191,19 +186,7 @@ public class VelenImpl implements Velen {
 
     @Override
     public List<VelenCommand> getCommands() {
-        return new ArrayList<>(commands.values());
-    }
-
-    @Override
-    public List<VelenCommand> getCategory(String category) {
-        return commands.values().stream()
-                .filter(velenCommand -> velenCommand.getCategory().equals(category))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public VelenCategory findCategory(String category) {
-        return categories.get(category.toLowerCase());
+        return company.getCommands();
     }
 
     @Override
@@ -218,95 +201,23 @@ public class VelenImpl implements Velen {
     }
 
     @Override
-    public List<VelenCommand> getCategoryIgnoreCasing(String category) {
-        return commands.values().stream()
-                .filter(velenCommand -> velenCommand.getCategory().equalsIgnoreCase(category))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public Map<String, List<VelenCommand>> getCategories() {
-        Map<String, List<VelenCommand>> catMap = new HashMap<>();
-        commands.values()
-                .stream()
-                .filter(command -> !command.getCategory().isEmpty())
-                .forEach(velenCommand -> {
-                    if(!catMap.containsKey(velenCommand.getCategory()))
-                        catMap.put(velenCommand.getCategory(), new ArrayList<>());
-
-                    catMap.get(velenCommand.getCategory()).add(velenCommand);
-                });
-
-        // We want the list to be returned as an immutable list.
-        return catMap.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey,
-                        e -> Collections.unmodifiableList(e.getValue())));
-    }
-
-    @Override
     public Optional<VelenCommand> getCommand(String command) {
-        return Optional.ofNullable(commands.get(command.toLowerCase()));
+        return company.getCommand(command);
     }
 
     @Override
-    @Deprecated
-    public Optional<VelenCommand> getCommandIgnoreCasing(String command) {
-        return getCommand(command);
+    public Optional<VelenCommand> getCommand(long id) {
+        return company.getCommand(id);
     }
 
     @Override
-    public CompletableFuture<Void> registerAllSlashCommands(DiscordApi api) {
-        return CompletableFuture.allOf(commands.values().stream().filter(VelenCommand::supportsSlashCommand)
-                .map(velenCommand -> {
-                    Pair<Long, SlashCommandBuilder> pair = velenCommand.asSlashCommand();
-
-                    if (pair.getLeft() != null && pair.getLeft() != 0L) {
-                        Optional<Server> server = api.getServerById(pair.getLeft());
-                        if (server.isPresent()) {
-                            return pair.getRight().createForServer(server.get());
-                        } else {
-                            throw new IllegalArgumentException("Server " + pair.getLeft() + " couldn't be found for " +
-                                    "slash command: " + pair.getRight().toString());
-                        }
-                    }
-
-                    return pair.getRight().createGlobal(api);
-                }).toArray(CompletableFuture[]::new)).exceptionally(ExceptionLogger.get());
+    public Optional<VelenCommand> getCommand(String command, long server) {
+        return company.getCommand(command, server);
     }
 
     @Override
-    public CompletableFuture<SlashCommand> registerSlashCommand(String command, DiscordApi api) {
-        if(!commands.containsKey(command.toLowerCase()))
-            throw new IllegalArgumentException("The command " + command + " couldn't be found!");
-
-        VelenCommand c = commands.get(command.toLowerCase());
-        if(!c.supportsSlashCommand())
-            throw new IllegalArgumentException("The command " + command + " does not support slash commands!");
-
-        Pair<Long, SlashCommandBuilder> pair = c.asSlashCommand();
-        if (pair.getLeft() != null && pair.getLeft() != 0L) {
-            Optional<Server> server = api.getServerById(pair.getLeft());
-            if (server.isPresent()) {
-                return pair.getRight().createForServer(server.get());
-            } else {
-                throw new IllegalArgumentException("Server " + pair.getLeft() + " couldn't be found for " +
-                        "slash command: " + pair.getRight().toString());
-            }
-        }
-
-        return pair.getRight().createGlobal(api);
-    }
-
-    @Override
-    public CompletableFuture<SlashCommand> updateSlashCommand(long id, String command, DiscordApi api) {
-        if(!commands.containsKey(command.toLowerCase()))
-            throw new IllegalArgumentException("The command " + command + " couldn't be found!");
-
-        VelenCommand c = commands.get(command.toLowerCase());
-        if(!c.supportsSlashCommand())
-            throw new IllegalArgumentException("The command " + command + " does not support slash commands!");
-
-        return updateSlashCommand(id, c, api);
+    public Velen removeCommand(VelenCommand command) {
+        return company.removeCommand(command);
     }
 
     @Override
@@ -323,17 +234,6 @@ public class VelenImpl implements Velen {
         }
 
         return pair.getRight().updateGlobal(api);
-    }
-
-    @Override
-    public CompletableFuture<Map<Long, String>> getAllSlashCommandIds(DiscordApi api) {
-        return api.getGlobalSlashCommands().thenApply(slashCommands -> slashCommands.stream()
-                .collect(Collectors.toMap(SlashCommand::getId, SlashCommand::getName)));
-    }
-
-    @Override
-    public boolean supportsBlacklist() {
-        return blacklist != null;
     }
 
     @Override
@@ -375,8 +275,10 @@ public class VelenImpl implements Velen {
         String kArgs = event.getMessageContent();
 
         String cmd = isUsingMention ? args[1] : args[0].substring(prefix.length());
-        if(commands.containsKey(cmd)) {
-            VelenCommand command = commands.get(cmd);
+
+        Optional<VelenCommand> optional = getCommand(cmd);
+        if(optional.isPresent()) {
+            VelenCommand command = optional.get();
             if(!command.isSlashCommandOnly()) {
                 commandInterceptorLogger.debug("Intercepted trigger for command ({}) with packet (message={}, args={}, user={}).",
                         command.getName(), event.getMessageContent(),
@@ -387,7 +289,7 @@ public class VelenImpl implements Velen {
                         VelenUtils.splitContent(kArgs)));
             }
         } else {
-            commands.values().stream()
+            getCommands().stream()
                     .filter(velenCommand -> !velenCommand.isSlashCommandOnly())
                     .filter(velenCommand -> Arrays.stream(velenCommand.getShortcuts()).anyMatch(cmd::equalsIgnoreCase))
                     .forEachOrdered(command -> {
@@ -407,16 +309,119 @@ public class VelenImpl implements Velen {
         if (supportsBlacklist() && blacklist.isBlacklisted(event.getSlashCommandInteraction()
                 .getUser().getId())) return;
 
-        if(commands.containsKey(event.getSlashCommandInteraction().getCommandName())
-                && commands.get(event.getSlashCommandInteraction().getCommandName().toLowerCase()).supportsSlashCommand()) {
-            // Log it!
-            commandInterceptorLogger.debug("Intercepted trigger for command ({}) with packet (type=interaction, user={}).",
-                    commands.get(event.getSlashCommandInteraction().getCommandName().toLowerCase()).getName(),
-                    event.getInteraction().getUser().getId());
+        // We'll search by index first.
+        Optional<VelenCommand> indexed = getCommand(event.getSlashCommandInteraction().getCommandId());
 
-            VelenThreadPool.executorService.submit(() -> ((VelenCommandImpl) commands.get(event.getSlashCommandInteraction()
-                    .getCommandName().toLowerCase())).onReceive(event));
+        if (indexed.isPresent()) {
+            VelenCommand command = indexed.get();
+
+            commandInterceptorLogger.debug("Intercepted trigger for command ({}) with packet (type=interaction, user={}).",
+                    command.getName(), event.getInteraction().getUser().getId());
+
+            VelenThreadPool.executorService.submit(() -> ((VelenCommandImpl) command).onReceive(event));
+        } else {
+
+            // If there is no indexed command then we'll opt for
+            // O(N) lookup.
+            List<VelenCommand> commands = getCommands()
+                    .stream()
+                    .filter(VelenCommand::supportsSlashCommand)
+                    .filter(cmd -> cmd.getName().equalsIgnoreCase(event.getSlashCommandInteraction().getCommandName()))
+                    .collect(Collectors.toList());
+
+            VelenThreadPool.executorService.submit(() -> commands.forEach(command -> {
+                commandInterceptorLogger.debug("Intercepted trigger for command ({}) with packet (type=interaction, user={}).", command.getName(),
+                        event.getInteraction().getUser().getId());
+                ((VelenCommandImpl) command).onReceive(event);
+            }));
         }
+    }
+
+    public static class Company implements VelenCompany {
+
+        public final List<VelenCommand> commands = new ArrayList<>();
+        public final Map<Long, VelenCommand> indexes = new HashMap<>();
+
+        private Map<String, Long> indexMap;
+        private final Velen velen;
+        private static final Logger logger = LoggerFactory.getLogger("Velen - Company");
+
+        public Company(Velen velen) {
+            this.velen = velen;
+        }
+
+        @Override
+        public List<VelenCommand> getCommands() {
+            return commands;
+        }
+
+        @Override
+        public Optional<VelenCommand> getCommand(String command) {
+            return commands.stream().filter(velenCommand -> velenCommand.getName().equalsIgnoreCase(command))
+                    .findFirst();
+        }
+
+        @Override
+        public Optional<VelenCommand> getCommand(long id) {
+            return indexes.containsKey(id) ? Optional.of(indexes.get(id)) : Optional.empty();
+        }
+
+        @Override
+        public Optional<VelenCommand> getCommand(String command, long server) {
+            return commands.stream()
+                    .filter(cmd -> cmd.getName().equalsIgnoreCase(command) && cmd.isServerOnly() &&cmd.getServerId() == server)
+                    .findFirst();
+        }
+
+        @Override
+        public Velen removeCommand(VelenCommand command) {
+            commands.remove(command);
+            return velen;
+        }
+
+        @Override
+        public Velen addCommand(VelenCommand command) {
+            commands.add(command);
+
+            if (indexMap == null || command.isServerOnly() || !command.supportsSlashCommand())
+                return velen;
+
+            if (!indexMap.containsKey(command.getName().toLowerCase()))
+                return velen;
+
+            indexes.put(indexMap.get(command.getName().toLowerCase()), command);
+            return velen;
+        }
+
+        @Override
+        public CompletableFuture<Void> index(DiscordApi api) {
+            logger.info("Attempting to index all commands...");
+            long start = System.currentTimeMillis();
+
+            return api.getGlobalSlashCommands().thenAcceptAsync(slashCommands -> {
+                Map<String, Long> newIndexes = new HashMap<>();
+
+                slashCommands.forEach(slashCommand -> newIndexes.put(slashCommand.getName().toLowerCase(),
+                        slashCommand.getId()));
+
+                // store for any future slash commands that will try to use.
+                indexMap = newIndexes;
+
+                if (commands.isEmpty()) {
+                    logger.warn("No command was found in the registry, indexing couldn't continue.");
+                    return;
+                }
+
+                // start indexing.
+                commands.stream()
+                        .filter(VelenCommand::supportsSlashCommand)
+                        .filter(command -> !command.isServerOnly())
+                        .forEach(velenCommand -> indexes.put(newIndexes.get(velenCommand.getName().toLowerCase()), velenCommand));
+
+                logger.info("All commands are now indexed. It took {} milliseconds.", System.currentTimeMillis() - start);
+            });
+        }
+
     }
 
     public static class Warehouse {

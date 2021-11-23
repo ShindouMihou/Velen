@@ -1,15 +1,19 @@
 package pw.mihou.velen.interfaces;
 
 import org.javacord.api.DiscordApi;
+import org.javacord.api.entity.server.Server;
 import org.javacord.api.interaction.SlashCommand;
+import org.javacord.api.interaction.SlashCommandBuilder;
 import org.javacord.api.listener.interaction.SlashCommandCreateListener;
 import org.javacord.api.listener.message.MessageCreateListener;
+import org.javacord.api.util.logging.ExceptionLogger;
 import pw.mihou.velen.VelenBuilder;
 import pw.mihou.velen.builders.VelenCategoryBuilder;
 import pw.mihou.velen.interfaces.afterware.VelenAfterware;
 import pw.mihou.velen.interfaces.afterware.types.VelenHybridAfterware;
 import pw.mihou.velen.interfaces.afterware.types.VelenMessageAfterware;
 import pw.mihou.velen.interfaces.afterware.types.VelenSlashAfterware;
+import pw.mihou.velen.interfaces.extensions.VelenCompany;
 import pw.mihou.velen.interfaces.messages.types.VelenPermissionMessage;
 import pw.mihou.velen.interfaces.messages.types.VelenRatelimitMessage;
 import pw.mihou.velen.interfaces.messages.types.VelenRoleMessage;
@@ -20,15 +24,15 @@ import pw.mihou.velen.interfaces.middleware.types.VelenSlashMiddleware;
 import pw.mihou.velen.internals.VelenBlacklist;
 import pw.mihou.velen.prefix.VelenPrefixManager;
 import pw.mihou.velen.ratelimiter.VelenRatelimiter;
+import pw.mihou.velen.utils.Pair;
 
 import java.io.File;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
-public interface Velen extends MessageCreateListener, SlashCommandCreateListener {
+public interface Velen extends MessageCreateListener, SlashCommandCreateListener, VelenCompany {
 
     /**
      * Creates a default Velen instance with default
@@ -52,19 +56,10 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
     }
 
     /**
-     * Adds a command, we recommend using use {@link pw.mihou.velen.builders.VelenCommandBuilder} to build
-     * the command instead of building it yourself.
-     *
-     * @param command The command to add, use {@link pw.mihou.velen.builders.VelenCommandBuilder} to build.
-     * @return An updated Velen.
-     */
-    Velen addCommand(VelenCommand command);
-
-    /**
      * Loads all commands from a specific directory.
      *
      * @param directory The directory to search for.
-     * @return The Velen instance with newer data.
+     * @return The {@link Velen}  instance for chain-calling methods..
      */
     Velen loadFrom(String directory);
 
@@ -72,7 +67,7 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * Loads all commands from a specific directory.
      *
      * @param directory The directory to search for.
-     * @return The Velen instance with newer data.
+     * @return The {@link Velen}  instance for chain-calling methods..
      */
     Velen loadFrom(File directory);
 
@@ -80,7 +75,7 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * Loads all commands specified.
      *
      * @param files The files to load.
-     * @return The Velen instance with newer data.
+     * @return The {@link Velen}  instance for chain-calling methods..
      */
     Velen load(File... files);
 
@@ -216,14 +211,6 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
     Velen addHandler(String name, VelenHybridHandler handler);
 
     /**
-     * Removes a command from Velen.
-     *
-     * @param command The command to remove.
-     * @return An updated Velen.
-     */
-    Velen removeCommand(VelenCommand command);
-
-    /**
      * Gets the current instance of Velen.
      *
      * @return The current instance of Velen.
@@ -262,19 +249,16 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
     VelenRatelimiter getRatelimiter();
 
     /**
-     * Gets all the commands registered on the Velen.
-     *
-     * @return The commands registered.
-     */
-    List<VelenCommand> getCommands();
-
-    /**
      * Gets all the commands registered with the specified category on the Velen.
      *
      * @param category The category to search for (case-sensitive).
      * @return The commands registered with the specified category.
      */
-    List<VelenCommand> getCategory(String category);
+    default List<VelenCommand> getCategory(String category) {
+        return getCommands().stream()
+                .filter(velenCommand -> velenCommand.getCategory().equals(category))
+                .collect(Collectors.toList());
+    }
 
     /**
      * Retrieves the category instance with the specified name.
@@ -282,7 +266,9 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * @param category The category to search for.
      * @return The {@link VelenCategory} instance.
      */
-    VelenCategory findCategory(String category);
+    default VelenCategory findCategory(String category) {
+        return findCategories().get(category.toLowerCase());
+    }
 
     /**
      * Retrieves the categories that are stored inside this Velen instance.
@@ -315,15 +301,11 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * @param category The category to search for (case-insensitive).
      * @return The commands registered with the specified category.
      */
-    List<VelenCommand> getCategoryIgnoreCasing(String category);
-
-    /**
-     * Gets a certain command through its name.
-     *
-     * @param command The command to find.
-     * @return An optional that possibly contains the command.
-     */
-    Optional<VelenCommand> getCommand(String command);
+    default List<VelenCommand> getCategoryIgnoreCasing(String category)  {
+        return getCommands().stream()
+                .filter(velenCommand -> velenCommand.getCategory().equalsIgnoreCase(category))
+                .collect(Collectors.toList());
+    }
 
     /**
      * Gets all the categories of all commands in Velen.
@@ -331,18 +313,23 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * @return a Map with the category name
      * and immutable list of VelenCommand.
      */
-    Map<String, List<VelenCommand>> getCategories();
+    default Map<String, List<VelenCommand>> getCategories() {
+        Map<String, List<VelenCommand>> catMap = new HashMap<>();
+        getCommands()
+                .stream()
+                .filter(command -> !command.getCategory().isEmpty())
+                .forEach(velenCommand -> {
+                    if(!catMap.containsKey(velenCommand.getCategory()))
+                        catMap.put(velenCommand.getCategory(), new ArrayList<>());
 
-    /**
-     * Gets a certain command through its name (ignoring casing).
-     * <br>
-     * <b>This is deprecated since we are now using HashMaps to store commands, you can use {@link Velen#getCommand(String)}
-     * instead for the same behavior.</b>
-     * @param command The command to find.
-     * @return An optional that possibly contains the command.
-     */
-    @Deprecated
-    Optional<VelenCommand> getCommandIgnoreCasing(String command);
+                    catMap.get(velenCommand.getCategory()).add(velenCommand);
+                });
+
+        // We want the list to be returned as an immutable list.
+        return catMap.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        e -> Collections.unmodifiableList(e.getValue())));
+    }
 
     /**
      * Registers all the slash commands registered under Velen.
@@ -354,7 +341,24 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * @param api The Discord API to register the commands to.
      * @return A CompletableFuture to mark its completion.
      */
-    CompletableFuture<Void> registerAllSlashCommands(DiscordApi api);
+    default CompletableFuture<Void> registerAllSlashCommands(DiscordApi api)  {
+        return CompletableFuture.allOf(getCommands().stream().filter(VelenCommand::supportsSlashCommand)
+                .map(velenCommand -> {
+                    Pair<Long, SlashCommandBuilder> pair = velenCommand.asSlashCommand();
+
+                    if (pair.getLeft() != null && pair.getLeft() != 0L) {
+                        Optional<Server> server = api.getServerById(pair.getLeft());
+                        if (server.isPresent()) {
+                            return pair.getRight().createForServer(server.get());
+                        } else {
+                            throw new IllegalArgumentException("Server " + pair.getLeft() + " couldn't be found for " +
+                                    "slash command: " + pair.getRight().toString());
+                        }
+                    }
+
+                    return pair.getRight().createGlobal(api);
+                }).toArray(CompletableFuture[]::new)).exceptionally(ExceptionLogger.get());
+    }
 
     /**
      * Registers a specific slash command that is being utilized by
@@ -370,7 +374,28 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * @param api The DiscordApi to use for registering the command.
      * @return The slash command returned.
      */
-    CompletableFuture<SlashCommand> registerSlashCommand(String command, DiscordApi api);
+    default CompletableFuture<SlashCommand> registerSlashCommand(String command, DiscordApi api) {
+        Optional<VelenCommand> optional = getCommand(command);
+        if (!optional.isPresent())
+            throw new IllegalArgumentException("The command " + command + " couldn't be found!");
+
+        VelenCommand c = optional.get();
+        if (!c.supportsSlashCommand())
+            throw new IllegalArgumentException("The command " + command + " does not support slash commands!");
+
+        Pair<Long, SlashCommandBuilder> pair = c.asSlashCommand();
+        if (pair.getLeft() != null && pair.getLeft() != 0L) {
+            Optional<Server> server = api.getServerById(pair.getLeft());
+            if (server.isPresent()) {
+                return pair.getRight().createForServer(server.get());
+            } else {
+                throw new IllegalArgumentException("Server " + pair.getLeft() + " couldn't be found for " +
+                        "slash command: " + pair.getRight().toString());
+            }
+        }
+
+        return pair.getRight().createGlobal(api);
+    }
 
     /**
      * Updates a specific slash command with the help of Velen, this can be used if
@@ -391,7 +416,17 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * @param api The DiscordApi to use for updating.
      * @return A new Slash Command instance.
      */
-    CompletableFuture<SlashCommand> updateSlashCommand(long id, String command, DiscordApi api);
+    default CompletableFuture<SlashCommand> updateSlashCommand(long id, String command, DiscordApi api) {
+        Optional<VelenCommand> optional = getCommand(command);
+        if (!optional.isPresent())
+            throw new IllegalArgumentException("The command " + command + " couldn't be found!");
+
+        VelenCommand c = optional.get();
+        if(!c.supportsSlashCommand())
+            throw new IllegalArgumentException("The command " + command + " does not support slash commands!");
+
+        return updateSlashCommand(id, c, api);
+    }
 
     /**
      * Updates a specific slash command with the help of Velen, this can be used if
@@ -418,7 +453,10 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * @param api The DiscordApi to use to retrieve the commands.
      * @return A map of slash command ids and name
      */
-    CompletableFuture<Map<Long, String>> getAllSlashCommandIds(DiscordApi api);
+    default CompletableFuture<Map<Long, String>> getAllSlashCommandIds(DiscordApi api) {
+        return api.getGlobalSlashCommands().thenApply(slashCommands -> slashCommands.stream()
+                .collect(Collectors.toMap(SlashCommand::getId, SlashCommand::getName)));
+    }
 
     /**
      * This is used to check if the Velen instance currently
@@ -426,7 +464,9 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      *
      * @return Does this Velen instance sport a blacklist?
      */
-    boolean supportsBlacklist();
+    default boolean supportsBlacklist() {
+        return getBlacklist() != null;
+    }
 
     /**
      * Gets the blacklist being used by this {@link Velen} instance.
