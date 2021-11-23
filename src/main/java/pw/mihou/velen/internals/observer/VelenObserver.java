@@ -46,7 +46,55 @@ public class VelenObserver {
         this.mode = mode;
     }
 
+    /**
+     * Retrieves and performs an observation check for all
+     * slash commands of all servers in the shards specified. <b>DO THIS AS YOUR OWN RISK.</b>.
+     *
+     * Not to be confused as {@link VelenObserver#observeServer(Velen, DiscordApi...)} which only checks
+     * for all the commands registered in the registry, disabling the automatic removal functionality.
+     *
+     * @param velen The Velen instance to fetch commands.
+     * @param shards The shards to fetch all the slash commands.
+     * @return A future that indicates progress or completion.
+     */
+    public CompletableFuture<Void> observeAllServers(Velen velen, DiscordApi... shards) {
+        return CompletableFuture.allOf(Arrays.stream(shards).map(DiscordApi::getServers)
+                .map(servers -> CompletableFuture.allOf(servers.stream().map(server -> observeServer(velen, server))
+                        .toArray(CompletableFuture[]::new)))
+                .toArray(CompletableFuture[]::new));
+    }
 
+    /**
+     * Retrieves and performs an observation check for all slash commands
+     * in the specified server.
+     *
+     * @param velen The Velen instance to check.
+     * @param server The server to fetch the commands from.
+     * @return A future that indicates progress.
+     */
+    public CompletableFuture<Void> observeServer(Velen velen,  Server server) {
+        List<VelenCommand> commands = velen.getCommands()
+                .stream()
+                .filter(VelenCommand::supportsSlashCommand)
+                .filter(VelenCommand::isServerOnly)
+                .filter(s -> s.asSlashCommand().getLeft() != 0L && s.asSlashCommand().getLeft() != null)
+                .collect(Collectors.toList());
+
+        return server.getSlashCommands().thenAcceptAsync(slashCommands -> commands.forEach(velenCommand -> finalizeServer(server, slashCommands, commands)));
+    }
+
+    /**
+     * Retrieves and performs an observation check for all
+     * slash commands of all the servers <bold>THAT HAS A COMMAND ATTACHED TO IT</bold> on the Velen registry.
+     *
+     * Not to be confused with {@link VelenObserver#observeAllServers(Velen, DiscordApi...)} which checks all
+     * servers' slash commands which allows that method to be both risky and also support all functionalities such as
+     * deleting slash commands that are no longer registered in Velen.
+     *
+     * @param velen The Velen instance to fetch commands.
+     * @param apis The shards to fetch all the slash commands.
+     * @return A future that indicates progress or completion.
+     */
     public CompletableFuture<Void> observeServer(Velen velen, DiscordApi... apis) {
         List<DiscordApi> shards = Arrays.stream(apis)
                 .sorted(Comparator.comparingInt(DiscordApi::getCurrentShard))
@@ -55,6 +103,7 @@ public class VelenObserver {
         List<VelenCommand> commands = velen.getCommands()
                 .stream()
                 .filter(VelenCommand::supportsSlashCommand)
+                .filter(VelenCommand::isServerOnly)
                 .filter(s -> s.asSlashCommand().getLeft() != 0L && s.asSlashCommand().getLeft() != null)
                 .collect(Collectors.toList());
 
@@ -81,37 +130,17 @@ public class VelenObserver {
 
             List<SlashCommand> slashCommands = serverSlashCommands.get(pair.getLeft());
 
-            if (mode.isCreate()) {
-                existentialFilter(commands, slashCommands).forEach(command -> {
-                    long start = System.currentTimeMillis();
-                    command.asSlashCommand().getRight().createForServer(server).thenAccept(slashCommand ->
-                                    logger.info("Application command was created for server {}. [name={}, description={}, id={}]. It took {} milliseconds.",
-                                            pair.getLeft(),
-                                            slashCommand.getName(), slashCommand.getDescription(),
-                                            slashCommand.getId(), System.currentTimeMillis() - start))
-                            .exceptionally(ExceptionLogger.get());
-                });
-            }
-
-            if (mode.isUpdate()) {
-                crustFilter(commands, slashCommands).forEach((aLong, velenCommand) -> {
-                    long start = System.currentTimeMillis();
-
-                    velenCommand.asSlashCommandUpdater(aLong).getRight().updateForServer(server)
-                            .thenAccept(slashCommand -> logger.info("Application command was updated for server {}. [name={}, description={}, id={}]. It took {} milliseconds.",
-                                    pair.getLeft(), slashCommand.getName(), slashCommand.getDescription(), slashCommand.getId(), System.currentTimeMillis() - start))
-                            .exceptionally(ExceptionLogger.get());
-                });
-            }
-
-            if (!mode.isUpdate() && !mode.isCreate()) {
-                existentialFilter(commands, slashCommands).forEach(command -> logger.warn("Application command is not registered on Discord API. [{}]", command.toString()));
-                crustFilter(commands, slashCommands).forEach((aLong, velenCommand) ->
-                        logger.warn("Application command requires updating. [id={}, {}]", aLong, velenCommand.toString()));
-            }
+            finalizeServer(server, slashCommands, commands);
         }), VelenThreadPool.executorService);
     }
 
+    /**
+     * This performs a global observation check that compares all slash commands
+     * globally with what is registered on Velen's registry.
+     *
+     * @param velen The velen instance to check.
+     * @return A future to indicate progress.
+     */
     public CompletableFuture<Void> observe(Velen velen) {
         List<VelenCommand> commands = velen.getCommands()
                 .stream()
@@ -221,6 +250,17 @@ public class VelenObserver {
         return reference.get();
     }
 
+    /**
+     * This performs a filter that checks the options, choices and other
+     * deeper levels of two commands and compares them.
+     *
+     * @param command The command to check.
+     * @param slashCommand The slash command equivalent to check.
+     * @param differences The differences in the two.
+     * @param slashCommandOptions The options to check.
+     * @param velenCommandOptions The velen options to check.
+     * @return
+     */
     private Map<Long, VelenCommand> depthFilter(VelenCommand command, SlashCommand slashCommand, Map<Long, VelenCommand> differences,
                                            List<SlashCommandOption> slashCommandOptions, List<SlashCommandOption> velenCommandOptions) {
 
@@ -294,6 +334,44 @@ public class VelenObserver {
         });
 
         return differences;
+    }
+
+    /**
+     * This performs finalization on server-command checks for Velen.
+     *
+     * @param server The server to check.
+     * @param slashCommands The slash commands to check.
+     * @param commands The commands to check.
+     */
+    private void finalizeServer(Server server, List<SlashCommand> slashCommands, List<VelenCommand> commands) {
+        if (mode.isCreate()) {
+            existentialFilter(commands, slashCommands).forEach(command -> {
+                long start = System.currentTimeMillis();
+                command.asSlashCommand().getRight().createForServer(server).thenAccept(slashCommand ->
+                                logger.info("Application command was created for server {}. [name={}, description={}, id={}]. It took {} milliseconds.",
+                                        server.getId(),
+                                        slashCommand.getName(), slashCommand.getDescription(),
+                                        slashCommand.getId(), System.currentTimeMillis() - start))
+                        .exceptionally(ExceptionLogger.get());
+            });
+        }
+
+        if (mode.isUpdate()) {
+            crustFilter(commands, slashCommands).forEach((aLong, velenCommand) -> {
+                long start = System.currentTimeMillis();
+
+                velenCommand.asSlashCommandUpdater(aLong).getRight().updateForServer(server)
+                        .thenAccept(slashCommand -> logger.info("Application command was updated for server {}. [name={}, description={}, id={}]. It took {} milliseconds.",
+                                server.getId(), slashCommand.getName(), slashCommand.getDescription(), slashCommand.getId(), System.currentTimeMillis() - start))
+                        .exceptionally(ExceptionLogger.get());
+            });
+        }
+
+        if (!mode.isUpdate() && !mode.isCreate()) {
+            existentialFilter(commands, slashCommands).forEach(command -> logger.warn("Application command is not registered on Discord API. [{}]", command.toString()));
+            crustFilter(commands, slashCommands).forEach((aLong, velenCommand) ->
+                    logger.warn("Application command requires updating. [id={}, {}]", aLong, velenCommand.toString()));
+        }
     }
 
 }
