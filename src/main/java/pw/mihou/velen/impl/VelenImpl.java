@@ -385,7 +385,7 @@ public class VelenImpl implements Velen {
          * @return Does this command have an index?
          */
         public boolean hasIndex(String command) {
-            return indexMap.containsKey(command);
+            return indexMap != null && indexMap.containsKey(command);
         }
 
         @Override
