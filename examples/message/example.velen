@@ -10,6 +10,7 @@
     &[response]: option {
         desc: What kind of move will you make?
         choice: [PING, PONG]
+        choice: [PONG, PING]
         type: string
     }
 
@@ -38,7 +39,8 @@
 
     &[scream]: option {
         type: string
-        choice: [AH, YA]
+        choice: [AH, AH]
+        choice: [YA, YA]
         desc: The scream type.
     }
 

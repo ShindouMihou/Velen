@@ -92,9 +92,7 @@ of creating commands and options? Don't worry, feel free to look at here.
     &[response]: option {
         desc: What kind of move will you make?
         
-        # This is how you initialize choices in hybrid and slash commands.
-        # because slash commands uses [key, value], it is required here.
-        # but on message commands, you can use [choiceOne, choiceTwo, choiceThree].
+        # This is how you initialize choices in hybrid, message and slash commands.
         # In our case, we are using [USER'S CHOICE, OUR RESPONSE].
         choice: [PING, PONG]
         choice: [PONG, PING]

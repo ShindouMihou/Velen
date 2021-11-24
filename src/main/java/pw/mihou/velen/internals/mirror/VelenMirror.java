@@ -159,14 +159,9 @@ public class VelenMirror extends VelenBaseParser {
                                 break;
                             }
                             case "choice": {
-                                if (commandType.get().equalsIgnoreCase("message")) {
-                                    formats.get("option." + currentOption.get()).append("::(")
-                                            .append(String.join(",", array(value))).append(")");
-                                } else {
-                                    Pair<String, String> details = arrayOfTwo(value);
-                                    choices.get(currentOption.get()).add(details.getLeft());
-                                    o.addChoice(details.getLeft(), details.getRight());
-                                }
+                                Pair<String, String> details = arrayOfTwo(value);
+                                choices.get(currentOption.get()).add(details.getLeft());
+                                o.addChoice(details.getLeft(), details.getRight());
                                 break;
                             }
                         }

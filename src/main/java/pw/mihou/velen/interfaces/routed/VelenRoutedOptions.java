@@ -25,13 +25,13 @@ public class VelenRoutedOptions {
         this.event = event;
 
         String[] commandIndexes = event.getMessageContent().split("\\s+");
-        VelenRoutedArgument[] vArgs = VelenUnderscoreParser.route(event.getMessageContent(), ((VelenCommandImpl)command).getFormats())
+
+        arguments = VelenUnderscoreParser.route(event.getMessageContent(), ((VelenCommandImpl)command).getFormats())
                 .entrySet()
                 .stream()
-                .map(entry -> new VelenRoutedArgument(entry.getKey(), entry.getValue(), commandIndexes[entry.getKey()]))
+                .map(entry -> new VelenRoutedArgument(entry.getKey(), entry.getValue().getLeft(),
+                        entry.getValue().getRight() == null ? commandIndexes[entry.getKey()] :  entry.getValue().getRight()))
                 .toArray(VelenRoutedArgument[]::new);
-
-        arguments = vArgs;
     }
 
     /**

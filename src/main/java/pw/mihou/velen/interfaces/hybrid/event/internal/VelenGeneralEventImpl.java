@@ -47,7 +47,8 @@ public class VelenGeneralEventImpl implements VelenGeneralEvent {
             VelenRoutedArgument[] vArgs = VelenUnderscoreParser.route(event.getMessageContent(), ((VelenCommandImpl)vl).getFormats())
                     .entrySet()
                     .stream()
-                    .map(entry -> new VelenRoutedArgument(entry.getKey(), entry.getValue(), commandIndexes[entry.getKey()]))
+                    .map(entry -> new VelenRoutedArgument(entry.getKey(), entry.getValue().getLeft(),
+                            entry.getValue().getRight() == null ? commandIndexes[entry.getKey()] :  entry.getValue().getRight()))
                     .toArray(VelenRoutedArgument[]::new);
 
             if (args.length == 0)

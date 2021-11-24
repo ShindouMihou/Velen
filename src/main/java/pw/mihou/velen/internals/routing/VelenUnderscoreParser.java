@@ -1,13 +1,11 @@
 package pw.mihou.velen.internals.routing;
 
-import org.javacord.api.util.DiscordRegexPattern;
 import pw.mihou.velen.internals.routing.routers.OfTypeRouter;
 import pw.mihou.velen.internals.routing.routers.RemoveSpecialSyntaxRouter;
 import pw.mihou.velen.utils.Pair;
 import pw.mihou.velen.utils.VelenUtils;
 
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,12 +20,12 @@ public class VelenUnderscoreParser {
         routers.add(new RemoveSpecialSyntaxRouter());
     }
 
-    public static Map<Integer, String> route(String command, List<String> formats) {
+    public static Map<Integer, Pair<String, String>> route(String command, List<String> formats) {
         String[] commandIndexes = Stream.concat(Arrays.stream(new String[]{command.split(" ")[0]}), Arrays.stream(VelenUtils.splitContent(command))
                         .filter(s -> !s.equals(command.split(" ")[0])))
                 .toArray(String[]::new);
         if (commandIndexes.length == 1)
-            return Collections.singletonMap(0, command);
+            return Collections.singletonMap(0, generatePairValue(command, null));
 
         List<String> foo;
 
@@ -43,12 +41,12 @@ public class VelenUnderscoreParser {
             foo = x;
         }
 
-        Map<Integer, String> finalMap = new HashMap<>();
+        Map<Integer, Pair<String, String>> finalMap = new HashMap<>();
         // This is used to allow us to send the name of options that passed.
-        Map<String, Map<Integer, String>> formatMaps = new HashMap<>();
+        Map<String, Map<Integer, Pair<String, String>>> formatMaps = new HashMap<>();
 
         for (String format : foo) {
-            Map<Integer, String> componentMap = new HashMap<>();
+            Map<Integer, Pair<String, String>> componentMap = new HashMap<>();
 
             if ((format.contains(":[") && format.contains("]"))) {
                 String[] indexes = format.split("\\s+");
@@ -57,6 +55,8 @@ public class VelenUnderscoreParser {
                 boolean isThisMrRight = true;
                 for (int i1 = 0; i1 < indexes.length; i1++) {
                     String s = indexes[i1];
+                    // This is used to store the value of the option.
+                    String value = null;
 
                     if (isThisMrRight) {
                         if (s.startsWith(":[")) {
@@ -71,9 +71,10 @@ public class VelenUnderscoreParser {
 
                                     String token = (ignoreCasing ? "::(" : ":(");
                                     String pattern = name.substring(name.indexOf(token) + token.length(), findClosure(name.indexOf(token), name, ')'));
-                                    String[] values = pattern.split(",");
+                                    String[] values = pattern.split(",", 2);
 
                                     name = name.replace(collect(token, ')', name), "");
+                                    value = values[1];
 
                                     // Check if it matches with the required options.
                                     int finalI = i1;
@@ -81,7 +82,7 @@ public class VelenUnderscoreParser {
                                             commandIndexes[finalI].equals(s1));
                                 } catch (IndexOutOfBoundsException e) {
                                     throw new IllegalStateException("An exception occurred while trying to parse command [" + command + "] with format [" + format + "]," +
-                                            " please do not put spaces between the options: e.g. :[option::(no,spaces,please)]!");
+                                            " please do not put spaces between the options: e.g. :[option::(no,spaces)]!");
                                 }
                             }
 
@@ -116,7 +117,7 @@ public class VelenUnderscoreParser {
                                         if (indexes[indexes.length - 1].contains(":hasMany()")) {
                                             name = name.replace(":hasMany()", "");
                                             for (int i = i1; i < commandIndexes.length; i++) {
-                                                componentMap.put(i, name);
+                                                componentMap.put(i, generatePairValue(name, value));
                                             }
                                         }
                                     } else {
@@ -126,7 +127,7 @@ public class VelenUnderscoreParser {
                                         }
                                     }
                                 }
-                                componentMap.put(i1, name);
+                                componentMap.put(i1, generatePairValue(name, value));
                             } else {
                                 componentMap.put(i1, null);
                                 isThisMrRight = false;
@@ -138,7 +139,7 @@ public class VelenUnderscoreParser {
                             if (!s.equalsIgnoreCase(commandIndexes[i1]) && i1 != 0) {
                                 isThisMrRight = false;
                             } else {
-                                componentMap.put(i1, "_commandName");
+                                componentMap.put(i1, generatePairValue("_commandName", null));
                             }
                         }
 
@@ -157,7 +158,7 @@ public class VelenUnderscoreParser {
         if (finalMap.isEmpty()) {
             // We want to return the format that actually got the largest amount
             // of arguments identified while leaving on those that failed to pass with null.
-            Optional<Map<Integer, String>> largestMap = formatMaps.values()
+            Optional<Map<Integer, Pair<String, String>>> largestMap = formatMaps.values()
                     .stream().max(Comparator.comparingInt(Map::size));
 
             if (largestMap.isPresent()) {
@@ -170,6 +171,10 @@ public class VelenUnderscoreParser {
         }
 
         return finalMap;
+    }
+
+    private static Pair<String, String> generatePairValue(String name, String value) {
+        return Pair.of(name, value);
     }
 
     public static boolean hasParameterType(String source, String type) {
