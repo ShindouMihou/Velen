@@ -51,7 +51,7 @@ public interface VelenCompany {
     Velen removeCommand(VelenCommand command);
 
     /**
-     * Adds a command to the registry, if {@link VelenImpl.Company#index(DiscordApi)} has been
+     * Adds a command to the registry, if {@link VelenImpl.Company#index(DiscordApi...)} has been
      * performed already then it will attach its own index.
      *
      * @param command The command to add to the registry.
@@ -63,9 +63,19 @@ public interface VelenCompany {
      * Performs a slash command indexing, this indexes any {@link VelenCommand} that
      * supports slash commands and isn't a server-specific command with their global id.
      *
-     * @param api The {@link DiscordApi} to use to collect the indexes.
+     * @param shards The {@link DiscordApi} to use to collect the indexes.
      * @return A future that indicates completion or progress.
      */
-    CompletableFuture<Void> index(DiscordApi api);
+    CompletableFuture<Void> index(DiscordApi... shards);
+
+    /**
+     * Performs a slash command indexing, this indexes any {@link VelenCommand} that
+     * supports slash commands including server-specific commands if specified.
+     *
+     * @param shards The {@link DiscordApi} to use to collect the indexes.
+     * @param allowServerIndexes Should server-commands be indexed as well?
+     * @return A future that indicates completion or progress.
+     */
+    CompletableFuture<Void> index(boolean allowServerIndexes, DiscordApi... shards);
 
 }

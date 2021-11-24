@@ -76,8 +76,13 @@ public class VelenImpl implements Velen {
     }
 
     @Override
-    public CompletableFuture<Void> index(DiscordApi api) {
-        return company.index(api);
+    public CompletableFuture<Void> index(DiscordApi... shards) {
+        return company.index(shards);
+    }
+
+    @Override
+    public CompletableFuture<Void> index(boolean allowServerIndexes, DiscordApi... shards) {
+        return company.index(allowServerIndexes, shards);
     }
 
     @Override
@@ -416,11 +421,16 @@ public class VelenImpl implements Velen {
         }
 
         @Override
-        public CompletableFuture<Void> index(DiscordApi api) {
+        public CompletableFuture<Void> index(DiscordApi... shards) {
+            return index(false, shards);
+        }
+
+        @Override
+        public CompletableFuture<Void> index(boolean allowServerIndexes, DiscordApi... shards) {
             logger.info("Attempting to index all commands...");
             long start = System.currentTimeMillis();
 
-            return api.getGlobalSlashCommands().thenAcceptAsync(slashCommands -> {
+            return shards[0].getGlobalSlashCommands().thenAcceptAsync(slashCommands -> {
                 Map<String, Long> newIndexes = new HashMap<>();
 
                 slashCommands.forEach(slashCommand -> newIndexes.put(slashCommand.getName().toLowerCase(),
@@ -439,6 +449,29 @@ public class VelenImpl implements Velen {
                         .filter(VelenCommand::supportsSlashCommand)
                         .filter(command -> !command.isServerOnly())
                         .forEach(velenCommand -> indexes.put(newIndexes.get(velenCommand.getName().toLowerCase()), velenCommand));
+
+                if (allowServerIndexes) {
+                    Map<Long, Map<String, Long>> serverIndexes = new HashMap<>();
+                    for (VelenCommand command : commands.stream().filter(VelenCommand::isServerOnly).collect(Collectors.toList())) {
+                        long id = command.getServerId();
+
+                        if (!serverIndexes.containsKey(id)) {
+                            Server server = Arrays.stream(shards)
+                                    .filter(shard -> shard.getServerById(id).isPresent())
+                                    .findFirst()
+                                    .flatMap(shard -> shard.getServerById(id))
+                                    .orElseThrow(AssertionError::new);
+                            serverIndexes.put(server.getId(), new HashMap<>());
+
+                            for (SlashCommand slashCommand : server.getSlashCommands().join()) {
+                                serverIndexes.get(server.getId()).put(slashCommand.getName().toLowerCase(), slashCommand.getId());
+                            }
+                        }
+
+                        // This command is now indexed.
+                        indexes.put(serverIndexes.get(id).get(command.getName().toLowerCase()), command);
+                    }
+                }
 
                 logger.info("All commands are now indexed. It took {} milliseconds.", System.currentTimeMillis() - start);
             });
