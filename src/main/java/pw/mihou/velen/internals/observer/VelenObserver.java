@@ -77,7 +77,7 @@ public class VelenObserver {
                 .stream()
                 .filter(VelenCommand::supportsSlashCommand)
                 .filter(VelenCommand::isServerOnly)
-                .filter(s -> s.asSlashCommand().getLeft() != 0L && s.asSlashCommand().getLeft() != null)
+                .filter(s -> s.asSlashCommand().getLeft() != 0L && s.asSlashCommand().getLeft() != null && s.asSlashCommand().getLeft() == server.getId())
                 .collect(Collectors.toList());
 
         return server.getSlashCommands().thenAcceptAsync(slashCommands -> commands.forEach(velenCommand -> finalizeServer(server, slashCommands, commands)));
