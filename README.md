@@ -1,4 +1,3 @@
-> 🛑 **WARNING**: Velen is currently relying on the development version of Javacord, as I do not know when the patch will be released, I decided to release the framework's version 3.0.0 officially while requiring the Development Version of Javacord (3.4.0-SNAPSHOT). Please use the SNAPSHOT version of Javacord instead which can be found on [their wiki](https://javacord.org/wiki/getting-started/download-installation.html#gradle-2)
 <img src="https://i.ibb.co/Ny1V3sg/Velen-Banner.png" width="800px" width="250px">
 
 # ✨ Velen ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/ShindouMihou/Velen?label=version&style=flat-square) [![Discord](https://img.shields.io/discord/807084089013174272?color=blue&label=Discord&style=flat-square)](https://discord.gg/9FefYq4p83) ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/ShindouMihou/Velen?color=red&style=flat-square) ![GitHub last commit](https://img.shields.io/github/last-commit/ShindouMihou/Velen?color=orange&style=flat-square)
@@ -42,7 +41,22 @@ All examples are located at the examples folders below.
 - [Slash Commands](https://github.com/ShindouMihou/Velen/tree/master/examples/slash)
 
 ## ❤️ Installation
-We are currently disabling Maven Central until Javacord's 3.4.0 is released officially, for now, [please use Jitpack in the meantime](https://jitpack.io/#pw.mihou/Velen)
+You can install Velen from Maven Central, otherwise known as Sonatype, which also hosts Javacord and many 
+other libraries.
+
+### 📦 Maven
+```xml
+<dependency>
+    <groupId>pw.mihou</groupId>
+    <artifactId>Velen</artifactId>
+    <version>3.1.1</version>
+</dependency>
+```
+
+### 📦 Gradle
+```groovy
+implementation 'pw.mihou:Velen:3.1.1'
+```
 
 ## ⛰️ Velen is used by
 - [Amelia](https://github.com/ManaNet/Amelia): A Discord bot that is dedicated to a webnovel site called ScribbleHub.
