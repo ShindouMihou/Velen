@@ -378,7 +378,7 @@ public class VelenMirror extends VelenBaseParser {
             case "user": return SlashCommandOptionType.USER;
             case "channel": return SlashCommandOptionType.CHANNEL;
             case "role": return SlashCommandOptionType.ROLE;
-            case "numeric": return SlashCommandOptionType.INTEGER;
+            case "numeric": return SlashCommandOptionType.LONG;
             case "boolean": return SlashCommandOptionType.BOOLEAN;
             default: return SlashCommandOptionType.STRING;
         }
@@ -406,7 +406,7 @@ public class VelenMirror extends VelenBaseParser {
          */
         OPTION(3);
 
-        private int value;
+        private final int value;
 
         STATE(int value) {
             this.value = value;

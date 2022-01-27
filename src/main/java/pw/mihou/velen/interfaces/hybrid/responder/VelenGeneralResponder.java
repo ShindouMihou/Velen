@@ -6,7 +6,6 @@ import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.MessageDecoration;
-import org.javacord.api.entity.message.MessageFlag;
 import org.javacord.api.entity.message.component.ActionRow;
 import org.javacord.api.entity.message.component.HighLevelComponent;
 import org.javacord.api.entity.message.component.LowLevelComponent;
@@ -167,108 +166,108 @@ public class VelenGeneralResponder implements VelenGeneralRespond<VelenGeneralRe
     @Override
     public VelenGeneralResponder addFile(BufferedImage image, String fileName) {
         if(builder == null)
-            updater.addFile(image, fileName);
+            updater.addAttachment(image, fileName);
         else
-            builder.addFile(image, fileName);
+            builder.addAttachment(image, fileName);
         return this;
     }
 
     @Override
     public VelenGeneralResponder addFile(File file) {
         if(builder == null)
-            updater.addFile(file);
+            updater.addAttachment(file);
         else
-            builder.addFile(file);
+            builder.addAttachment(file);
         return this;
     }
 
     @Override
     public VelenGeneralResponder addFile(Icon icon) {
         if(builder == null)
-            updater.addFile(icon);
+            updater.addAttachment(icon);
         else
-            builder.addFile(icon);
+            builder.addAttachment(icon);
         return this;
     }
 
     @Override
     public VelenGeneralResponder addFile(URL url) {
         if(builder == null)
-            updater.addFile(url);
+            updater.addAttachment(url);
         else
-            builder.addFile(url);
+            builder.addAttachment(url);
         return this;
     }
 
     @Override
     public VelenGeneralResponder addFile(byte[] bytes, String fileName) {
         if(builder == null)
-            updater.addFile(bytes, fileName);
+            updater.addAttachment(bytes, fileName);
         else
-            builder.addFile(bytes, fileName);
+            builder.addAttachment(bytes, fileName);
         return this;
     }
 
     @Override
     public VelenGeneralResponder addFile(InputStream stream, String fileName) {
         if(builder == null)
-            updater.addFile(stream, fileName);
+            updater.addAttachment(stream, fileName);
         else
-            builder.addFile(stream, fileName);
+            builder.addAttachment(stream, fileName);
         return this;
     }
 
     @Override
     public VelenGeneralResponder addFileAsSpoiler(BufferedImage image, String fileName) {
         if(builder == null)
-            updater.addFileAsSpoiler(image, fileName);
+            updater.addAttachmentAsSpoiler(image, fileName);
         else
-            builder.addFileAsSpoiler(image, fileName);
+            builder.addAttachmentAsSpoiler(image, fileName);
         return this;
     }
 
     @Override
     public VelenGeneralResponder addFileAsSpoiler(File file) {
         if(builder == null)
-            updater.addFileAsSpoiler(file);
+            updater.addAttachmentAsSpoiler(file);
         else
-            builder.addFileAsSpoiler(file);
+            builder.addAttachmentAsSpoiler(file);
         return this;
     }
 
     @Override
     public VelenGeneralResponder addFileAsSpoiler(Icon icon) {
         if(builder == null)
-            updater.addFileAsSpoiler(icon);
+            updater.addAttachmentAsSpoiler(icon);
         else
-            builder.addFileAsSpoiler(icon);
+            builder.addAttachmentAsSpoiler(icon);
         return this;
     }
 
     @Override
     public VelenGeneralResponder addFileAsSpoiler(URL url) {
         if(builder == null)
-            updater.addFileAsSpoiler(url);
+            updater.addAttachmentAsSpoiler(url);
         else
-            builder.addFileAsSpoiler(url);
+            builder.addAttachmentAsSpoiler(url);
         return this;
     }
 
     @Override
     public VelenGeneralResponder addFileAsSpoiler(byte[] bytes, String fileName) {
         if(builder == null)
-            updater.addFileAsSpoiler(bytes, fileName);
+            updater.addAttachmentAsSpoiler(bytes, fileName);
         else
-            builder.addFileAsSpoiler(bytes, fileName);
+            builder.addAttachmentAsSpoiler(bytes, fileName);
         return this;
     }
 
     @Override
     public VelenGeneralResponder addFileAsSpoiler(InputStream stream, String fileName) {
         if(builder == null)
-            updater.addFileAsSpoiler(stream, fileName);
+            updater.addAttachmentAsSpoiler(stream, fileName);
         else
-            builder.addFileAsSpoiler(stream, fileName);
+            builder.addAttachmentAsSpoiler(stream, fileName);
         return this;
     }
 
