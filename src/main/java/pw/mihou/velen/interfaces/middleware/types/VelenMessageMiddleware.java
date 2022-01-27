@@ -17,6 +17,7 @@ public interface VelenMessageMiddleware extends VelenMiddleware {
      * @param event The event to hand over to the user.
      * @param command The command instance.
      * @param options The options that are incldued in this command.
+     * @param gate The gate that is responsible for creating whether the command can execute further or not.
      * @return The response whether to allow or reject the user.
      */
     Pair<Boolean, String> onEvent(MessageCreateEvent event, VelenCommand command, VelenRoutedOptions options, VelenGate gate);

@@ -12,6 +12,8 @@ public interface VelenUnderscoreRoute {
      * @param index The index position.
      * @param commandIndexes All the indexes of the message content.
      * @param messageArgument The index value message content of the current index.
+     * @param command The command name in string.
+     * @param format The format for this command.
      * @return Whether to accept this or not, also the new name of the index.
      */
     Pair<Boolean, String> accept(String s, String name, int index, String[] commandIndexes, String messageArgument, String command,

@@ -15,6 +15,7 @@ public interface VelenSlashMiddleware extends VelenMiddleware {
      *
      * @param event The event to hand over to the user.
      * @param command The command instance.
+     * @param gate The gate that is responsible for creating whether the command can execute further or not.
      * @return The response whether to allow or reject the user.
      */
     Pair<Boolean, String> onEvent(SlashCommandCreateEvent event, VelenCommand command, VelenGate gate);

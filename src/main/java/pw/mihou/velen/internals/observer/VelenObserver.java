@@ -85,7 +85,7 @@ public class VelenObserver {
 
     /**
      * Retrieves and performs an observation check for all
-     * slash commands of all the servers <bold>THAT HAS A COMMAND ATTACHED TO IT</bold> on the Velen registry.
+     * slash commands of all the servers <b>THAT HAS A COMMAND ATTACHED TO IT</b> on the Velen registry.
      *
      * Not to be confused with {@link VelenObserver#observeAllServers(Velen, DiscordApi...)} which checks all
      * servers' slash commands which allows that method to be both risky and also support all functionalities such as

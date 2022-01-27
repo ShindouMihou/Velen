@@ -185,6 +185,7 @@ public class BaseCommandImplementation {
      *
      * @param middlewares The middlewares to use.
      * @param event The event to use.
+     * @param options The options to send.
      * @return Is this accepted by the gate?
      */
     public Pair<Boolean, String> applyMessageMiddlewares(List<VelenMessageMiddleware> middlewares, MessageCreateEvent event, VelenRoutedOptions options) {

@@ -193,6 +193,7 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * Adds a new handler for message commands.
      * @param name The name of the handler, it must be unique otherwise it would collide.
      * @param handler The handler to add.
+     * @return The {@link Velen}  instance for chain-calling methods..
      */
     Velen addHandler(String name, VelenEvent handler);
 
@@ -200,6 +201,7 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * Adds a new handler for slash commands.
      * @param name The name of the handler, it must be unique otherwise it would collide.
      * @param handler The handler to add.
+     * @return The {@link Velen}  instance for chain-calling methods..
      */
     Velen addHandler(String name, VelenSlashEvent handler);
 
@@ -207,6 +209,7 @@ public interface Velen extends MessageCreateListener, SlashCommandCreateListener
      * Adds a new handler for hybrid commands.
      * @param name The name of the handler, it must be unique otherwise it would collide.
      * @param handler The handler to add.
+     * @return The {@link Velen}  instance for chain-calling methods..
      */
     Velen addHandler(String name, VelenHybridHandler handler);
 

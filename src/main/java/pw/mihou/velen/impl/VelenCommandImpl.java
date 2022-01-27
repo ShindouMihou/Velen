@@ -45,6 +45,7 @@ public class VelenCommandImpl implements VelenCommand {
      * and handles the to-do tasks such as authentication and so forth.
      *
      * @param event The message event received.
+     * @param args The arguments received from the event.
      */
     public void onReceive(MessageCreateEvent event, String[] args) {
         baseMessageCommand.onReceive(event, args);

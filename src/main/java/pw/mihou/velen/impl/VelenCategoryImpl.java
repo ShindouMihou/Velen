@@ -25,6 +25,7 @@ public class VelenCategoryImpl implements VelenCategory {
      * @param description The description of the category.
      * @param velen The velen instance to attach to.
      * @param middlewares The list of middlewares to use.
+     * @param afterwares The list of afterwares to use.
      */
     public VelenCategoryImpl(String name, String description, List<String> middlewares, List<String> afterwares, Velen velen) {
         this.name = name;

@@ -26,6 +26,18 @@ public class VelenOption {
     private final String name;
     private final VelenCommand vl;
 
+    /**
+     * Creates a new {@link VelenOption} that can be used to alternatively select
+     * different options from an event without worrying about whether it is a message or
+     * slash command.
+     *
+     * @param index The index number or position of the argument.
+     * @param arg The message routed argument.
+     * @param option The slash command option.
+     * @param api The Discord API shard received.
+     * @param arguments The arguments for hybrid.
+     * @param vl The command that is in charge of this.
+     */
     private VelenOption(int index, VelenRoutedArgument arg, SlashCommandInteractionOption option, DiscordApi api,
                         VelenHybridArguments arguments, VelenCommand vl) {
         this.index = index;
@@ -62,7 +74,11 @@ public class VelenOption {
     /**
      * Creates a new Velen Option that originated from a message command.
      *
-     * @param arg The argument vaule.
+     * @param arg The argument value.
+     * @param vl The Velen Command that is in charge of this.
+     * @param api The Discord API shard that the event came from.
+     * @param arguments The hybrid command arguments.
+     * @param index The index or position number of the argument.
      */
     public VelenOption(int index, VelenRoutedArgument arg, DiscordApi api, VelenHybridArguments arguments, VelenCommand vl) {
         this(index, arg, null, api, arguments, vl);

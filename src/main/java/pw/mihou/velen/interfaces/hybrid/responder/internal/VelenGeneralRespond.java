@@ -16,6 +16,7 @@ public interface VelenGeneralRespond<T> extends VelenResponderBase<T> {
      * Sends the response to the user or channel that triggered
      * this event, by default, if {@link VelenGeneralResponder#respondTo(TextChannel)} isn't set
      * then it will send to the channel or user that triggered the event.
+     * @return The message wrapped in a future.
      */
     CompletableFuture<Message> respond();
 

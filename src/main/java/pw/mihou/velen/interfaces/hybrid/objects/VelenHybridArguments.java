@@ -39,6 +39,7 @@ public class VelenHybridArguments implements VelenCommonsArguments {
      *
      * @param args The arguments to use for the options.
      * @param api The API to use for the options (fetching, etc).
+     * @param vl The velen command to retrieve from.
      */
     public VelenHybridArguments(VelenRoutedArgument[] args, DiscordApi api, VelenCommand vl) {
         // The length() filter is because of an issue where args has a length, somehow.
@@ -49,6 +50,7 @@ public class VelenHybridArguments implements VelenCommonsArguments {
      * Creates a new Velen Hybrid arguments that originated from a Slash Command.
      *
      * @param provider The provider to use for the options.
+     * @param vl The velen command to retrieve from.
      */
     public VelenHybridArguments(List<SlashCommandInteractionOption> provider, VelenCommand vl) {
         this(null, provider, null, vl);

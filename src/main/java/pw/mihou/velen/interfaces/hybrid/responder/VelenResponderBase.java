@@ -374,6 +374,7 @@ public interface VelenResponderBase<T> {
      * from a Slash Command.
      *
      * @param messageFlags The message flag of the message.
+     * @return The current instance in order to chain call methods.
      */
     T setFlags(EnumSet<InteractionCallbackDataFlag> messageFlags);
 
@@ -382,6 +383,7 @@ public interface VelenResponderBase<T> {
      * from a Slash Command.
      *
      * @param messageFlags The message flag of the message.
+     * @return The current instance in order to chain call methods.
      */
     T setFlags(InteractionCallbackDataFlag... messageFlags);
 }
