@@ -205,7 +205,7 @@ public class VelenOption {
         if(arg == null)
             return option.getRoleValue();
 
-        Matcher matcher = DiscordRegexPattern.CHANNEL_MENTION.matcher(arg);
+        Matcher matcher = DiscordRegexPattern.ROLE_MENTION.matcher(arg);
         if(!matcher.matches())
             return Optional.empty();
 
