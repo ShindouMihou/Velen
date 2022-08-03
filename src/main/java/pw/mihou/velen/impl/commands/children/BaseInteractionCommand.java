@@ -1,10 +1,10 @@
 package pw.mihou.velen.impl.commands.children;
 
 import org.javacord.api.entity.channel.TextChannel;
+import org.javacord.api.entity.message.MessageFlag;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.interaction.SlashCommandCreateEvent;
-import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
 import org.javacord.api.interaction.callback.InteractionImmediateResponseBuilder;
 import org.javacord.api.util.logging.ExceptionLogger;
 import pw.mihou.velen.impl.VelenCommandImpl;
@@ -50,7 +50,7 @@ public class BaseInteractionCommand extends BaseCommandImplementation {
         }
 
         InteractionImmediateResponseBuilder builder = event.getSlashCommandInteraction().createImmediateResponder()
-                .setFlags(InteractionCallbackDataFlag.EPHEMERAL);
+                .setFlags(MessageFlag.EPHEMERAL);
         TextChannel channel = event.getSlashCommandInteraction().getChannel().orElseThrow(() ->
                 new IllegalStateException("Text channel not found for slash command, please create an issue @ https://github.com/ShindouMihou/Velen."));
 
