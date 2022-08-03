@@ -450,8 +450,10 @@ public interface VelenCommand {
      * @return The server id of the server this is intended (nullable) and the slash command builder.
      */
     default Pair<Long, SlashCommandBuilder> asSlashCommand() {
-        SlashCommandBuilder builder = SlashCommand.with(getName().toLowerCase(), getDescription())
-                .setDefaultPermission(isDefaultPermissionEnabled());
+        SlashCommandBuilder builder = SlashCommand.with(getName().toLowerCase(), getDescription());
+
+        if (isDefaultPermissionEnabled())
+            builder.setDefaultEnabledForPermissions(PermissionType.ADMINISTRATOR);
 
         if (getOptions() != null)
             return Pair.of(getServerId(), builder.setOptions(getOptions()));
@@ -470,8 +472,11 @@ public interface VelenCommand {
     default Pair<Long, SlashCommandUpdater> asSlashCommandUpdater(long commandId) {
         SlashCommandUpdater updater = new SlashCommandUpdater(commandId)
                 .setName(getName())
-                .setDescription(getDescription())
-                .setDefaultPermission(isDefaultPermissionEnabled());
+                .setDescription(getDescription());
+
+        if (isDefaultPermissionEnabled()) {
+            updater.setDefaultEnabledForPermissions(PermissionType.ADMINISTRATOR);
+        }
 
         if(getOptions() != null && !getOptions().isEmpty()) {
             updater.setSlashCommandOptions(getOptions());

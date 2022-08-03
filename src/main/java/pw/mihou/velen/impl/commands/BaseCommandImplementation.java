@@ -1,11 +1,11 @@
 package pw.mihou.velen.impl.commands;
 
+import org.javacord.api.entity.message.MessageFlag;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.interaction.SlashCommandCreateEvent;
 import org.javacord.api.event.message.MessageCreateEvent;
-import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
 import pw.mihou.velen.impl.VelenCommandImpl;
 import pw.mihou.velen.interfaces.VelenArguments;
 import pw.mihou.velen.interfaces.afterware.types.VelenHybridAfterware;
@@ -329,7 +329,7 @@ public class BaseCommandImplementation {
                     event.getSlashCommandInteraction()
                             .createImmediateResponder()
                             .setContent(middlewareResponse.getRight())
-                            .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
+                            .setFlags(MessageFlag.EPHEMERAL)
                             .respond();
                 }
                 return;
@@ -357,7 +357,7 @@ public class BaseCommandImplementation {
                 if (middlewareResponse.getRight() != null) {
                     e.createResponder()
                             .setContent(middlewareResponse.getRight())
-                            .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
+                            .setFlags(MessageFlag.EPHEMERAL)
                             .respond();
                 }
                 return;
@@ -414,7 +414,7 @@ public class BaseCommandImplementation {
                     if (middlewareResponse.getRight() != null) {
                         e.createResponder()
                                 .setContent(middlewareResponse.getRight())
-                                .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
+                                .setFlags(MessageFlag.EPHEMERAL)
                                 .respond();
                     }
                     return;

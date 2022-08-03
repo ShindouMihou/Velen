@@ -1,6 +1,7 @@
 package pw.mihou.velen.internals.observer;
 
 import org.javacord.api.DiscordApi;
+import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.interaction.SlashCommand;
 import org.javacord.api.interaction.SlashCommandBuilder;
@@ -239,7 +240,7 @@ public class VelenObserver {
                 return;
             }
 
-            if (slashCommand.getDefaultPermission() != command.isDefaultPermissionEnabled()) {
+            if (slashCommand.getDefaultRequiredPermissions().map(permissionTypes -> permissionTypes.contains(PermissionType.ADMINISTRATOR)).orElse(false) != command.isDefaultPermissionEnabled()) {
                 reference.get().put(slashCommand.getId(), command);
                 return;
             }
