@@ -81,7 +81,7 @@ public class VelenObserver {
                 .filter(s -> s.asSlashCommand().getLeft() != 0L && s.asSlashCommand().getLeft() != null && s.asSlashCommand().getLeft() == server.getId())
                 .collect(Collectors.toList());
 
-        return server.getSlashCommands().thenAcceptAsync(slashCommands -> commands.forEach(velenCommand -> finalizeServer(server, slashCommands, commands)));
+        return server.getSlashCommands().thenAcceptAsync(slashCommands -> commands.forEach(velenCommand -> finalizeServer(server, new ArrayList<>(slashCommands), commands)));
     }
 
     /**
@@ -126,7 +126,7 @@ public class VelenObserver {
                             + "'s server " + pair.getLeft() + " cannot be found through all " + shards.get(0).getTotalShards() + " shards."));
 
             if (!serverSlashCommands.containsKey(pair.getLeft())) {
-                serverSlashCommands.put(pair.getLeft(), api.getServerSlashCommands(server).join());
+                serverSlashCommands.put(pair.getLeft(), new ArrayList<>(api.getServerSlashCommands(server).join()));
             }
 
             List<SlashCommand> slashCommands = serverSlashCommands.get(pair.getLeft());
@@ -151,8 +151,10 @@ public class VelenObserver {
 
         return api.getGlobalSlashCommands().thenAcceptAsync(slashCommands -> {
 
+            List<SlashCommand> slashCommandList = new ArrayList<>(slashCommands);
+
             if (mode.isCreate()) {
-                existentialFilter(commands, slashCommands).forEach(command -> {
+                existentialFilter(commands, slashCommandList).forEach(command -> {
                     long start = System.currentTimeMillis();
                     command.asSlashCommand().getRight().createGlobal(api).thenAccept(slashCommand ->
                             logger.info("Application command was created. [name={}, description={}, id={}]. It took {} milliseconds.", slashCommand.getName(), slashCommand.getDescription(),
@@ -162,7 +164,7 @@ public class VelenObserver {
             }
 
             if (mode.isUpdate()) {
-                crustFilter(commands, slashCommands).forEach((aLong, velenCommand) -> {
+                crustFilter(commands, slashCommandList).forEach((aLong, velenCommand) -> {
                     long start = System.currentTimeMillis();
 
                     velenCommand.asSlashCommandUpdater(aLong).getRight().updateGlobal(api)
@@ -173,8 +175,8 @@ public class VelenObserver {
             }
 
             if (!mode.isUpdate() && !mode.isCreate()) {
-                existentialFilter(commands, slashCommands).forEach(command -> logger.warn("Application command is not registered on Discord API. [{}]", command.toString()));
-                crustFilter(commands, slashCommands).forEach((aLong, velenCommand) ->
+                existentialFilter(commands, slashCommandList).forEach(command -> logger.warn("Application command is not registered on Discord API. [{}]", command.toString()));
+                crustFilter(commands, slashCommandList).forEach((aLong, velenCommand) ->
                         logger.warn("Application command requires updating. [id={}, {}]", aLong, velenCommand.toString()));
             }
 
