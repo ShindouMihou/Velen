@@ -1,3 +1,8 @@
+> **Unmaintained!**
+>
+> Velen has been unmaintained for over years now. For slash commands and context menus, we recommend using the successor framework [`Nexus`](https://github.com/ShindouMihou/Nexus) instead
+> which has been actively maintained since Velen went inactive and is used more, always kept up-to-date with Discord's latest changes.
+
 <img src="https://i.ibb.co/Ny1V3sg/Velen-Banner.png" width="800px" width="250px">
 
 # ✨ Velen ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/ShindouMihou/Velen?label=version&style=flat-square) [![Discord](https://img.shields.io/discord/807084089013174272?color=blue&label=Discord&style=flat-square)](https://discord.gg/9FefYq4p83) ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/ShindouMihou/Velen?color=red&style=flat-square) ![GitHub last commit](https://img.shields.io/github/last-commit/ShindouMihou/Velen?color=orange&style=flat-square)
