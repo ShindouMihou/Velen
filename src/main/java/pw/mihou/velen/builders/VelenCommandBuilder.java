@@ -31,7 +31,7 @@ public class VelenCommandBuilder {
     private String name;
     private final List<String> usages = new ArrayList<>();
     private String description;
-    private boolean defaultPermission = true;
+    private boolean defaultPermission = false;
     private VelenSlashEvent velenSlashEvent;
     private VelenHybridHandler velenHybridHandler;
     private Duration cooldown;
